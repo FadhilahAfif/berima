@@ -4,105 +4,166 @@
 
 | Layer | Choice |
 |---|---|
-| Language | Kotlin |
-| UI | Jetpack Compose |
+| Language | Kotlin 2.2.10 |
+| UI | Jetpack Compose (BOM 2026.02.01) |
 | Architecture | MVVM |
 | State | StateFlow + ViewModel |
-| Navigation | Navigation Compose (single activity) |
-| DI | Hilt |
-| Backend | Firebase (Auth, Firestore, Storage) |
-| Image loading | Coil |
-| Async | Kotlin Coroutines |
+| Navigation | Navigation Compose 2.9.5 (single activity) |
+| DI | Hilt 2.59.2 (KSP) |
+| Backend | Firebase (Auth, Firestore, Storage) — BOM 34.3.0 |
+| Image loading | Coil 2.7.0 |
+| Async | Kotlin Coroutines 1.9.0 |
+| Build | AGP 9.2.1, Gradle 9.4.1, Java 11, minSdk 24, targetSdk 36 |
+
+## Package
+
+Root package is `upnvj.berima.v1` (matches `applicationId` and `namespace`).
 
 ## Folder Structure
 
 ```
-app/src/main/java/com/berima/app/
+app/src/main/java/upnvj/berima/v1/
+├── BerimaApplication.kt   # @HiltAndroidApp entry point
+├── MainActivity.kt        # @AndroidEntryPoint, hosts BerimaApp()
 ├── data/
-│   ├── model/              # Data classes: User, Listing, Order, Review, Message
-│   ├── repository/         # One repository per domain: AuthRepository, ListingRepository,
-│   │                       # OrderRepository, ReviewRepository, MessageRepository
-│   └── remote/             # Firebase datasource wrappers (if needed)
+│   ├── model/             # User, Listing, Order, Review, Message, Constants
+│   ├── repository/        # AuthRepository, ListingRepository, OrderRepository,
+│   │                      # ReviewRepository, MessageRepository
+│   └── remote/            # Optional Firebase datasource wrappers (not created yet)
 ├── ui/
-│   ├── auth/               # LoginScreen, RegisterScreen + their ViewModels
-│   ├── home/               # HomeScreen, SearchScreen + ViewModels
-│   ├── listing/            # ListingDetailScreen, CreateListingScreen, EditListingScreen
-│   ├── order/              # CreateOrderScreen, OrdersScreen, OrderDetailScreen
-│   ├── review/             # CreateReviewScreen
-│   ├── profile/            # ProfileScreen, EditProfileScreen, UserProfileScreen
-│   ├── splash/             # SplashScreen
-│   └── common/             # Reusable composables (ListingCard, UserAvatar, StatusChip, etc.)
+│   ├── BerimaApp.kt       # Root composable, owns NavController + Scaffold
+│   ├── auth/              # LoginScreen, RegisterScreen + ViewModels (Phase 1 UI)
+│   ├── home/              # HomeScreen, SearchScreen + ViewModels (Phase 2)
+│   ├── listing/           # ListingDetail, CreateListing, EditListing (Phase 2)
+│   ├── order/             # CreateOrder, Orders, OrderDetail (Phase 3)
+│   ├── review/            # CreateReview (Phase 4)
+│   ├── profile/           # Profile, EditProfile, UserProfile (Phase 4)
+│   ├── splash/            # SplashScreen (Phase 1 UI)
+│   ├── common/            # Reusable composables (ListingCard, StatusChip, ...)
+│   └── theme/             # BerimaTheme, Color, Type
 ├── navigation/
-│   ├── NavGraph.kt         # All NavHost destinations defined here
-│   └── Screen.kt           # Sealed class with all route strings
+│   ├── NavGraph.kt        # NavHost, all destinations (placeholders until UI lands)
+│   └── Screen.kt          # Sealed class with every route + createRoute helpers
 └── di/
-    └── AppModule.kt        # Hilt module providing Firebase instances
+    └── AppModule.kt       # Provides FirebaseAuth, FirebaseFirestore, FirebaseStorage
 ```
 
-## Key Dependencies (build.gradle.kts)
+## Version Catalog
+
+All dependency versions live in `gradle/libs.versions.toml`. Never hardcode
+versions in `build.gradle.kts`; always use `libs.xxx` aliases.
+
+## Key Dependencies
 
 ```kotlin
-// Compose BOM
-implementation(platform("androidx.compose:compose-bom:2024.02.00"))
-implementation("androidx.compose.ui:ui")
-implementation("androidx.compose.material3:material3")
-implementation("androidx.compose.ui:ui-tooling-preview")
-implementation("androidx.activity:activity-compose:1.8.2")
+// Compose
+implementation(platform(libs.androidx.compose.bom))   // 2026.02.01
+implementation(libs.androidx.compose.ui)
+implementation(libs.androidx.compose.material3)
+implementation(libs.androidx.compose.ui.tooling.preview)
+implementation(libs.androidx.activity.compose)
+
+// Lifecycle
+implementation(libs.androidx.lifecycle.runtime.ktx)
+implementation(libs.androidx.lifecycle.runtime.compose)
+implementation(libs.androidx.lifecycle.viewmodel.compose)
 
 // Navigation
-implementation("androidx.navigation:navigation-compose:2.7.7")
-
-// ViewModel
-implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+implementation(libs.androidx.navigation.compose)       // 2.9.5
 
 // Hilt
-implementation("com.google.dagger:hilt-android:2.51")
-kapt("com.google.dagger:hilt-compiler:2.51")
-implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+implementation(libs.hilt.android)                      // 2.59.2
+ksp(libs.hilt.compiler)
+implementation(libs.androidx.hilt.navigation.compose)  // 1.2.0
 
 // Firebase
-implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
-implementation("com.google.firebase:firebase-auth-ktx")
-implementation("com.google.firebase:firebase-firestore-ktx")
-implementation("com.google.firebase:firebase-storage-ktx")
+implementation(platform(libs.firebase.bom))            // 34.3.0
+implementation(libs.firebase.auth)
+implementation(libs.firebase.firestore)
+implementation(libs.firebase.storage)
 
 // Coil
-implementation("io.coil-kt:coil-compose:2.6.0")
+implementation(libs.coil.compose)                      // 2.7.0
 
 // Coroutines
-implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+implementation(libs.kotlinx.coroutines.android)        // 1.9.0
+implementation(libs.kotlinx.coroutines.play.services)  // for .await()
 ```
+
+## Plugins applied to `app`
+
+```
+com.android.application
+org.jetbrains.kotlin.plugin.compose
+com.google.dagger.hilt.android
+com.google.devtools.ksp
+com.google.gms.google-services
+```
+
+> **Note:** Do NOT apply `org.jetbrains.kotlin.android`. AGP 9 bundles
+> built-in Kotlin support; applying `kotlin-android` on top throws
+> "Cannot add extension with name 'kotlin'". AGP wires Kotlin in on its
+> own when the Compose plugin is applied.
+
+> **Note:** `gradle.properties` sets `android.disallowKotlinSourceSets=false`.
+> KSP still registers its generated sources via `kotlin.sourceSets`, which
+> AGP 9 blocks by default. Remove this flag once KSP ships a native
+> AGP-9-compatible source registration path.
 
 ## Route Definitions (Screen.kt)
 
+Canonical routes. Callers use `Screen.X.createRoute(...)` for routes with
+arguments — never concatenate strings by hand.
+
 ```kotlin
 sealed class Screen(val route: String) {
-    object Splash : Screen("splash")
-    object Login : Screen("login")
-    object Register : Screen("register")
-    object Home : Screen("home")
-    object Orders : Screen("orders")
-    object Profile : Screen("profile")
-    object ListingDetail : Screen("listing/{listingId}") {
+    data object Splash : Screen("splash")
+    data object Login : Screen("login")
+    data object Register : Screen("register")
+    data object Home : Screen("home")
+    data object Orders : Screen("orders")
+    data object Profile : Screen("profile")
+    data object ListingDetail : Screen("listing/{listingId}") {
+        const val ARG_LISTING_ID = "listingId"
         fun createRoute(listingId: String) = "listing/$listingId"
     }
-    object CreateListing : Screen("listing/create")
-    object EditListing : Screen("listing/edit/{listingId}") {
+    data object CreateListing : Screen("listing/create")
+    data object EditListing : Screen("listing/edit/{listingId}") {
+        const val ARG_LISTING_ID = "listingId"
         fun createRoute(listingId: String) = "listing/edit/$listingId"
     }
-    object CreateOrder : Screen("order/create/{listingId}") {
+    data object CreateOrder : Screen("order/create/{listingId}") {
+        const val ARG_LISTING_ID = "listingId"
         fun createRoute(listingId: String) = "order/create/$listingId"
     }
-    object OrderDetail : Screen("order/{orderId}") {
+    data object OrderDetail : Screen("order/{orderId}") {
+        const val ARG_ORDER_ID = "orderId"
         fun createRoute(orderId: String) = "order/$orderId"
     }
-    object CreateReview : Screen("review/create/{orderId}") {
+    data object CreateReview : Screen("review/create/{orderId}") {
+        const val ARG_ORDER_ID = "orderId"
         fun createRoute(orderId: String) = "review/create/$orderId"
     }
-    object EditProfile : Screen("profile/edit")
-    object UserProfile : Screen("user/{userId}") {
+    data object EditProfile : Screen("profile/edit")
+    data object UserProfile : Screen("user/{userId}") {
+        const val ARG_USER_ID = "userId"
         fun createRoute(userId: String) = "user/$userId"
     }
 }
 ```
+
+## Firebase setup (one-time, manual)
+
+1. Firebase Console → **Add project** → name it `Berima`.
+2. Inside the project → **Add app** → Android.
+3. Package name: `upnvj.berima.v1`, app nickname: `Berima`. SHA-1 is not needed
+   for email/password auth; add later only if Google Sign-In is introduced.
+4. Download `google-services.json` and drop it at `app/google-services.json`.
+   The file is gitignored by `app/.gitignore` (verify before first commit).
+5. In the Firebase console:
+   - Authentication → enable **Email/Password**.
+   - Firestore Database → create in test mode for now. Security rules from
+     `database.md` are deployed in Phase 5.
+   - Storage → enable default bucket.
+6. Build will fail with `File google-services.json is missing` until step 4 is
+   done — this is expected.
