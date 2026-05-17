@@ -11,12 +11,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import upnvj.berima.v1.ui.auth.LoginScreen
+import upnvj.berima.v1.ui.auth.RegisterScreen
+import upnvj.berima.v1.ui.splash.SplashScreen
 
-/**
- * Single source of truth for the navigation graph.
- * Each destination is currently a placeholder. Real screens will replace
- * these composable bodies in later phases — routes stay stable.
- */
 @Composable
 fun BerimaNavGraph(
     navController: NavHostController,
@@ -29,13 +27,44 @@ fun BerimaNavGraph(
         modifier = modifier
     ) {
         composable(Screen.Splash.route) {
-            Placeholder(name = "Splash")
+            SplashScreen(
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+            )
         }
+
         composable(Screen.Login.route) {
-            Placeholder(name = "Login")
+            LoginScreen(
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
+                onNavigateToRegister = {
+                    navController.navigate(Screen.Register.route)
+                },
+            )
         }
+
         composable(Screen.Register.route) {
-            Placeholder(name = "Register")
+            RegisterScreen(
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.popBackStack()
+                },
+            )
         }
 
         composable(Screen.Home.route) {

@@ -1,58 +1,77 @@
 package upnvj.berima.v1.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.CompositionLocalProvider
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+private val BerimaLightColorScheme = lightColorScheme(
+    primary = BrandPrimary,
+    onPrimary = BrandOnPrimary,
+    primaryContainer = BrandPrimaryContainer,
+    onPrimaryContainer = BrandOnPrimaryContainer,
+    inversePrimary = BrandInversePrimary,
+    secondary = BrandSecondary,
+    onSecondary = BrandOnSecondary,
+    secondaryContainer = BrandSecondaryContainer,
+    onSecondaryContainer = BrandOnSecondaryContainer,
+    tertiary = BrandTertiary,
+    onTertiary = BrandOnTertiary,
+    tertiaryContainer = BrandTertiaryContainer,
+    onTertiaryContainer = BrandOnTertiaryContainer,
+    error = SemanticError,
+    onError = SemanticOnError,
+    errorContainer = SemanticErrorContainer,
+    onErrorContainer = SemanticOnErrorContainer,
+    background = BgBackground,
+    onBackground = ContentOnBackground,
+    surface = BgSurface,
+    onSurface = ContentOnSurface,
+    onSurfaceVariant = ContentOnSurfaceVariant,
+    surfaceVariant = BgSurfaceContainerHighest,
+    surfaceTint = BrandPrimary,
+    inverseSurface = ContentInverseSurface,
+    inverseOnSurface = ContentInverseOnSurface,
+    outline = ContentOutline,
+    outlineVariant = ContentOutlineVariant,
+    surfaceContainerLowest = BgSurfaceContainerLowest,
+    surfaceContainerLow = BgSurfaceContainerLow,
+    surfaceContainer = BgSurfaceContainer,
+    surfaceContainerHigh = BgSurfaceContainerHigh,
+    surfaceContainerHighest = BgSurfaceContainerHighest,
+    surfaceDim = BgSurfaceDim,
+    surfaceBright = BgSurfaceBright,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val BerimaExtendedColors = BerimaColors(
+    primaryDim = BrandPrimaryDim,
+    surfaceRaised = BgSurfaceRaised,
+    surfacePressed = BgSurfacePressed,
+    borderSubtle = BorderSubtle,
+    borderInput = BorderInput,
+    containerGreen = AccentContainerGreen,
+    starRating = AccentStarRating,
+    textSecondary = ContentTextSecondary,
+    statusPending = StatusColors(StatusPendingContainer, StatusPendingText),
+    statusInProgress = StatusColors(StatusInProgressContainer, StatusInProgressText),
+    statusDelivered = StatusColors(StatusDeliveredContainer, StatusDeliveredText),
+    statusCompleted = StatusColors(StatusCompletedContainer, StatusCompletedText),
+    statusPaid = StatusColors(StatusPaidContainer, StatusPaidText),
+    statusCancelled = StatusColors(StatusCancelledContainer, StatusCancelledText),
+    statusRejected = StatusColors(StatusRejectedContainer, StatusRejectedText),
 )
 
 @Composable
 fun BerimaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean = false,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    CompositionLocalProvider(LocalBerimaColors provides BerimaExtendedColors) {
+        MaterialTheme(
+            colorScheme = BerimaLightColorScheme,
+            typography = BerimaTypography,
+            content = content,
+        )
     }
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
 }

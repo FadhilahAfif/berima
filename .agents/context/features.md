@@ -34,13 +34,13 @@ Bottom navigation items: **Home** (browse) | **Orders** | **Profile**
 
 ### LoginScreen
 - Fields: email, password
-- Validation: email must match `@upnvj.ac.id` domain
+- Validation: valid email format
 - Specific error messages: "Email tidak terdaftar" / "Password salah"
 - Link to RegisterScreen
 
 ### RegisterScreen
 - Fields: full name, email, password, confirm password
-- Validation: email domain `@upnvj.ac.id`, password min 8 chars, passwords must match
+- Validation: valid email format, password min 8 chars, passwords must match
 - On success: auto-login → navigate to Home
 - No email verification step (MVP simplification)
 
