@@ -77,6 +77,7 @@ fun RegisterScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
         modifier = modifier,
     ) { innerPadding ->
         RegisterContent(
@@ -183,8 +184,8 @@ private fun RegisterContent(
 
     Column(
         modifier = modifier
-            .imePadding()
             .verticalScroll(rememberScrollState())
+            .imePadding()
             .padding(horizontal = 24.dp),
     ) {
         Spacer(modifier = Modifier.height(40.dp))
