@@ -1,8 +1,9 @@
 package upnvj.berima.v1.ui.auth
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,8 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.tooling.preview.Preview
-import upnvj.berima.v1.ui.theme.BerimaTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,29 +21,32 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import upnvj.berima.v1.R
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.common.BerimaTextField
+import upnvj.berima.v1.ui.theme.BerimaTheme
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 
 @Composable
@@ -57,7 +59,6 @@ fun RegisterScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
-    val berimaColors = LocalBerimaColors.current
 
     LaunchedEffect(uiState.navigateToHome) {
         if (uiState.navigateToHome) {
@@ -78,34 +79,144 @@ fun RegisterScreen(
         containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier,
     ) { innerPadding ->
-        Column(
+        RegisterContent(
+            name = uiState.name,
+            email = uiState.email,
+            password = uiState.password,
+            confirmPassword = uiState.confirmPassword,
+            isLoading = uiState.isLoading,
+            onNameChange = viewModel::onNameChange,
+            onEmailChange = viewModel::onEmailChange,
+            onPasswordChange = viewModel::onPasswordChange,
+            onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
+            onSubmit = {
+                focusManager.clearFocus()
+                viewModel.signUp()
+            },
+            onLoginClick = onNavigateToLogin,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Spacer(modifier = Modifier.height(48.dp))
+                .padding(innerPadding),
+        )
+    }
+}
 
+@Composable
+private fun RegisterContent(
+    name: String,
+    email: String,
+    password: String,
+    confirmPassword: String,
+    isLoading: Boolean,
+    onNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onLoginClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val focusManager = LocalFocusManager.current
+    val berimaColors = LocalBerimaColors.current
+    val isPreview = LocalInspectionMode.current
+
+    val heroAlpha = remember { Animatable(if (isPreview) 1f else 0f) }
+    val nameAlpha = remember { Animatable(if (isPreview) 1f else 0f) }
+    val nameOffset = remember { Animatable(if (isPreview) 0f else 8f) }
+    val emailAlpha = remember { Animatable(if (isPreview) 1f else 0f) }
+    val emailOffset = remember { Animatable(if (isPreview) 0f else 8f) }
+    val pwAlpha = remember { Animatable(if (isPreview) 1f else 0f) }
+    val pwOffset = remember { Animatable(if (isPreview) 0f else 8f) }
+    val confirmAlpha = remember { Animatable(if (isPreview) 1f else 0f) }
+    val confirmOffset = remember { Animatable(if (isPreview) 0f else 8f) }
+    val buttonAlpha = remember { Animatable(if (isPreview) 1f else 0f) }
+    val footerAlpha = remember { Animatable(if (isPreview) 1f else 0f) }
+
+    if (!isPreview) {
+        LaunchedEffect(Unit) {
+            heroAlpha.animateTo(1f, animationSpec = tween(400))
+        }
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(200)
+            nameAlpha.animateTo(1f, animationSpec = tween(400))
+        }
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(200)
+            nameOffset.animateTo(0f, animationSpec = tween(400))
+        }
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(260)
+            emailAlpha.animateTo(1f, animationSpec = tween(400))
+        }
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(260)
+            emailOffset.animateTo(0f, animationSpec = tween(400))
+        }
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(320)
+            pwAlpha.animateTo(1f, animationSpec = tween(400))
+        }
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(320)
+            pwOffset.animateTo(0f, animationSpec = tween(400))
+        }
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(380)
+            confirmAlpha.animateTo(1f, animationSpec = tween(400))
+        }
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(380)
+            confirmOffset.animateTo(0f, animationSpec = tween(400))
+        }
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(500)
+            buttonAlpha.animateTo(1f, animationSpec = tween(400))
+        }
+        LaunchedEffect(Unit) {
+            kotlinx.coroutines.delay(580)
+            footerAlpha.animateTo(1f, animationSpec = tween(400))
+        }
+    }
+
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+    ) {
+        Spacer(modifier = Modifier.height(40.dp))
+
+        // Hero block
+        Column(modifier = Modifier.alpha(heroAlpha.value)) {
+            BrandMarkChip()
+            Spacer(modifier = Modifier.height(28.dp))
             Text(
-                text = "Buat akun baru",
+                text = "Buat\nakun baru.",
                 style = MaterialTheme.typography.displayLarge,
                 color = MaterialTheme.colorScheme.onBackground,
             )
-            Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Daftar dan mulai tawarkan jasamu",
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Daftar dan mulai tawarkan jasamu.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = berimaColors.textSecondary,
             )
+        }
 
-            Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
+        // Name
+        Box(
+            modifier = Modifier
+                .alpha(nameAlpha.value)
+                .graphicsLayer { translationY = nameOffset.value.dp.toPx() },
+        ) {
             BerimaTextField(
-                value = uiState.name,
-                onValueChange = viewModel::onNameChange,
+                value = name,
+                onValueChange = onNameChange,
                 label = "Nama lengkap",
                 placeholder = "Nama sesuai KTM",
                 keyboardOptions = KeyboardOptions(
@@ -115,13 +226,27 @@ fun RegisterScreen(
                 keyboardActions = KeyboardActions(
                     onNext = { focusManager.moveFocus(FocusDirection.Down) }
                 ),
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_person),
+                        contentDescription = null,
+                        tint = berimaColors.textSecondary,
+                    )
+                },
             )
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
+        // Email
+        Box(
+            modifier = Modifier
+                .alpha(emailAlpha.value)
+                .graphicsLayer { translationY = emailOffset.value.dp.toPx() },
+        ) {
             BerimaTextField(
-                value = uiState.email,
-                onValueChange = viewModel::onEmailChange,
+                value = email,
+                onValueChange = onEmailChange,
                 label = "Email",
                 placeholder = "nama@email.com",
                 keyboardOptions = KeyboardOptions(
@@ -131,16 +256,29 @@ fun RegisterScreen(
                 keyboardActions = KeyboardActions(
                     onNext = { focusManager.moveFocus(FocusDirection.Down) }
                 ),
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_mail),
+                        contentDescription = null,
+                        tint = berimaColors.textSecondary,
+                    )
+                },
             )
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-            var passwordVisible by remember { mutableStateOf(false) }
+        // Password
+        Box(
+            modifier = Modifier
+                .alpha(pwAlpha.value)
+                .graphicsLayer { translationY = pwOffset.value.dp.toPx() },
+        ) {
             BerimaTextField(
-                value = uiState.password,
-                onValueChange = viewModel::onPasswordChange,
+                value = password,
+                onValueChange = onPasswordChange,
                 label = "Password",
-                placeholder = "Minimal 8 karakter",
+                placeholder = "••••••••",
                 visualTransformation = if (passwordVisible) VisualTransformation.None
                 else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
@@ -150,6 +288,13 @@ fun RegisterScreen(
                 keyboardActions = KeyboardActions(
                     onNext = { focusManager.moveFocus(FocusDirection.Down) }
                 ),
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_lock),
+                        contentDescription = null,
+                        tint = berimaColors.textSecondary,
+                    )
+                },
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
@@ -163,14 +308,27 @@ fun RegisterScreen(
                         )
                     }
                 },
+                supportingText = {
+                    Text(
+                        text = "Minimal 8 karakter",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = berimaColors.textSecondary,
+                    )
+                },
             )
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-            var confirmPasswordVisible by remember { mutableStateOf(false) }
+        // Confirm password
+        Box(
+            modifier = Modifier
+                .alpha(confirmAlpha.value)
+                .graphicsLayer { translationY = confirmOffset.value.dp.toPx() },
+        ) {
             BerimaTextField(
-                value = uiState.confirmPassword,
-                onValueChange = viewModel::onConfirmPasswordChange,
+                value = confirmPassword,
+                onValueChange = onConfirmPasswordChange,
                 label = "Konfirmasi password",
                 placeholder = "Ulangi password",
                 visualTransformation = if (confirmPasswordVisible) VisualTransformation.None
@@ -180,11 +338,15 @@ fun RegisterScreen(
                     imeAction = ImeAction.Done,
                 ),
                 keyboardActions = KeyboardActions(
-                    onDone = {
-                        focusManager.clearFocus()
-                        viewModel.signUp()
-                    }
+                    onDone = { onSubmit() }
                 ),
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_lock),
+                        contentDescription = null,
+                        tint = berimaColors.textSecondary,
+                    )
+                },
                 trailingIcon = {
                     IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                         Icon(
@@ -199,127 +361,59 @@ fun RegisterScreen(
                     }
                 },
             )
+        }
 
-            Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
+        Box(modifier = Modifier.alpha(buttonAlpha.value)) {
             BerimaButton(
                 text = "Daftar",
-                onClick = {
-                    focusManager.clearFocus()
-                    viewModel.signUp()
-                },
-                isLoading = uiState.isLoading,
+                onClick = onSubmit,
+                isLoading = isLoading,
                 modifier = Modifier.fillMaxWidth(),
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Sudah punya akun?",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = berimaColors.textSecondary,
-                )
-                TextButton(onClick = onNavigateToLogin) {
-                    Text(
-                        text = "Masuk",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(48.dp))
         }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        FooterLink(
+            prefix = "Sudah punya akun?",
+            actionLabel = "Masuk",
+            onClick = onLoginClick,
+            modifier = Modifier.alpha(footerAlpha.value),
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+// --- Direction B: Bottom sheet panel variant (preview only) -------------------
+
+// Direction B was rejected on 2026-05-17. Editorial direction is the runtime UI.
+
+// --- Previews -----------------------------------------------------------------
+
+@Preview(name = "Register · Editorial", showBackground = true, showSystemUi = true)
 @Composable
 private fun RegisterScreenPreview() {
     BerimaTheme {
-        val berimaColors = LocalBerimaColors.current
-        Scaffold(
-            containerColor = MaterialTheme.colorScheme.background,
-        ) { innerPadding ->
-            Column(
+        Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+            RegisterContent(
+                name = "",
+                email = "",
+                password = "",
+                confirmPassword = "",
+                isLoading = false,
+                onNameChange = {},
+                onEmailChange = {},
+                onPasswordChange = {},
+                onConfirmPasswordChange = {},
+                onSubmit = {},
+                onLoginClick = {},
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = "Buat akun baru",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                text = "Daftar dan mulai tawarkan jasamu",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = berimaColors.textSecondary,
-                )
-                Spacer(modifier = Modifier.height(40.dp))
-                BerimaTextField(
-                    value = "",
-                    onValueChange = {},
-                    label = "Nama lengkap",
-                    placeholder = "Nama lengkap kamu",
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                BerimaTextField(
-                    value = "",
-                    onValueChange = {},
-                    label = "Email",
-                    placeholder = "nama@email.com",
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                BerimaTextField(
-                    value = "",
-                    onValueChange = {},
-                    label = "Password",
-                    placeholder = "Minimal 8 karakter",
-                    visualTransformation = PasswordVisualTransformation(),
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                BerimaTextField(
-                    value = "",
-                    onValueChange = {},
-                    label = "Konfirmasi password",
-                    placeholder = "Ulangi password",
-                    visualTransformation = PasswordVisualTransformation(),
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                BerimaButton(
-                    text = "Daftar",
-                    onClick = {},
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "Sudah punya akun?",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = berimaColors.textSecondary,
-                    )
-                    TextButton(onClick = {}) {
-                        Text(
-                            text = "Masuk",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                }
-            }
+                    .padding(padding),
+            )
         }
     }
 }

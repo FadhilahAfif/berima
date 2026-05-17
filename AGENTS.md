@@ -64,9 +64,9 @@ One agent session should update at minimum one item before ending.
 | All repository classes | ✅ Done | Auth, Listing, Order, Review, Message |
 | AppModule.kt (Hilt DI) | ✅ Done | Provides FirebaseAuth, Firestore, Storage |
 | NavGraph.kt + Screen.kt | ✅ Done | All routes wired to placeholder composables |
-| SplashScreen | ✅ Done | Animated logo + tagline, auth-state routing |
-| LoginScreen + LoginViewModel | ✅ Done | Email/password, domain validation, snackbar errors |
-| RegisterScreen + RegisterViewModel | ✅ Done | 4-field form, auto-login on success |
+| SplashScreen | ✅ Done | Logo + halo + delayed pulsing-dots loader, staggered entry, auth-state routing |
+| LoginScreen + LoginViewModel | ✅ Done | Editorial 2-line headline, brand-mark chip, leading-icon fields, staggered entry |
+| RegisterScreen + RegisterViewModel | ✅ Done | Editorial 2-line headline, brand-mark chip, leading-icon fields, password supportingText |
 
 ### Phase 2 — Core Listing
 | Task | Status | Notes |

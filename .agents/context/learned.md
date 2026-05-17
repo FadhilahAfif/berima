@@ -85,3 +85,35 @@ Each entry must include: what was learned, which file it affects (if any), and d
   `isAllowedEmail()` replaced with `isValidEmail()` using `android.util.Patterns.EMAIL_ADDRESS`.
   All UPNVJ-specific strings removed from LoginScreen, RegisterScreen, RegisterViewModel,
   and AuthRepository. App now accepts any valid email address.
+- [2026-05-17] Auth + Splash visual upgrade. `BerimaTextField` gained a
+  `leadingIcon` parameter (mirrors `trailingIcon`) so any field can show a
+  leading symbol without ad-hoc Row wrappers. New vector drawables added in
+  `app/src/main/res/drawable/`: `ic_mail.xml`, `ic_lock.xml`, `ic_person.xml`.
+  SplashScreen now stacks `ic_berima_mark` on a primaryContainer halo above
+  `ic_berima_wordmark`, with a 600ms-delayed pulsing-dots loader plus
+  `BERIMA · 2026` label anchored at the bottom. Login/Register screens use a
+  brand-mark chip + 2-line `displayLarge` headline ("Halo,\nselamat datang." /
+  "Buat\nakun baru.") and a single-line annotated footer link with a chevron
+  (replaces the old `TextButton` row). Both screens stagger entry animations
+  (hero → fields → button → footer) using `Animatable` + `tween`.
+- [2026-05-17] Convention: when comparing UI directions, encode each variant
+  as a `*Content` private composable inside the same screen file plus a named
+  `@Preview` per variant (e.g. "Login · A · Editorial",
+  "Login · B · Bottom sheet"). Keeps draft variants out of the runtime
+  navigation graph and discoverable via Android Studio's preview pane.
+  Once a winner is picked, delete the loser's `*ContentSheet` and preview.
+- [2026-05-17] Auth visual direction picked: **Editorial-grounded (Direction A)**.
+  Bottom-sheet panel variant (Direction B) was tried as a side-by-side preview
+  and rejected — the cream-canvas + tonal layering reads stronger without a
+  panel split. Direction B drafts removed from `LoginScreen.kt` and
+  `RegisterScreen.kt`; only the editorial layout remains.
+- [2026-05-17] Compose Preview gotcha: `LaunchedEffect` blocks do NOT run in
+  Android Studio's `@Preview` renderer. Any composable that uses
+  `Animatable(0f)` + `LaunchedEffect { animateTo(1f) }` for an entry
+  animation will render with alpha 0 / offset values stuck at their initial
+  state, producing a blank preview while runtime works fine. Fix: detect
+  preview via `LocalInspectionMode.current` and seed `Animatable(...)` with
+  the *final* value when in preview, plus skip the `LaunchedEffect` block
+  entirely. Example pattern lives in `SplashScreen.kt`, `LoginScreen.kt`,
+  `RegisterScreen.kt`. Apply this to every future screen with entry
+  animations.
