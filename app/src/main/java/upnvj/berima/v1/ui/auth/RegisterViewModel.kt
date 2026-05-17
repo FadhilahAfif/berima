@@ -45,6 +45,7 @@ class RegisterViewModel @Inject constructor(
     }
 
     fun signUp() {
+        if (_uiState.value.isLoading) return
         val state = _uiState.value
         when {
             state.name.isBlank() -> {
