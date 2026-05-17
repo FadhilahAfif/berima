@@ -59,7 +59,7 @@ status:
   pending:
     container: '#FFF4D6'
     text: '#7A5800'
-  in-progress:
+  in_progress:
     container: '#E5EFE9'
     text: '#0f5238'
   delivered:
