@@ -30,7 +30,6 @@ object OrderStatus {
 }
 
 object Validation {
-    const val ALLOWED_EMAIL_DOMAIN = "@upnvj.ac.id"
     const val MIN_PASSWORD_LENGTH = 8
 
     const val MAX_LISTING_TITLE_LENGTH = 60
@@ -42,6 +41,6 @@ object Validation {
     const val MAX_MESSAGE_LENGTH = 500
     const val MAX_BIO_LENGTH = 150
 
-    fun isAllowedEmail(email: String): Boolean =
-        email.trim().lowercase().endsWith(ALLOWED_EMAIL_DOMAIN)
+    fun isValidEmail(email: String): Boolean =
+        android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
 }

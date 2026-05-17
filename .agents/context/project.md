@@ -2,7 +2,7 @@
 
 ## What is Berima
 
-Berima ("Beri Jasa, Terima Hasil") is an Android marketplace app where university students
+Berima ("Beri Jasa, Terima Hasil") is an Android marketplace app where students
 buy and sell small digital services (micro-gigs) that can be completed in under 48 hours.
 
 Tagline: "Tugas Tuntas, Kantong Pas."
@@ -17,8 +17,8 @@ This causes three problems:
 
 ## The Solution
 
-A campus-specific C2C marketplace with:
-- Verified users (university email only)
+A student-focused C2C marketplace with:
+- Verified users (any valid email)
 - Structured listings with categories and fixed pricing
 - Order tracking with clear status flow
 - Rating and review system to build trust
@@ -42,10 +42,10 @@ One user can be both seller and buyer simultaneously.
 
 ## User Restriction (MVP)
 
-Only students with `@upnvj.ac.id` email can register. Enforced via client-side regex validation.
+Any valid email address can register. Enforced via client-side regex validation using `android.util.Patterns.EMAIL_ADDRESS`.
 
 ## Project Status
 
-This is an MVP built for a Technopreneurship course demo and a campus bazaar.
+This is an MVP built for a Technopreneurship course demo.
 Goal: a working, demonstrable app — not a production system.
 Payment is simulated (no real money). Some features are intentionally simplified.

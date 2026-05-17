@@ -10,7 +10,7 @@
 ```
 uid:                  String      // same as document ID
 name:                 String
-email:                String      // must be @upnvj.ac.id
+email:                String      // any valid email address
 photoUrl:             String?     // Firebase Storage URL
 bio:                  String?     // max 150 chars
 faculty:              String?

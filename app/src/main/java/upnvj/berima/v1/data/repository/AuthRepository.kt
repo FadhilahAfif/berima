@@ -42,9 +42,9 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun signIn(email: String, password: String): Result<String> {
-        if (!Validation.isAllowedEmail(email)) {
+        if (!Validation.isValidEmail(email)) {
             return Result.failure(
-                IllegalArgumentException("Email harus berdomain ${Validation.ALLOWED_EMAIL_DOMAIN}")
+                IllegalArgumentException("Format email tidak valid")
             )
         }
         return try {
@@ -63,9 +63,9 @@ class AuthRepository @Inject constructor(
      * user can retry.
      */
     suspend fun signUp(name: String, email: String, password: String): Result<String> {
-        if (!Validation.isAllowedEmail(email)) {
+        if (!Validation.isValidEmail(email)) {
             return Result.failure(
-                IllegalArgumentException("Email harus berdomain ${Validation.ALLOWED_EMAIL_DOMAIN}")
+                IllegalArgumentException("Format email tidak valid")
             )
         }
         if (password.length < Validation.MIN_PASSWORD_LENGTH) {

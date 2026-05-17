@@ -62,9 +62,9 @@ One agent session should update at minimum one item before ending.
 | All repository classes | ✅ Done | Auth, Listing, Order, Review, Message |
 | AppModule.kt (Hilt DI) | ✅ Done | Provides FirebaseAuth, Firestore, Storage |
 | NavGraph.kt + Screen.kt | ✅ Done | All routes wired to placeholder composables |
-| SplashScreen | ⬜ Not started | Phase 1 UI — pending google-services.json |
-| LoginScreen + LoginViewModel | ⬜ Not started | Phase 1 UI |
-| RegisterScreen + RegisterViewModel | ⬜ Not started | Phase 1 UI |
+| SplashScreen | ✅ Done | Animated logo + tagline, auth-state routing |
+| LoginScreen + LoginViewModel | ✅ Done | Email/password, domain validation, snackbar errors |
+| RegisterScreen + RegisterViewModel | ✅ Done | 4-field form, auto-login on success |
 
 ### Phase 2 — Core Listing
 | Task | Status | Notes |
@@ -168,3 +168,27 @@ Each entry must include: what was learned, which file it affects (if any), and d
   `gradle.properties` so Gradle uses only the JVM that launched it.
   Requires setting `JAVA_HOME` to a real JDK (Android Studio JBR at
   `C:\Program Files\Android\Android Studio\jbr` works).
+- [2026-05-17] Design system fully reconciled into DESIGN.MD. All tokens are
+  single source of truth. Berima-only tokens (primary-dim, surface-pressed,
+  border-subtle, border-input, surface-raised, container-green, star-rating,
+  all status.*) live on `BerimaColors` data class via `LocalBerimaColors`
+  CompositionLocal. M3 ColorScheme slots filled from the same token set.
+- [2026-05-17] Plus Jakarta Sans bundled as 4 static TTF files in
+  `app/src/main/res/font/` (regular/semibold/bold/extrabold, weights
+  400/600/700/800). Downloaded from fonts.gstatic.com v12. Do NOT switch to
+  Downloadable Fonts API — offline availability is required.
+- [2026-05-17] `BerimaTheme` is light-only (`darkTheme = false`,
+  `dynamicColor = false`). Dark mode deferred. Dynamic color disabled so
+  Android 12+ wallpaper extraction cannot override the brand palette.
+- [2026-05-17] Shared UI components (`BerimaButton`, `BerimaTextField`) live
+  in `ui/common/Components.kt`. Import from there — do not redefine per screen.
+- [2026-05-17] Password visibility toggle icons added as vector drawables:
+  `ic_visibility.xml` and `ic_visibility_off.xml` in `res/drawable/`.
+- [2026-05-17] `Typography` val renamed to `BerimaTypography` in `Type.kt` to
+  avoid shadowing the M3 default. `Theme.kt` references `BerimaTypography`.
+- [2026-05-17] Phase 1 UI (Splash, Login, Register) verified: `assembleDebug`
+  BUILD SUCCESSFUL in 35s with KSP + Hilt codegen + Compose compile all clean.
+- [2026-05-17] Removed campus email restriction. `Validation.ALLOWED_EMAIL_DOMAIN` and
+  `isAllowedEmail()` replaced with `isValidEmail()` using `android.util.Patterns.EMAIL_ADDRESS`.
+  All UPNVJ-specific strings removed from LoginScreen, RegisterScreen, RegisterViewModel,
+  and AuthRepository. App now accepts any valid email address.
