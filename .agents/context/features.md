@@ -47,12 +47,13 @@ Bottom navigation items: **Home** (browse) | **Orders** | **Profile**
 ---
 
 ### HomeScreen
-- Search bar at top (navigates to search mode on tap)
+- Search bar at top (tappable, navigates to SearchScreen)
+- **"Sedang ramai" horizontal rail**: top 5 listings ordered by `totalOrders DESC`, shown as a `LazyRow` of `ListingCard` (width 180dp). Hidden when empty.
 - Category filter chips: Semua | Academic Support | Visual Branding | Data Processing
-- Listing grid or list: ListingCard with thumbnail, title, price, seller name, seller rating
-- Pull-to-refresh
-- Paginate: load 10 items, load more on scroll to bottom
-- Query: `listings` where `isActive == true`, ordered by `createdAt` DESC
+- **"Terbaru" vertical list**: active listings ordered by `createdAt DESC`, filtered by selected category, limit 20
+- Empty state when no listings match the selected category
+- Query for featured: `listings` where `isActive == true`, ordered by `totalOrders` DESC, limit 5
+- Query for main list: `listings` where `isActive == true` (+ optional `category ==`), ordered by `createdAt` DESC, limit 20
 
 ### SearchScreen
 - Activated when user taps search bar on Home

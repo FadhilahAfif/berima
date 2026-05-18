@@ -107,6 +107,22 @@ Each entry must include: what was learned, which file it affects (if any), and d
   and rejected — the cream-canvas + tonal layering reads stronger without a
   panel split. Direction B drafts removed from `LoginScreen.kt` and
   `RegisterScreen.kt`; only the editorial layout remains.
+- [2026-05-18] Every screen must have a `@Preview` composable at the bottom of its file.
+  Follow the pattern from SplashScreen/LoginScreen: detect `LocalInspectionMode.current`
+  to seed Animatable with final values and skip LaunchedEffect blocks.
+  For screens with ViewModels, create a preview-safe wrapper that passes fake/default data
+  directly instead of using `hiltViewModel()`. Never call `hiltViewModel()` inside a `@Preview`.
+- [2026-05-18] Firebase CLI installed globally via npm (`firebase-tools`). User is logged in.
+  Use `firebase deploy --only firestore:rules` and `firebase deploy --only firestore:indexes`
+  in Phase 5 instead of manual console steps.
+- [2026-05-18] All 8 Firestore composite indexes created manually in Firebase Console.
+  Future indexes should be added to `database.md` and deployed via Firebase CLI in Phase 5.
+- [2026-05-18] HomeScreen built as combined browse + explore surface (no separate Explore tab).
+  Sections: search bar → "Sedang ramai" featured LazyRow (top 5 by totalOrders DESC) →
+  category chips → "Terbaru" LazyColumn (createdAt DESC, category-filtered, limit 20).
+  New repo method: `getFeaturedListings()`. New composite index required:
+  `listings / isActive ASC + totalOrders DESC`. ListingCard lives in `ui/common/ListingCard.kt`.
+  onSearchClick in NavGraph is a placeholder (navigates to Orders) until SearchScreen is built.
 - [2026-05-17] Compose Preview gotcha: `LaunchedEffect` blocks do NOT run in
   Android Studio's `@Preview` renderer. Any composable that uses
   `Animatable(0f)` + `LaunchedEffect { animateTo(1f) }` for an entry

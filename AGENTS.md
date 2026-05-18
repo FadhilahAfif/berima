@@ -71,12 +71,12 @@ One agent session should update at minimum one item before ending.
 ### Phase 2 — Core Listing
 | Task | Status | Notes |
 |---|---|---|
-| HomeScreen + HomeViewModel | ⬜ Not started | |
-| SearchScreen | ⬜ Not started | |
-| ListingDetailScreen + ListingDetailViewModel | ⬜ Not started | |
-| CreateListingScreen + CreateListingViewModel | ⬜ Not started | |
-| EditListingScreen | ⬜ Not started | |
-| ListingCard composable (reusable) | ⬜ Not started | |
+| HomeScreen + HomeViewModel | ✅ Done | Enriched: featured rail + category chips + listing grid |
+| SearchScreen | ✅ Done | Client-side title filter, auto-focus, empty/no-results states |
+| ListingDetailScreen + ListingDetailViewModel | ✅ Done | Full detail view, seller card, reviews section, owner/buyer CTA |
+| CreateListingScreen + CreateListingViewModel | ✅ Done | Form with validation, category dropdown, tags |
+| EditListingScreen | ✅ Done | Pre-filled form, reuses CategoryDropdown from CreateListingScreen |
+| ListingCard composable (reusable) | ✅ Done | `ui/common/ListingCard.kt` |
 
 ### Phase 3 — Order Flow
 | Task | Status | Notes |
