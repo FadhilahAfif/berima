@@ -1,5 +1,6 @@
 package upnvj.berima.v1.ui.auth
 
+import upnvj.berima.v1.ui.common.AppStrings
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -175,13 +176,13 @@ private fun LoginContent(
             BrandMarkChip()
             Spacer(modifier = Modifier.height(28.dp))
             Text(
-                text = "Halo,\nselamat datang.",
+                text = AppStrings.LOGIN_HEADLINE,
                 style = MaterialTheme.typography.displayLarge,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Masuk untuk lanjut beri jasa, terima hasil.",
+                text = AppStrings.LOGIN_SUBHEADLINE,
                 style = MaterialTheme.typography.bodyLarge,
                 color = berimaColors.textSecondary,
             )

@@ -59,6 +59,24 @@ class ListingRepository @Inject constructor(
             awaitClose { listener.remove() }
         }
 
+    fun getFeaturedListings(limit: Long = 5L): Flow<List<Listing>> = callbackFlow {
+        val listener = listingsCollection
+            .whereEqualTo("isActive", true)
+            .orderBy("totalOrders", Query.Direction.DESCENDING)
+            .limit(limit)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                val listings = snapshot?.documents
+                    ?.mapNotNull { it.toObject(Listing::class.java) }
+                    ?: emptyList()
+                trySend(listings)
+            }
+        awaitClose { listener.remove() }
+    }
+
     fun getListingsBySeller(sellerId: String): Flow<List<Listing>> = callbackFlow {
         val listener = listingsCollection
             .whereEqualTo("sellerId", sellerId)

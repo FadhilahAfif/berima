@@ -81,9 +81,10 @@ class OrderRepository @Inject constructor(
     }
 
     /**
-     * Creates the order, then bumps `totalOrdersAsBuyer`, `totalOrdersAsSeller`
-     * on the users and `totalOrders` on the listing. Counter writes are
-     * best-effort; a failure there does not roll back the order.
+     * Creates the order in `pending` state. Counter increments on
+     * `users.totalOrdersAsBuyer`, `users.totalOrdersAsSeller`, and
+     * `listings.totalOrders` happen later inside [markPaid] so they only
+     * reflect actually-completed transactions.
      */
     suspend fun createOrder(order: Order): Result<String> {
         return try {
@@ -96,24 +97,54 @@ class OrderRepository @Inject constructor(
                 updatedAt = now
             )
             ref.set(toWrite).await()
-
-            runCatching {
-                usersCollection.document(order.buyerId)
-                    .update("totalOrdersAsBuyer", FieldValue.increment(1L))
-                    .await()
-            }
-            runCatching {
-                usersCollection.document(order.sellerId)
-                    .update("totalOrdersAsSeller", FieldValue.increment(1L))
-                    .await()
-            }
-            runCatching {
-                listingsCollection.document(order.listingId)
-                    .update("totalOrders", FieldValue.increment(1L))
-                    .await()
-            }
-
             Result.success(ref.id)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Atomically flips the order to `paid` and bumps the three denormalized
+     * counters (buyer, seller, listing). All four writes happen inside a
+     * Firestore transaction so they either all land or none do.
+     *
+     * Idempotent: if the order is already `paid`, returns success without
+     * any writes — guards against accidental double-tap on "Simulasi Bayar".
+     */
+    suspend fun markPaid(orderId: String): Result<Unit> {
+        return try {
+            firestore.runTransaction { txn ->
+                val orderRef = ordersCollection.document(orderId)
+                val snapshot = txn.get(orderRef)
+                val order = snapshot.toObject(Order::class.java)
+                    ?: throw IllegalStateException("Pesanan tidak ditemukan")
+                if (order.status == OrderStatus.PAID) return@runTransaction null
+
+                txn.update(
+                    orderRef,
+                    mapOf(
+                        "status" to OrderStatus.PAID,
+                        "updatedAt" to Timestamp.now()
+                    )
+                )
+                txn.update(
+                    usersCollection.document(order.buyerId),
+                    "totalOrdersAsBuyer",
+                    FieldValue.increment(1L)
+                )
+                txn.update(
+                    usersCollection.document(order.sellerId),
+                    "totalOrdersAsSeller",
+                    FieldValue.increment(1L)
+                )
+                txn.update(
+                    listingsCollection.document(order.listingId),
+                    "totalOrders",
+                    FieldValue.increment(1L)
+                )
+                null
+            }.await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

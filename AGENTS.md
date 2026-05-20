@@ -71,21 +71,21 @@ One agent session should update at minimum one item before ending.
 ### Phase 2 — Core Listing
 | Task | Status | Notes |
 |---|---|---|
-| HomeScreen + HomeViewModel | ⬜ Not started | |
-| SearchScreen | ⬜ Not started | |
-| ListingDetailScreen + ListingDetailViewModel | ⬜ Not started | |
-| CreateListingScreen + CreateListingViewModel | ⬜ Not started | |
-| EditListingScreen | ⬜ Not started | |
-| ListingCard composable (reusable) | ⬜ Not started | |
+| HomeScreen + HomeViewModel | ✅ Done | Enriched: featured rail + category chips + listing grid |
+| SearchScreen | ✅ Done | Client-side title filter, auto-focus, empty/no-results states |
+| ListingDetailScreen + ListingDetailViewModel | ✅ Done | Full detail view, seller card, reviews section, owner/buyer CTA |
+| CreateListingScreen + CreateListingViewModel | ✅ Done | Form with validation, category dropdown, tags |
+| EditListingScreen | ✅ Done | Pre-filled form, reuses CategoryDropdown from CreateListingScreen |
+| ListingCard composable (reusable) | ✅ Done | `ui/common/ListingCard.kt` |
 
 ### Phase 3 — Order Flow
 | Task | Status | Notes |
 |---|---|---|
-| CreateOrderScreen + CreateOrderViewModel | ⬜ Not started | |
-| OrdersScreen + OrdersViewModel | ⬜ Not started | |
-| OrderDetailScreen + OrderDetailViewModel | ⬜ Not started | |
-| Chat section inside OrderDetailScreen | ⬜ Not started | |
-| StatusChip composable (reusable) | ⬜ Not started | |
+| CreateOrderScreen + CreateOrderViewModel | ✅ Done | Loads listing via one-shot `getListing`, denormalizes buyer/seller fields onto Order, optional 300-char note |
+| OrdersScreen + OrdersViewModel | ✅ Done | `PrimaryTabRow` with Pembeli / Penjual tabs, BI relative timestamps, empty states per tab |
+| OrderDetailScreen + OrderDetailViewModel | ✅ Done | Two-VM split (detail + chat), centralized `OrderAction` dispatch, role × status action matrix, file picker for result upload |
+| Chat section inside OrderDetailScreen | ✅ Done | Bounded LazyColumn (200–480dp), auto-scroll on new message, ➤ glyph send button (no `material-icons-extended` dep) |
+| StatusChip composable (reusable) | ✅ Done | `ui/common/StatusChip.kt`, all 7 statuses mapped to design tokens, pill shape |
 
 ### Phase 4 — Profile & Review
 | Task | Status | Notes |

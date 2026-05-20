@@ -161,6 +161,7 @@ Create these in Firebase Console → Firestore → Indexes:
 | Collection | Fields | Order |
 |---|---|---|
 | `listings` | `isActive` ASC, `createdAt` DESC | — |
+| `listings` | `isActive` ASC, `totalOrders` DESC | — |
 | `listings` | `category` ASC, `createdAt` DESC | — |
 | `listings` | `sellerId` ASC, `isActive` ASC | — |
 | `orders` | `buyerId` ASC, `createdAt` DESC | — |

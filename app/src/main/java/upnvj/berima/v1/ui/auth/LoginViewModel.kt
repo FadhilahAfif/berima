@@ -55,7 +55,7 @@ class LoginViewModel @Inject constructor(
                         e.message?.contains("password", ignoreCase = true) == true ||
                         e.message?.contains("wrong-password", ignoreCase = true) == true ->
                             "Password salah"
-                        else -> e.message ?: "Terjadi kesalahan"
+                        else -> "Terjadi kesalahan saat masuk. Silakan coba lagi."
                     }
                     _uiState.value = _uiState.value.copy(isLoading = false, error = message)
                 }
