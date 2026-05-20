@@ -133,3 +133,45 @@ Each entry must include: what was learned, which file it affects (if any), and d
   entirely. Example pattern lives in `SplashScreen.kt`, `LoginScreen.kt`,
   `RegisterScreen.kt`. Apply this to every future screen with entry
   animations.
+- [2026-05-20] Phase 3 counter semantics: `listings.totalOrders`,
+  `users.totalOrdersAsBuyer`, `users.totalOrdersAsSeller` are bumped only
+  when an order transitions to `paid`, NOT on `createOrder`. Bumping on
+  pending inflates Home's "Sedang ramai" rail with un-transacted demand and
+  forces decrement logic for cancellations. The bump now happens inside
+  `OrderRepository.markPaid()` as a single Firestore transaction so the
+  status flip + 3 counter increments either all land or none do. Method is
+  idempotent: re-entering when status is already `paid` short-circuits with
+  no writes — defends against double-tap on "Simulasi Bayar".
+- [2026-05-20] Two-ViewModel pattern on `OrderDetailScreen`:
+  `OrderDetailViewModel` owns the order doc + action dispatch,
+  `ChatViewModel` owns messages + send. Both injected via `hiltViewModel()`
+  on the same screen. Both read `orderId` from `SavedStateHandle` keyed on
+  `Screen.OrderDetail.ARG_ORDER_ID` since `hiltViewModel()` populates the
+  handle from nav args. Different lifecycles, separate error channels —
+  better than a fat single VM.
+- [2026-05-20] Action dispatch on order detail uses a sealed
+  `OrderAction` interface (in `ui/order/OrderAction.kt`) routed through one
+  `onAction(action: OrderAction)` entry point. The composable decides which
+  buttons to render based on `(order.status, isBuyer)`; the ViewModel owns
+  the role × status execution. Keeps the matrix in one place.
+- [2026-05-20] `StorageRepository` (new in Phase 3) wraps Firebase Storage
+  uploads. Order results go to `orders/{orderId}/result/{filename}` with a
+  20 MB pre-flight size check via
+  `contentResolver.openAssetFileDescriptor(uri, "r").length`. Some content
+  providers return -1 for length; we treat unknown-size as allow and rely on
+  Firebase's own limits as a backstop. Production storage rules must
+  restrict reads/writes on `/orders/{orderId}/result/**` to the buyer and
+  seller of that order — not yet deployed (Phase 5 task).
+- [2026-05-20] Material3 1.3+ (Compose BOM 2026.02.01) reshaped `TabRow`'s
+  indicator API: legacy `indicator: @Composable (List<TabPosition>) -> Unit`
+  is replaced with `TabIndicatorScope.() -> Unit` and the old
+  `TabRowDefaults.tabIndicatorOffset(TabPosition)` is deprecated. For
+  simple two-tab layouts use `PrimaryTabRow` which gives the spec's
+  primary-color underline by default — no custom indicator slot needed.
+  Use `divider = {}` to remove the default `HorizontalDivider` so the row
+  sits clean on the cream canvas. See `OrdersScreen.kt` for the pattern.
+- [2026-05-20] `material-icons-extended` is NOT in the project. For send
+  buttons and similar one-off needs use a Unicode glyph in a `Text`
+  composable (e.g. `"\u27A4"` for ➤) inside a clickable `Box` styled as a
+  pill. `IconButton` enforces a fixed 40dp internal size that breaks brand
+  pill sizing — use `Box(...).clickable` instead.

@@ -18,6 +18,9 @@ import upnvj.berima.v1.ui.home.SearchScreen
 import upnvj.berima.v1.ui.listing.CreateListingScreen
 import upnvj.berima.v1.ui.listing.EditListingScreen
 import upnvj.berima.v1.ui.listing.ListingDetailScreen
+import upnvj.berima.v1.ui.order.CreateOrderScreen
+import upnvj.berima.v1.ui.order.OrderDetailScreen
+import upnvj.berima.v1.ui.order.OrdersScreen
 import upnvj.berima.v1.ui.splash.SplashScreen
 
 @Composable
@@ -91,7 +94,11 @@ fun BerimaNavGraph(
             )
         }
         composable(Screen.Orders.route) {
-            Placeholder(name = "Orders")
+            OrdersScreen(
+                onOrderClick = { orderId ->
+                    navController.navigate(Screen.OrderDetail.createRoute(orderId))
+                }
+            )
         }
         composable(Screen.Profile.route) {
             Placeholder(name = "Profile")
@@ -102,7 +109,7 @@ fun BerimaNavGraph(
             arguments = listOf(
                 navArgument(Screen.ListingDetail.ARG_LISTING_ID) { type = NavType.StringType }
             )
-        ) { entry ->
+        ) {
             ListingDetailScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onOrderClick = { listingId ->
@@ -139,9 +146,15 @@ fun BerimaNavGraph(
             arguments = listOf(
                 navArgument(Screen.CreateOrder.ARG_LISTING_ID) { type = NavType.StringType }
             )
-        ) { entry ->
-            val listingId = entry.arguments?.getString(Screen.CreateOrder.ARG_LISTING_ID).orEmpty()
-            Placeholder(name = "CreateOrder($listingId)")
+        ) {
+            CreateOrderScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onOrderCreated = { orderId ->
+                    navController.navigate(Screen.OrderDetail.createRoute(orderId)) {
+                        popUpTo(Screen.ListingDetail.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(
@@ -149,9 +162,16 @@ fun BerimaNavGraph(
             arguments = listOf(
                 navArgument(Screen.OrderDetail.ARG_ORDER_ID) { type = NavType.StringType }
             )
-        ) { entry ->
-            val orderId = entry.arguments?.getString(Screen.OrderDetail.ARG_ORDER_ID).orEmpty()
-            Placeholder(name = "OrderDetail($orderId)")
+        ) {
+            OrderDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onListingClick = { listingId ->
+                    navController.navigate(Screen.ListingDetail.createRoute(listingId))
+                },
+                onReviewClick = { orderId ->
+                    navController.navigate(Screen.CreateReview.createRoute(orderId))
+                }
+            )
         }
 
         composable(

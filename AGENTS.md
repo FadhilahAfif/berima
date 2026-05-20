@@ -81,11 +81,11 @@ One agent session should update at minimum one item before ending.
 ### Phase 3 — Order Flow
 | Task | Status | Notes |
 |---|---|---|
-| CreateOrderScreen + CreateOrderViewModel | ⬜ Not started | |
-| OrdersScreen + OrdersViewModel | ⬜ Not started | |
-| OrderDetailScreen + OrderDetailViewModel | ⬜ Not started | |
-| Chat section inside OrderDetailScreen | ⬜ Not started | |
-| StatusChip composable (reusable) | ⬜ Not started | |
+| CreateOrderScreen + CreateOrderViewModel | ✅ Done | Loads listing via one-shot `getListing`, denormalizes buyer/seller fields onto Order, optional 300-char note |
+| OrdersScreen + OrdersViewModel | ✅ Done | `PrimaryTabRow` with Pembeli / Penjual tabs, BI relative timestamps, empty states per tab |
+| OrderDetailScreen + OrderDetailViewModel | ✅ Done | Two-VM split (detail + chat), centralized `OrderAction` dispatch, role × status action matrix, file picker for result upload |
+| Chat section inside OrderDetailScreen | ✅ Done | Bounded LazyColumn (200–480dp), auto-scroll on new message, ➤ glyph send button (no `material-icons-extended` dep) |
+| StatusChip composable (reusable) | ✅ Done | `ui/common/StatusChip.kt`, all 7 statuses mapped to design tokens, pill shape |
 
 ### Phase 4 — Profile & Review
 | Task | Status | Notes |
