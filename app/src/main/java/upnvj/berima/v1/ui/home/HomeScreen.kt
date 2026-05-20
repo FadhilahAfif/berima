@@ -1,5 +1,6 @@
 package upnvj.berima.v1.ui.home
 
+import upnvj.berima.v1.ui.common.AppStrings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -191,7 +192,7 @@ private fun HomeSearchBar(
         )
         Spacer(Modifier.width(10.dp))
         Text(
-            text = "Cari layanan...",
+            text = AppStrings.SEARCH_PLACEHOLDER,
             style = MaterialTheme.typography.bodyMedium,
             color = berimaColors.textSecondary
         )

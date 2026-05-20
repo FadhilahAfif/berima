@@ -1,5 +1,6 @@
 package upnvj.berima.v1.ui.home
 
+import upnvj.berima.v1.ui.common.AppStrings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -79,7 +80,7 @@ fun SearchScreen(
                         onValueChange = viewModel::onQueryChange,
                         placeholder = {
                             Text(
-                                text = "Cari layanan...",
+                                text = AppStrings.SEARCH_PLACEHOLDER,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = berimaColors.textSecondary
                             )
@@ -123,7 +124,7 @@ fun SearchScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Ketik untuk mencari layanan.",
+                        text = AppStrings.SEARCH_HINT,
                         style = MaterialTheme.typography.bodyMedium,
                         color = berimaColors.textSecondary,
                         textAlign = TextAlign.Center
@@ -221,31 +222,10 @@ private fun SearchScreenEmptyQueryPreview() {
             }
         ) { padding ->
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("Ketik untuk mencari layanan.", style = MaterialTheme.typography.bodyMedium, color = berimaColors.textSecondary)
+                Text(AppStrings.SEARCH_HINT, style = MaterialTheme.typography.bodyMedium, color = berimaColors.textSecondary)
             }
         }
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(name = "SearchScreen · empty query", showBackground = true, showSystemUi = true)
-@Composable
-private fun SearchScreenEmptyPreview() {
-    upnvj.berima.v1.ui.theme.BerimaTheme {
-        SearchScreen(
-            onListingClick = {},
-            onNavigateBack = {},
-            viewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
-                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                        @Suppress("UNCHECKED_CAST")
-                        return upnvj.berima.v1.ui.home.SearchViewModel(
-                            upnvj.berima.v1.data.repository.ListingRepository(
-                                com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                            )
-                        ) as T
-                    }
-                }
-            )
-        )
-    }
-}
+

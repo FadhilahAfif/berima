@@ -9,6 +9,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import upnvj.berima.v1.ui.common.AppStrings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -116,7 +117,7 @@ private fun SplashContent(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Tugas Tuntas, Kantong Pas.",
+                text = AppStrings.SPLASH_TAGLINE,
                 style = MaterialTheme.typography.bodyMedium,
                 color = LocalBerimaColors.current.textSecondary,
                 textAlign = TextAlign.Center,

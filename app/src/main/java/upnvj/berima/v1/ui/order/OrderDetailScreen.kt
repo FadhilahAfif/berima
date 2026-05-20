@@ -1,5 +1,6 @@
 package upnvj.berima.v1.ui.order
 
+import upnvj.berima.v1.ui.common.formatRupiah
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -64,8 +65,6 @@ import upnvj.berima.v1.ui.order.components.ChatBubble
 import upnvj.berima.v1.ui.order.components.OrderActions
 import upnvj.berima.v1.ui.order.components.OrderStatusTimeline
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
-import java.text.NumberFormat
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -574,10 +573,7 @@ private fun ChatInputRow(
     }
 }
 
-private fun formatRupiah(amount: Long): String {
-    val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
-    return "Rp${formatter.format(amount)}"
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @androidx.compose.ui.tooling.preview.Preview(

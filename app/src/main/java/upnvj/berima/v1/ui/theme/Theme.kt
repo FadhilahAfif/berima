@@ -63,8 +63,6 @@ private val BerimaExtendedColors = BerimaColors(
 
 @Composable
 fun BerimaTheme(
-    darkTheme: Boolean = false,
-    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(LocalBerimaColors provides BerimaExtendedColors) {

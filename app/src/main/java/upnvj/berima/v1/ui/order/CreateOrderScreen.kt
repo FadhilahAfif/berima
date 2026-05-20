@@ -1,5 +1,7 @@
 package upnvj.berima.v1.ui.order
 
+import upnvj.berima.v1.ui.common.AppStrings
+import upnvj.berima.v1.ui.common.formatRupiah
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -49,8 +51,6 @@ import upnvj.berima.v1.data.model.Listing
 import upnvj.berima.v1.data.model.Validation
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
-import java.text.NumberFormat
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,7 +87,7 @@ fun CreateOrderScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Konfirmasi Pesanan",
+                        text = AppStrings.CREATE_ORDER_TITLE,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -96,7 +96,7 @@ fun CreateOrderScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Kembali",
+                            contentDescription = AppStrings.BACK_CONTENT_DESCRIPTION,
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -317,10 +317,7 @@ private fun ListingSummaryCard(
     }
 }
 
-private fun formatRupiah(amount: Long): String {
-    val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
-    return "Rp${formatter.format(amount)}"
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @androidx.compose.ui.tooling.preview.Preview(name = "CreateOrderScreen", showBackground = true, showSystemUi = true)
@@ -343,7 +340,7 @@ private fun CreateOrderScreenPreview() {
                 TopAppBar(
                     title = {
                         Text(
-                            text = "Konfirmasi Pesanan",
+                            text = AppStrings.CREATE_ORDER_TITLE,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )

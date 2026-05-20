@@ -1,5 +1,7 @@
 package upnvj.berima.v1.ui.order
 
+import upnvj.berima.v1.ui.common.AppStrings
+import upnvj.berima.v1.ui.common.formatRupiah
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,7 +47,6 @@ import upnvj.berima.v1.data.model.OrderStatus
 import upnvj.berima.v1.ui.common.StatusChip
 import upnvj.berima.v1.ui.theme.BerimaTheme
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
-import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -78,7 +79,7 @@ fun OrdersScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Pesanan",
+                        text = AppStrings.ORDERS_TITLE,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -269,10 +270,7 @@ private fun EmptyOrders(
     }
 }
 
-private fun formatRupiah(amount: Long): String {
-    val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
-    return "Rp${formatter.format(amount)}"
-}
+
 
 private fun formatRelativeTime(timestamp: Timestamp): String {
     val now = System.currentTimeMillis()

@@ -1,5 +1,6 @@
 package upnvj.berima.v1.ui.listing
 
+import upnvj.berima.v1.ui.common.formatRupiah
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -48,7 +49,6 @@ import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Review
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
-import java.text.NumberFormat
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -366,10 +366,7 @@ private fun ReviewItem(
     }
 }
 
-private fun formatRupiah(amount: Long): String {
-    val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
-    return "Rp${formatter.format(amount)}"
-}
+
 
 @androidx.compose.ui.tooling.preview.Preview(name = "ListingDetailScreen · buyer view", showBackground = true, showSystemUi = true)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)

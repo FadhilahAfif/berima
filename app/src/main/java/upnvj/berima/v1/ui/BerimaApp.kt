@@ -1,5 +1,6 @@
 package upnvj.berima.v1.ui
 
+import upnvj.berima.v1.ui.common.AppStrings
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -30,9 +31,9 @@ private data class BottomNavItem(
 )
 
 private val bottomNavItems = listOf(
-    BottomNavItem(Screen.Home, "Beranda", R.drawable.ic_home),
-    BottomNavItem(Screen.Orders, "Pesanan", R.drawable.ic_orders),
-    BottomNavItem(Screen.Profile, "Profil", R.drawable.ic_profile),
+    BottomNavItem(Screen.Home, AppStrings.NAV_HOME, R.drawable.ic_home),
+    BottomNavItem(Screen.Orders, AppStrings.NAV_ORDERS, R.drawable.ic_orders),
+    BottomNavItem(Screen.Profile, AppStrings.NAV_PROFILE, R.drawable.ic_profile),
 )
 
 private val bottomNavRoutes = setOf(

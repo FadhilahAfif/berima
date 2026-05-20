@@ -30,7 +30,6 @@ import coil.compose.AsyncImage
 import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Listing
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
-import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
@@ -137,10 +136,7 @@ fun ListingCard(
     }
 }
 
-private fun formatRupiah(amount: Long): String {
-    val formatter = NumberFormat.getNumberInstance(Locale("id", "ID"))
-    return "Rp${formatter.format(amount)}"
-}
+
 
 @androidx.compose.ui.tooling.preview.Preview(name = "ListingCard · with rating", showBackground = true, backgroundColor = 0xFFF2EFE9)
 @Composable
