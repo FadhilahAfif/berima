@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import upnvj.berima.v1.data.model.Listing
 import upnvj.berima.v1.data.repository.ListingRepository
@@ -31,7 +33,9 @@ class HomeViewModel @Inject constructor(
 
     val featuredListings: StateFlow<List<Listing>> = listingRepository
         .getFeaturedListings(limit = 5L)
-        .catch { e -> _error.value = e.message }
+        .onStart { _isLoading.value = true }
+        .onEach { _isLoading.value = false }
+        .catch { e -> _error.value = e.message; _isLoading.value = false }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -43,7 +47,9 @@ class HomeViewModel @Inject constructor(
                 listingRepository.getListingsByCategory(category, limit = 20L)
             }
         }
-        .catch { e -> _error.value = e.message }
+        .onStart { _isLoading.value = true }
+        .onEach { _isLoading.value = false }
+        .catch { e -> _error.value = e.message; _isLoading.value = false }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun selectCategory(category: String?) {

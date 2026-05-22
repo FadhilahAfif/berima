@@ -1,6 +1,5 @@
 package upnvj.berima.v1.data.repository
 
-import android.content.Context
 import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -9,8 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Wraps Firebase Storage uploads. Currently scoped to order result files;
- * extend with new methods (profile photos, listing thumbnails) as needed.
+ * Wraps Firebase Storage uploads for order result files and user profile photos.
  */
 @Singleton
 class StorageRepository @Inject constructor(
@@ -30,7 +28,7 @@ class StorageRepository @Inject constructor(
      * Some content providers don't expose a known length (returns -1). In
      * that case we trust Firebase's own limits as a backstop.
      */
-    suspend fun uploadProfilePhoto(userId: String, uri: Uri, context: Context): Result<String> {
+    suspend fun uploadProfilePhoto(userId: String, uri: Uri): Result<String> {
         return try {
             val rawName = uri.lastPathSegment?.substringAfterLast('/').orEmpty()
             val filename = if (rawName.isNotBlank()) rawName else "profile-${System.currentTimeMillis()}"

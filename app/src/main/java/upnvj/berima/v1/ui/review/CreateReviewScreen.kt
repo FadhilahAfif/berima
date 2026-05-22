@@ -44,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Order
 import upnvj.berima.v1.data.model.Validation
+import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.common.BerimaTextField
 import upnvj.berima.v1.ui.theme.BerimaTheme
@@ -83,7 +84,7 @@ fun CreateReviewScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Tulis Ulasan",
+                        text = AppStrings.REVIEW_TITLE,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -92,7 +93,7 @@ fun CreateReviewScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Kembali",
+                            contentDescription = AppStrings.BACK_CONTENT_DESCRIPTION,
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }

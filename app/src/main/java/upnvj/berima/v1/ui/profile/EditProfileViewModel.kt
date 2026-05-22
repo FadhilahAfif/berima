@@ -101,7 +101,7 @@ class EditProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             _isLoading.value = true
-            storageRepository.uploadProfilePhoto(uid, uri, context)
+            storageRepository.uploadProfilePhoto(uid, uri)
                 .onSuccess { url ->
                     _photoUrl.value = url
                 }

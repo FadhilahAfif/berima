@@ -103,7 +103,7 @@ fun SearchScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Kembali",
+                            contentDescription = AppStrings.BACK_CONTENT_DESCRIPTION,
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -148,14 +148,14 @@ fun SearchScreen(
                         )
                         Spacer(Modifier.height(12.dp))
                         Text(
-                            text = "Tidak ada hasil untuk \"$query\"",
+                            text = "${AppStrings.SEARCH_NO_RESULTS_TITLE_QUERY} \"$query\"",
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurface,
                             textAlign = TextAlign.Center
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = "Coba kata kunci lain.",
+                            text = AppStrings.SEARCH_NO_RESULTS_BODY,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center

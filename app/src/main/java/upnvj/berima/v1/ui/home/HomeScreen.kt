@@ -105,7 +105,7 @@ fun HomeScreen(
             if (featuredListings.isNotEmpty()) {
                 item {
                     SectionHeader(
-                        title = "Sedang ramai",
+                        title = AppStrings.HOME_SECTION_FEATURED,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                     Spacer(Modifier.height(12.dp))
@@ -127,8 +127,8 @@ fun HomeScreen(
             }
 
             item {
-                SectionHeader(
-                    title = "Terbaru",
+                    SectionHeader(
+                        title = AppStrings.HOME_SECTION_LATEST,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 Spacer(Modifier.height(12.dp))
