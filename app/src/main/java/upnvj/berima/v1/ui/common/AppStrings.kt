@@ -26,4 +26,11 @@ object AppStrings {
     const val REGISTER_SUBHEADLINE = "Daftar dan mulai tawarkan jasamu."
 
     const val BACK_CONTENT_DESCRIPTION = "Kembali"
+
+    const val REVIEW_TITLE = "Tulis Ulasan"
+
+    const val HOME_SECTION_FEATURED = "Sedang ramai"
+    const val HOME_SECTION_LATEST = "Terbaru"
+
+    const val SEARCH_NO_RESULTS_TITLE_QUERY = "Tidak ada hasil untuk"
 }

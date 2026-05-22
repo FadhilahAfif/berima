@@ -21,6 +21,10 @@ import upnvj.berima.v1.ui.listing.ListingDetailScreen
 import upnvj.berima.v1.ui.order.CreateOrderScreen
 import upnvj.berima.v1.ui.order.OrderDetailScreen
 import upnvj.berima.v1.ui.order.OrdersScreen
+import upnvj.berima.v1.ui.profile.EditProfileScreen
+import upnvj.berima.v1.ui.profile.ProfileScreen
+import upnvj.berima.v1.ui.profile.UserProfileScreen
+import upnvj.berima.v1.ui.review.CreateReviewScreen
 import upnvj.berima.v1.ui.splash.SplashScreen
 
 @Composable
@@ -101,7 +105,22 @@ fun BerimaNavGraph(
             )
         }
         composable(Screen.Profile.route) {
-            Placeholder(name = "Profile")
+            ProfileScreen(
+                onNavigateToEditProfile = {
+                    navController.navigate(Screen.EditProfile.route)
+                },
+                onNavigateToCreateListing = {
+                    navController.navigate(Screen.CreateListing.route)
+                },
+                onListingClick = { listingId ->
+                    navController.navigate(Screen.ListingDetail.createRoute(listingId))
+                },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(
@@ -179,13 +198,16 @@ fun BerimaNavGraph(
             arguments = listOf(
                 navArgument(Screen.CreateReview.ARG_ORDER_ID) { type = NavType.StringType }
             )
-        ) { entry ->
-            val orderId = entry.arguments?.getString(Screen.CreateReview.ARG_ORDER_ID).orEmpty()
-            Placeholder(name = "CreateReview($orderId)")
+        ) {
+            CreateReviewScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         composable(Screen.EditProfile.route) {
-            Placeholder(name = "EditProfile")
+            EditProfileScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         composable(
@@ -193,9 +215,13 @@ fun BerimaNavGraph(
             arguments = listOf(
                 navArgument(Screen.UserProfile.ARG_USER_ID) { type = NavType.StringType }
             )
-        ) { entry ->
-            val userId = entry.arguments?.getString(Screen.UserProfile.ARG_USER_ID).orEmpty()
-            Placeholder(name = "UserProfile($userId)")
+        ) {
+            UserProfileScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onListingClick = { listingId ->
+                    navController.navigate(Screen.ListingDetail.createRoute(listingId))
+                }
+            )
         }
     }
 }

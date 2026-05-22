@@ -344,7 +344,7 @@ private fun ReviewItem(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    repeat(review.rating) {
+                    repeat(review.rating.coerceIn(0, 5)) {
                         Icon(
                             painter = painterResource(R.drawable.ic_star),
                             contentDescription = null,
