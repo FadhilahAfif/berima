@@ -98,9 +98,10 @@ One agent session should update at minimum one item before ending.
 ### Phase 5 — Polish & Demo Readiness
 | Task | Status | Notes |
 |---|---|---|
-| Demo data seeded (10 listings, 3 sellers, 3 orders) | ⬜ Not started | |
-| Firestore security rules deployed | ⬜ Not started | |
-| Firestore composite indexes created | ⬜ Not started | |
+| Demo data seeded (10 listings, 3 sellers, 3 orders) | ✅ Done | `scripts/seed.js` via Firestore REST API; 4 users, 10 listings, 3 orders seeded |
+| Firestore security rules deployed | ✅ Done | `firestore.rules` + `firebase.json` created, deployed via `firebase deploy --only firestore:rules` |
+| Firestore composite indexes created | ✅ Done | `firestore.indexes.json` deployed via Firebase CLI |
+| Maestro E2E test suite scaffolded | ✅ Done | `.maestro/` — 15 flows across `flows/` (Phase 4 + Phase 5 active), stubs archived in `flows-phase5/` |
 | App tested on 2 physical Android devices | ⬜ Not started | |
 | No crash on full demo flow (browse → order → review) | ⬜ Not started | |
 

@@ -1,0 +1,35 @@
+# Reusable login subflow.
+#
+# Idempotent: if splash already routed an authenticated session to Home,
+# this subflow is a no-op. Otherwise it logs in with the supplied credentials.
+#
+# Caller passes credentials explicitly:
+#
+#   - runFlow:
+#       file: ../subflows/login.yaml
+#       env:
+#         EMAIL: ${BERIMA_TEST_EMAIL}
+#         PASSWORD: ${BERIMA_TEST_PASSWORD}
+#
+# Both EMAIL and PASSWORD are required.
+appId: upnvj.berima.v1
+---
+- runFlow:
+    when:
+      visible:
+        text: "Halo,"
+    commands:
+      - assertVisible: "Masuk"
+      - tapOn:
+          text: "Email"
+      - inputText: ${EMAIL}
+      - hideKeyboard
+      - tapOn:
+          text: "Password"
+      - inputText: ${PASSWORD}
+      - hideKeyboard
+      - tapOn:
+          text: "Masuk"
+      - extendedWaitUntil:
+          visible: "Beranda"
+          timeout: 15000

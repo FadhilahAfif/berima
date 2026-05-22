@@ -1,0 +1,43 @@
+# ProfileScreen (own): avatar, name/email, bio, faculty, role badge, stats,
+# Listing Saya, Edit Profil + Tambah Listing Baru CTAs, Keluar.
+appId: upnvj.berima.v1
+tags:
+  - profile
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+# Navigate to Profile
+- tapOn:
+    text: "Profil"
+- extendedWaitUntil:
+    visible: "Listing Saya"
+    timeout: 10000
+- takeScreenshot: 20-profile-01-landed
+
+# Header structure
+- assertVisible: "Profil"
+- assertVisible: "Keluar"
+- assertVisible: "Edit Profil"
+- assertVisible: "Tambah Listing Baru"
+- assertVisible: "Listing Saya"
+
+# Scroll to bottom to capture full screen content
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: 20-profile-02-scrolled
+
+# Scroll back to top
+- scrollUntilVisible:
+    element:
+      text: "Edit Profil"
+    direction: UP
+    timeout: 5000
+    speed: 60
+- takeScreenshot: 20-profile-03-back-at-top

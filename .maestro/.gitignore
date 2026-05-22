@@ -1,0 +1,7 @@
+# Local credentials - never commit
+.env
+
+# Maestro screenshot/recording output (when invoked via run.ps1)
+output/
+*.png
+*.mp4

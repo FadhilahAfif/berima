@@ -1,0 +1,62 @@
+# Phase 5 stub: CreateOrderScreen happy path.
+# WARNING: this flow creates a real order in Firestore. Either accept some
+# test-account pollution, clean up afterwards, or run it against a separate
+# Firebase project.
+appId: upnvj.berima.v1
+tags:
+  - order
+  - phase5
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+# Find a listing the test account does not own
+- scrollUntilVisible:
+    element:
+      text: ${BERIMA_TEST_LISTING_TITLE}
+    direction: DOWN
+    timeout: 10000
+    speed: 60
+- tapOn:
+    text: ${BERIMA_TEST_LISTING_TITLE}
+- extendedWaitUntil:
+    visible: "Pesan Sekarang"
+    timeout: 8000
+
+# Tap CTA
+- tapOn:
+    text: "Pesan Sekarang"
+- extendedWaitUntil:
+    visible: "Konfirmasi Pesanan"
+    timeout: 8000
+- takeScreenshot: 61-create-order-01-form
+
+# TODO: assert the listing summary block, total price, and the optional
+# note field once the screen's exact strings are read from
+# CreateOrderScreen.kt.
+
+# Add a note (optional, max 300 chars per features.md)
+- tapOn:
+    text: "Catatan"
+    optional: true
+- inputText: "Maestro QA order ${BERIMA_RUN_ID}"
+- hideKeyboard
+- takeScreenshot: 61-create-order-02-note-typed
+
+# Confirm
+- tapOn:
+    text: "Konfirmasi Pesanan"
+# After success, app navigates to OrderDetailScreen.
+- extendedWaitUntil:
+    visible: "Pending"
+    timeout: 15000
+- takeScreenshot: 61-create-order-03-detail-pending
+
+# TODO: confirm the order detail header strings and the buyer-side
+# "Batalkan Pesanan" CTA wording from OrderDetailScreen.kt before
+# adding stricter assertions here.

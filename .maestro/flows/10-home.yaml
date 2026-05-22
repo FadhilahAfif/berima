@@ -1,0 +1,73 @@
+# HomeScreen browse: search bar, featured rail (if any), category chip filtering,
+# empty/populated states. Tolerates an empty Firestore.
+appId: upnvj.berima.v1
+tags:
+  - home
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+# Land on Home (default tab after login)
+- assertVisible: "Beranda"
+- assertVisible: "Cari layanan..."
+- takeScreenshot: 10-home-01-landed
+
+# Section headers
+# - "Sedang ramai" appears only if there is at least one listing with totalOrders > 0.
+# - "Terbaru" should always render.
+- assertVisible: "Terbaru"
+- assertVisible:
+    text: "SEMUA"
+- assertVisible:
+    text: "ACADEMIC SUPPORT"
+- assertVisible:
+    text: "VISUAL BRANDING"
+- assertVisible:
+    text: "DATA PROCESSING"
+- takeScreenshot: 10-home-02-default-category-semua
+
+# Filter: Academic Support
+- tapOn:
+    text: "ACADEMIC SUPPORT"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: 10-home-03-category-academic
+
+# Filter: Visual Branding
+- tapOn:
+    text: "VISUAL BRANDING"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: 10-home-04-category-visual
+
+# Filter: Data Processing
+- tapOn:
+    text: "DATA PROCESSING"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: 10-home-05-category-data
+
+# Back to "Semua"
+- tapOn:
+    text: "SEMUA"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: 10-home-06-category-semua-again
+
+# Tapping the search bar should open SearchScreen with focus.
+- tapOn:
+    text: "Cari layanan..."
+- extendedWaitUntil:
+    visible: "Ketik untuk mencari layanan."
+    timeout: 5000
+- takeScreenshot: 10-home-07-search-opened
+- back
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 5000
+- takeScreenshot: 10-home-08-back-on-home

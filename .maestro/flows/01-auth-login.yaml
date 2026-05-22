@@ -1,0 +1,43 @@
+# Login happy path + visual capture of every form state.
+# Requires BERIMA_TEST_EMAIL / BERIMA_TEST_PASSWORD in .env.
+appId: upnvj.berima.v1
+tags:
+  - auth
+---
+- launchApp:
+    clearState: true
+
+# Splash -> Login
+- extendedWaitUntil:
+    visible:
+      text: "Halo,"
+    timeout: 10000
+- takeScreenshot: 01-login-01-empty
+- assertVisible: "selamat datang."
+- assertVisible: "Masuk untuk lanjut beri jasa, terima hasil."
+- assertVisible: "Email"
+- assertVisible: "Password"
+- assertVisible: "Belum punya akun?"
+- assertVisible: "Buat sekarang"
+
+# Filled state (so screenshots capture both)
+- tapOn:
+    text: "Email"
+- inputText: ${BERIMA_TEST_EMAIL}
+- hideKeyboard
+- tapOn:
+    text: "Password"
+- inputText: ${BERIMA_TEST_PASSWORD}
+- hideKeyboard
+- takeScreenshot: 01-login-02-filled
+
+# Submit and verify Home renders
+- tapOn:
+    text: "Masuk"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 15000
+- takeScreenshot: 01-login-03-home-after-login
+- assertVisible: "Beranda"
+- assertVisible: "Pesanan"
+- assertVisible: "Profil"

@@ -1,0 +1,60 @@
+# CreateOrderScreen happy path (buyer Dian orders a seeded listing).
+# Creates a real order - uses BERIMA_RUN_ID in the note to identify test orders.
+appId: upnvj.berima.v1
+tags:
+  - order
+  - phase5
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+# Navigate to a listing the buyer does not own
+- extendedWaitUntil:
+    visible: "Terbaru"
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      text: ${BERIMA_TEST_LISTING_TITLE}
+    direction: DOWN
+    timeout: 10000
+    speed: 60
+- tapOn:
+    text: ${BERIMA_TEST_LISTING_TITLE}
+- extendedWaitUntil:
+    visible: "Pesan Sekarang"
+    timeout: 8000
+- tapOn:
+    text: "Pesan Sekarang"
+
+# CreateOrderScreen
+- extendedWaitUntil:
+    visible: "Konfirmasi Pesanan"
+    timeout: 8000
+- takeScreenshot: 61-order-01-form-loaded
+- assertVisible: "Catatan untuk penjual (opsional)"
+- assertVisible: "Tulis catatan..."
+- assertVisible: "Total"
+- assertVisible: "Konfirmasi Pesanan"
+
+# Add a note
+- tapOn:
+    text: "Tulis catatan..."
+- inputText: "Maestro QA order ${BERIMA_RUN_ID}"
+- hideKeyboard
+- takeScreenshot: 61-order-02-note-typed
+
+# Confirm
+- tapOn:
+    text: "Konfirmasi Pesanan"
+- extendedWaitUntil:
+    visible: "Detail Pesanan"
+    timeout: 15000
+- takeScreenshot: 61-order-03-detail-pending
+- assertVisible: "STATUS"
+- assertVisible: "Batalkan"
+- assertVisible: "Chat dengan"

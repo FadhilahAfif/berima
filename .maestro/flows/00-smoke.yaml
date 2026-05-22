@@ -1,0 +1,20 @@
+# Smoke test: app launches, splash renders, navigates to either Login or Home.
+# Cheapest way to confirm the build is alive before running the full suite.
+appId: upnvj.berima.v1
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+- takeScreenshot: 00-smoke-01-cold-launch
+# Splash logo + tagline
+- assertVisible: "Tugas Tuntas, Kantong Pas."
+- takeScreenshot: 00-smoke-02-splash
+# Splash routes to Login (no persisted session after clearState).
+- extendedWaitUntil:
+    visible:
+      text: "Halo,"
+    timeout: 10000
+- assertVisible: "Masuk"
+- assertVisible: "Belum punya akun?"
+- takeScreenshot: 00-smoke-03-login-landed
