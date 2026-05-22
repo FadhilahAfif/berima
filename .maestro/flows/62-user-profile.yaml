@@ -1,0 +1,59 @@
+# UserProfileScreen (read-only seller profile).
+# Reached by tapping "Lihat profil" on a listing detail seller card.
+appId: upnvj.berima.v1
+tags:
+  - profile
+  - phase5
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+- extendedWaitUntil:
+    visible: "Terbaru"
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      text: ${BERIMA_TEST_LISTING_TITLE}
+    direction: DOWN
+    timeout: 10000
+    speed: 60
+- tapOn:
+    text: ${BERIMA_TEST_LISTING_TITLE}
+- extendedWaitUntil:
+    visible: "Penjual"
+    timeout: 8000
+- tapOn:
+    text: "Lihat profil"
+- extendedWaitUntil:
+    visible: "Profil Penjual"
+    timeout: 8000
+- takeScreenshot: 62-user-profile-01-loaded
+
+# Read-only: no owner-only controls
+- assertVisible: "Profil Penjual"
+- assertVisible: "Listing Aktif"
+- assertNotVisible: "Edit Profil"
+- assertNotVisible: "Tambah Listing Baru"
+- assertNotVisible: "Keluar"
+
+# Stats row (ulasan + pesanan selesai)
+- assertVisible: "ulasan"
+- assertVisible: "pesanan selesai"
+- takeScreenshot: 62-user-profile-02-stats
+
+# Scroll to listings
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: 62-user-profile-03-listings
+
+# Back to listing detail
+- back
+- extendedWaitUntil:
+    visible: "Pesan Sekarang"
+    timeout: 5000

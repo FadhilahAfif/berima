@@ -1,0 +1,74 @@
+# CreateReviewScreen: star selector + comment + submit.
+# Requires a seeded order with status=paid and hasReview=false.
+# Flow: login as buyer -> Pesanan tab -> tap paid order -> Tulis Ulasan.
+appId: upnvj.berima.v1
+tags:
+  - review
+  - phase5
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+# Open Orders -> Sebagai Pembeli
+- tapOn:
+    text: "Pesanan"
+- extendedWaitUntil:
+    visible: "Sebagai Pembeli"
+    timeout: 8000
+- takeScreenshot: 63-review-01-orders
+
+# Tap the paid order (seeded title)
+- scrollUntilVisible:
+    element:
+      text: ${BERIMA_TEST_PAID_ORDER_TITLE}
+    direction: DOWN
+    timeout: 8000
+    speed: 60
+- tapOn:
+    text: ${BERIMA_TEST_PAID_ORDER_TITLE}
+- extendedWaitUntil:
+    visible: "Detail Pesanan"
+    timeout: 8000
+- takeScreenshot: 63-review-02-order-detail-paid
+- assertVisible: "Tulis Ulasan"
+
+# Open review screen
+- tapOn:
+    text: "Tulis Ulasan"
+- extendedWaitUntil:
+    visible: "Tulis Ulasan"
+    timeout: 5000
+- takeScreenshot: 63-review-03-empty
+- assertVisible: "Rating"
+- assertVisible: "Komentar (opsional)"
+- assertVisible: "Kirim Ulasan"
+
+# Tap star 5 (contentDescription = "Rating 5")
+- tapOn:
+    text: "Rating 5"
+- waitForAnimationToEnd:
+    timeout: 500
+- takeScreenshot: 63-review-04-stars-selected
+
+# Add comment
+- tapOn:
+    text: "Komentar (opsional)"
+- inputText: "Maestro QA review ${BERIMA_RUN_ID}"
+- hideKeyboard
+- takeScreenshot: 63-review-05-with-comment
+
+# Submit - navigates back to OrderDetailScreen on success
+- tapOn:
+    text: "Kirim Ulasan"
+- extendedWaitUntil:
+    visible: "Detail Pesanan"
+    timeout: 15000
+- takeScreenshot: 63-review-06-submitted
+
+# Tulis Ulasan button should be gone now (hasReview = true)
+- assertNotVisible: "Tulis Ulasan"

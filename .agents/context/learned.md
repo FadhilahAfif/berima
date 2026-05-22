@@ -189,8 +189,41 @@ Each entry must include: what was learned, which file it affects (if any), and d
   parameters (defaults: `singleLine=true`, `maxLines=1`) so multiline fields
   (bio, comment) can reuse the shared component. All existing callers
   unaffected by the defaults.
+- [2026-05-22] `@DocumentId` fields (`listingId`, `orderId`, `uid`) must NOT be written
+  as Firestore document fields. Firestore populates them from the document ID at
+  deserialization time. Writing them as fields causes a RuntimeException:
+  "'listingId' was found from document ... cannot apply @DocumentId on this property".
+  The seed script (`scripts/seed.js`) must omit these fields when calling `upsertDoc`.
 - [2026-05-22] `BerimaTextField` in `ui/common/Components.kt` gained
   `singleLine: Boolean = true` and `maxLines: Int` parameters so multiline
   fields (e.g. review comment) can reuse the shared component without
   ad-hoc `OutlinedTextField` wrappers. Default is `singleLine = true` so
   all existing callers are unaffected.
+- [2026-05-22] Maestro E2E suite scaffolded under `.maestro/`. Phase 4 flows
+  (auth, home, search, profile, edit-profile, listing create/edit, orders
+  empty states, navigation) live in `.maestro/flows/` and are runnable today.
+  Phase 5 flows (listing detail, create order, user profile, create review)
+  scaffolded under `.maestro/flows-phase5/` with `# TODO` markers — promote
+  once Phase 5 seed data lands. Credentials read from `.maestro/.env`
+  (gitignored). Runner: `.maestro/run.ps1` loads env, generates a per-run
+  `BERIMA_RUN_ID`, captures HTML report + screenshots to
+  `.maestro/output/<timestamp>/`. Maestro syntax gotchas hit during build:
+  (a) `eraseText: 10` not `eraseText: { charactersToErase: 10 }`,
+  (b) Compose `IconButton` `contentDescription` is not a Maestro `id` —
+  use `back` command or `tapOn: text:` against the contentDescription string,
+  (c) screen entry tap focuses the field, so subsequent re-taps on the same
+  placeholder fail once text has been entered (just call `inputText` directly
+  after the initial tap).
+- [2026-05-22] Phase 5 Maestro flows promoted from `flows-phase5/` stubs to
+  active `flows/` once Phase 5 seed data and screens were confirmed complete.
+  Real selectors confirmed from source: `"Lihat profil"` (contentDescription on
+  seller card arrow), `"Rating 5"` (contentDescription on 5th star in
+  `StarRatingSelector`), `"Batalkan"` (buyer cancel at pending),
+  `"Tulis Ulasan"` (buyer CTA at paid), `"Profil Penjual"` (UserProfileScreen
+  title), `"Listing Aktif"` (UserProfileScreen section header),
+  `"Catatan untuk penjual (opsional)"` / `"Tulis catatan..."` (CreateOrder note
+  field label/placeholder), `"Detail Pesanan"` (OrderDetailScreen title).
+  Test accounts: buyer `test+buyer@berima.dev`, seller `test+seller@berima.dev`,
+  both password `changeme123`. Credentials stored in `.maestro/.env` (gitignored).
+  `BERIMA_TEST_PAID_ORDER_TITLE` must be set in `.env` to a seeded paid order
+  title before running `63-create-review`.

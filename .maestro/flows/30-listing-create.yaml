@@ -1,0 +1,102 @@
+# CreateListingScreen: form rendering, empty-submit validation, full happy path.
+# Creates a real listing in Firestore - the title is suffixed with BERIMA_RUN_ID
+# so re-runs don't collide. The 31-listing-edit flow consumes this listing.
+appId: upnvj.berima.v1
+tags:
+  - listing
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+# Profile -> Tambah Listing Baru
+- tapOn:
+    text: "Profil"
+- extendedWaitUntil:
+    visible: "Tambah Listing Baru"
+    timeout: 8000
+- takeScreenshot: 30-listing-01-profile
+- tapOn:
+    text: "Tambah Listing Baru"
+- extendedWaitUntil:
+    visible: "Buat Listing"
+    timeout: 5000
+
+# Empty form rendering
+- assertVisible: "Judul"
+- assertVisible: "Kategori"
+- assertVisible: "Deskripsi"
+- assertVisible: "Harga (Rp)"
+- assertVisible: "Waktu pengerjaan (jam)"
+- assertVisible: "Tags (opsional)"
+- assertVisible: "Simpan Listing"
+- takeScreenshot: 30-listing-02-create-empty
+
+# Submit empty - should refuse and stay on the form
+- tapOn:
+    text: "Simpan Listing"
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible: "Buat Listing"
+- assertVisible: "Simpan Listing"
+- takeScreenshot: 30-listing-03-empty-submit-rejected
+
+# Open category dropdown to inspect options
+- tapOn:
+    text: "Kategori"
+- waitForAnimationToEnd:
+    timeout: 1000
+- assertVisible: "Academic Support"
+- assertVisible: "Visual Branding"
+- assertVisible: "Data Processing"
+- takeScreenshot: 30-listing-04-category-dropdown
+- tapOn:
+    text: "Visual Branding"
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# Fill the rest of the form
+- tapOn:
+    text: "Judul"
+- inputText: "Maestro QA Listing ${BERIMA_RUN_ID}"
+- hideKeyboard
+- tapOn:
+    text: "Deskripsi"
+- inputText: "Listing ini dibuat otomatis oleh Maestro untuk pengujian UI."
+- hideKeyboard
+- tapOn:
+    text: "Harga (Rp)"
+- inputText: "50000"
+- hideKeyboard
+- tapOn:
+    text: "Waktu pengerjaan (jam)"
+- inputText: "24"
+- hideKeyboard
+- tapOn:
+    text: "Tags (opsional)"
+- inputText: "qa, maestro"
+- hideKeyboard
+- takeScreenshot: 30-listing-05-form-filled
+
+# Submit - app navigates back to Profile on success
+- tapOn:
+    text: "Simpan Listing"
+- extendedWaitUntil:
+    visible: "Listing Saya"
+    timeout: 15000
+- takeScreenshot: 30-listing-06-back-on-profile
+
+# Verify the new listing appears in "Listing Saya"
+- scrollUntilVisible:
+    element:
+      text: "Maestro QA Listing ${BERIMA_RUN_ID}"
+    direction: DOWN
+    timeout: 8000
+    speed: 60
+- assertVisible:
+    text: "Maestro QA Listing ${BERIMA_RUN_ID}"
+- takeScreenshot: 30-listing-07-listing-visible

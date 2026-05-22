@@ -1,0 +1,31 @@
+# Maestro workspace config for Berima.
+# Docs: https://docs.maestro.dev/cli/configuration
+#
+# Usage: from repo root, run `maestro test .maestro/flows/<flow>.yaml`
+# or use `.maestro\run.ps1` to load .env automatically.
+
+flows:
+  - flows/*.yaml
+
+# Phase 5 flows live under flows-phase5/ and are excluded by default
+# because they require seeded Firestore data. Promote them by moving
+# the file into flows/ once seed data exists, or run them explicitly:
+#   maestro test .maestro/flows-phase5/<flow>.yaml
+
+executionOrder:
+  flowsOrder:
+    - 00-smoke
+    - 01-auth-login
+    - 02-auth-register-validation
+    - 10-home
+    - 11-search
+    - 20-profile-own
+    - 21-edit-profile
+    - 30-listing-create
+    - 31-listing-edit
+    - 40-orders-empty
+    - 50-navigation
+    - 60-listing-detail
+    - 61-create-order
+    - 62-user-profile
+    - 63-create-review

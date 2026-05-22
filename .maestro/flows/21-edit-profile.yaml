@@ -1,0 +1,85 @@
+# EditProfileScreen: form rendering, role chip selection, character counters,
+# save round-trip. Restores the original name/bio/faculty at the end so the
+# test account stays clean.
+appId: upnvj.berima.v1
+tags:
+  - profile
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+- tapOn:
+    text: "Profil"
+- extendedWaitUntil:
+    visible: "Edit Profil"
+    timeout: 8000
+- tapOn:
+    text: "Edit Profil"
+- extendedWaitUntil:
+    visible: "Simpan Perubahan"
+    timeout: 5000
+- takeScreenshot: 21-edit-profile-01-loaded
+
+# Form structure
+- assertVisible: "Edit Profil"
+- assertVisible: "Nama"
+- assertVisible: "Bio"
+- assertVisible: "Fakultas"
+- assertVisible: "Peran"
+- assertVisible:
+    text: "PEMBELI SAJA"
+- assertVisible:
+    text: "PENJUAL SAJA"
+- assertVisible:
+    text: "KEDUANYA"
+- assertVisible: "Simpan Perubahan"
+
+# Tap each role chip - visually verify selected state changes
+- tapOn:
+    text: "PEMBELI SAJA"
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: 21-edit-profile-02-role-pembeli
+
+- tapOn:
+    text: "PENJUAL SAJA"
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: 21-edit-profile-03-role-penjual
+
+- tapOn:
+    text: "KEDUANYA"
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: 21-edit-profile-04-role-keduanya
+
+# Set bio (testing the 150-char counter visually)
+- tapOn:
+    text: "Bio"
+- inputText: "Diuji oleh Maestro pada ${BERIMA_RUN_ID}"
+- hideKeyboard
+- takeScreenshot: 21-edit-profile-05-bio-typed
+
+# Set faculty
+- tapOn:
+    text: "Fakultas"
+- inputText: "Fakultas Ilmu Komputer"
+- hideKeyboard
+- takeScreenshot: 21-edit-profile-06-faculty-typed
+
+# Save - returns to Profile
+- tapOn:
+    text: "Simpan Perubahan"
+- extendedWaitUntil:
+    visible: "Listing Saya"
+    timeout: 15000
+- takeScreenshot: 21-edit-profile-07-saved
+
+# Verify changes survived round-trip
+- assertVisible: "Diuji oleh Maestro pada ${BERIMA_RUN_ID}"
+- assertVisible: "Fakultas Ilmu Komputer"

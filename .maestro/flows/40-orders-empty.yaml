@@ -1,0 +1,50 @@
+# OrdersScreen empty states and tab switching.
+# Promote to Phase 5 / extend with order detail once seed data lands.
+appId: upnvj.berima.v1
+tags:
+  - orders
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+- tapOn:
+    text: "Pesanan"
+- extendedWaitUntil:
+    visible: "Sebagai Pembeli"
+    timeout: 8000
+- assertVisible: "Sebagai Penjual"
+- takeScreenshot: 40-orders-01-buyer-tab
+
+# Buyer tab - either populated or empty.
+# Capture both possible states without failing the run.
+- runFlow:
+    when:
+      visible: "Belum ada pesanan"
+    commands:
+      - assertVisible: "Mulai pesan layanan dari teman kampusmu"
+      - takeScreenshot: 40-orders-02-buyer-empty
+
+# Switch to Penjual tab
+- tapOn:
+    text: "Sebagai Penjual"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: 40-orders-03-seller-tab
+- runFlow:
+    when:
+      visible: "Belum ada pesanan"
+    commands:
+      - assertVisible: "Listing kamu belum ada yang dipesan"
+      - takeScreenshot: 40-orders-04-seller-empty
+
+# Back to Pembeli
+- tapOn:
+    text: "Sebagai Pembeli"
+- waitForAnimationToEnd:
+    timeout: 1500
+- takeScreenshot: 40-orders-05-buyer-tab-again

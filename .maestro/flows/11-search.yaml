@@ -1,0 +1,54 @@
+# SearchScreen: empty hint, no-results state, populated state (if any data).
+# Designed to inspect the three search UI states without assuming data exists.
+appId: upnvj.berima.v1
+tags:
+  - search
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+# Open SearchScreen via the home search bar.
+# After this tap the field is focused; subsequent inputText goes there.
+- tapOn:
+    text: "Cari layanan..."
+- extendedWaitUntil:
+    visible: "Ketik untuk mencari layanan."
+    timeout: 5000
+- takeScreenshot: 11-search-01-empty-hint
+
+# Type a query that almost certainly returns nothing
+- inputText: "zzznoresult123"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: 11-search-02-no-results
+- assertVisible: "Tidak ada hasil untuk"
+- assertVisible: "Coba kata kunci lain."
+
+# Clear and try a likely-real keyword (will surface results if data is seeded,
+# else stays in the no-results state - both screenshots are useful).
+- eraseText: 20
+- waitForAnimationToEnd:
+    timeout: 1000
+- inputText: "desain"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: 11-search-03-query-desain
+
+# Erase entirely - should fall back to the empty hint
+- eraseText: 20
+- waitForAnimationToEnd:
+    timeout: 1000
+- assertVisible: "Ketik untuk mencari layanan."
+- takeScreenshot: 11-search-04-cleared
+
+# Back to Home
+- back
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 5000
+- takeScreenshot: 11-search-05-back-on-home

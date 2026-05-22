@@ -1,0 +1,49 @@
+# Phase 5 stub: UserProfileScreen (other user, read-only) reached by tapping
+# the seller's name/avatar from a listing detail.
+appId: upnvj.berima.v1
+tags:
+  - profile
+  - phase5
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+- scrollUntilVisible:
+    element:
+      text: ${BERIMA_TEST_LISTING_TITLE}
+    direction: DOWN
+    timeout: 10000
+    speed: 60
+- tapOn:
+    text: ${BERIMA_TEST_LISTING_TITLE}
+- extendedWaitUntil:
+    visible: "Pesan Sekarang"
+    timeout: 8000
+
+# TODO: replace this with the actual gesture that opens the seller profile
+# (likely tapping the seller card or the seller's name) once
+# ListingDetailScreen.kt is reviewed for the exact target.
+- tapOn:
+    id: "seller-card"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: 62-user-profile-01-loaded
+
+# Read-only screen: should NOT show Edit Profil / Tambah Listing Baru / Keluar
+- assertNotVisible: "Edit Profil"
+- assertNotVisible: "Tambah Listing Baru"
+- assertNotVisible: "Keluar"
+
+# TODO: positive assertions on the read-only profile header once
+# UserProfileScreen.kt strings are confirmed.
+
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: 62-user-profile-02-scrolled

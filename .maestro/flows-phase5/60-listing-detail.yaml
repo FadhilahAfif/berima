@@ -1,0 +1,55 @@
+# Phase 5 stub: ListingDetailScreen as a non-owner.
+# Requires BERIMA_TEST_LISTING_TITLE - a listing not owned by the test account.
+appId: upnvj.berima.v1
+tags:
+  - listing
+  - phase5
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+# Find the listing on Home (or via search)
+- assertVisible: "Beranda"
+- scrollUntilVisible:
+    element:
+      text: ${BERIMA_TEST_LISTING_TITLE}
+    direction: DOWN
+    timeout: 10000
+    speed: 60
+- tapOn:
+    text: ${BERIMA_TEST_LISTING_TITLE}
+
+# TODO: confirm the actual title text on ListingDetailScreen if it
+# wraps differently from the card.
+- extendedWaitUntil:
+    visible: "Pesan Sekarang"
+    timeout: 8000
+- takeScreenshot: 60-detail-01-loaded
+
+# Non-owner sees the order CTA, not Edit
+- assertVisible: "Pesan Sekarang"
+- assertNotVisible: "Edit Listing"
+
+# TODO: assert specific seller card / reviews section copy once the
+# detail screen labels are confirmed by reading ListingDetailScreen.kt.
+
+# Scroll to inspect description, reviews, footer
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: 60-detail-02-scrolled
+- scroll
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: 60-detail-03-scrolled-more
+
+# Back to Home
+- back
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 5000

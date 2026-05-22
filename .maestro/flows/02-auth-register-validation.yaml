@@ -1,0 +1,78 @@
+# Register screen UI + client-side validation.
+# Does NOT submit a real registration - we don't want to spam Firebase Auth.
+# Uses the navigation Login -> Register link to land on the screen, exercises
+# the form, then goes back without committing.
+appId: upnvj.berima.v1
+tags:
+  - auth
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      text: "Halo,"
+    timeout: 10000
+
+# Login -> Register via footer link
+- tapOn:
+    text: "Buat sekarang"
+- extendedWaitUntil:
+    visible: "Buat"
+    timeout: 5000
+- assertVisible: "akun baru."
+- assertVisible: "Daftar dan mulai tawarkan jasamu."
+- assertVisible: "Nama lengkap"
+- assertVisible: "Email"
+- assertVisible: "Password"
+- assertVisible: "Konfirmasi password"
+- assertVisible: "Minimal 8 karakter"
+- assertVisible: "Daftar"
+- assertVisible: "Sudah punya akun?"
+- takeScreenshot: 02-register-01-empty
+
+# Fill with mismatching passwords to surface validation feedback at runtime
+- tapOn:
+    text: "Nama lengkap"
+- inputText: "Maestro QA"
+- hideKeyboard
+- tapOn:
+    text: "Email"
+- inputText: "not-an-email"
+- hideKeyboard
+- tapOn:
+    text: "Password"
+- inputText: "short"
+- hideKeyboard
+- tapOn:
+    text: "Konfirmasi password"
+- inputText: "different"
+- hideKeyboard
+- takeScreenshot: 02-register-02-invalid-state
+
+# Submit - app should refuse and surface a snackbar / inline error.
+# We can't assert a specific snackbar reliably (it auto-dismisses) so we
+# just verify we are still on the Register screen and not on Home.
+- tapOn:
+    text: "Daftar"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "Daftar"
+- assertNotVisible: "Beranda"
+- takeScreenshot: 02-register-03-after-invalid-submit
+
+# Toggle password visibility - useful UX surface to inspect.
+# Tapped via contentDescription. Marked optional in case the layout shifts.
+- tapOn:
+    text: "Tampilkan password"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 1000
+- takeScreenshot: 02-register-04-password-visible
+
+# Back to Login
+- tapOn:
+    text: "Masuk"
+- extendedWaitUntil:
+    visible: "selamat datang."
+    timeout: 5000
+- takeScreenshot: 02-register-05-back-to-login

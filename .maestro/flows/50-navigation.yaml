@@ -1,0 +1,44 @@
+# Bottom-bar navigation: tab switching keeps the user logged in, preserves
+# state, and does not crash. Final action: logout via Profile -> Keluar.
+appId: upnvj.berima.v1
+tags:
+  - navigation
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+# Round-trip Home -> Pesanan -> Profil -> Home
+- assertVisible: "Beranda"
+- takeScreenshot: 50-nav-01-home
+
+- tapOn:
+    text: "Pesanan"
+- extendedWaitUntil:
+    visible: "Sebagai Pembeli"
+    timeout: 8000
+- takeScreenshot: 50-nav-02-orders
+
+- tapOn:
+    text: "Profil"
+- extendedWaitUntil:
+    visible: "Listing Saya"
+    timeout: 8000
+- takeScreenshot: 50-nav-03-profile
+
+- tapOn:
+    text: "Beranda"
+- extendedWaitUntil:
+    visible: "Cari layanan..."
+    timeout: 5000
+- takeScreenshot: 50-nav-04-back-on-home
+
+# Logout via Profile
+- runFlow:
+    file: ../subflows/logout.yaml
+- assertVisible: "Halo,"
+- takeScreenshot: 50-nav-05-after-logout

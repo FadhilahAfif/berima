@@ -1,0 +1,84 @@
+# EditListingScreen: opens the listing created by 30-listing-create, modifies
+# fields, saves, verifies the change. Depends on 30-listing-create having run
+# in the same suite invocation (same BERIMA_RUN_ID).
+#
+# If you run this flow standalone, ensure a listing matching the title pattern
+# exists, or change the search term below.
+appId: upnvj.berima.v1
+tags:
+  - listing
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: ${BERIMA_TEST_EMAIL}
+      PASSWORD: ${BERIMA_TEST_PASSWORD}
+
+# Profile -> Listing Saya -> tap created listing
+- tapOn:
+    text: "Profil"
+- extendedWaitUntil:
+    visible: "Listing Saya"
+    timeout: 8000
+- scrollUntilVisible:
+    element:
+      text: "Maestro QA Listing ${BERIMA_RUN_ID}"
+    direction: DOWN
+    timeout: 8000
+    speed: 60
+- tapOn:
+    text: "Maestro QA Listing ${BERIMA_RUN_ID}"
+- extendedWaitUntil:
+    visible: "Edit Listing"
+    timeout: 8000
+- takeScreenshot: 31-listing-01-detail-as-owner
+
+# Owner sees Edit Listing CTA, NOT Pesan Sekarang
+- assertVisible: "Edit Listing"
+- assertNotVisible: "Pesan Sekarang"
+
+# Enter Edit
+- tapOn:
+    text: "Edit Listing"
+- extendedWaitUntil:
+    visible: "Edit Listing"
+    timeout: 5000
+# Wait for the prefilled form to load
+- extendedWaitUntil:
+    visible: "Simpan Perubahan"
+    timeout: 8000
+- takeScreenshot: 31-listing-02-edit-prefilled
+
+# Form should be prefilled - title, price, etc. already populated
+- assertVisible: "Maestro QA Listing ${BERIMA_RUN_ID}"
+
+# Modify the price
+- tapOn:
+    text: "Harga (Rp)"
+- eraseText: 10
+- inputText: "75000"
+- hideKeyboard
+- takeScreenshot: 31-listing-03-edit-modified
+
+# Save
+- tapOn:
+    text: "Simpan Perubahan"
+- extendedWaitUntil:
+    visible: "Edit Listing"
+    timeout: 15000
+- takeScreenshot: 31-listing-04-after-save-on-detail
+
+# Back to Profile to confirm the listing still exists with the updated price
+- runFlow:
+    when:
+      visible: "Edit Listing"
+    commands:
+      - back
+- extendedWaitUntil:
+    visible: "Listing Saya"
+    timeout: 5000
+- assertVisible:
+    text: "Maestro QA Listing ${BERIMA_RUN_ID}"
+- takeScreenshot: 31-listing-05-back-on-profile

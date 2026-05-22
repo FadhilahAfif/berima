@@ -1,0 +1,15 @@
+# Reusable logout subflow.
+# Assumes the caller is signed in; navigates to Profile and taps Keluar.
+appId: upnvj.berima.v1
+---
+- tapOn:
+    text: "Profil"
+- extendedWaitUntil:
+    visible: "Keluar"
+    timeout: 8000
+- tapOn:
+    text: "Keluar"
+- extendedWaitUntil:
+    visible:
+      text: "Halo,"
+    timeout: 10000
