@@ -175,3 +175,22 @@ Each entry must include: what was learned, which file it affects (if any), and d
   composable (e.g. `"\u27A4"` for ➤) inside a clickable `Box` styled as a
   pill. `IconButton` enforces a fixed 40dp internal size that breaks brand
   pill sizing — use `Box(...).clickable` instead.
+- [2026-05-22] Phase 4 screens wired into NavGraph. All 4 placeholder
+  composables replaced: ProfileScreen, EditProfileScreen, UserProfileScreen,
+  CreateReviewScreen. Build verified: `assembleDebug` BUILD SUCCESSFUL in 35s.
+- [2026-05-22] `return` is prohibited inside `init` blocks in Kotlin. Use
+  a null-check `if (uid != null) { ... }` guard instead of `?: return` or
+  `?: run { return@init }`. The `return@init` label does not exist.
+- [2026-05-22] `@OptIn(ExperimentalMaterial3Api::class)` must be on the
+  composable function itself (not just the file) when `TopAppBar` is used
+  inside that function. Missing opt-in causes a compile error even if the
+  annotation is present elsewhere in the file.
+- [2026-05-22] `BerimaTextField` extended with `singleLine` and `maxLines`
+  parameters (defaults: `singleLine=true`, `maxLines=1`) so multiline fields
+  (bio, comment) can reuse the shared component. All existing callers
+  unaffected by the defaults.
+- [2026-05-22] `BerimaTextField` in `ui/common/Components.kt` gained
+  `singleLine: Boolean = true` and `maxLines: Int` parameters so multiline
+  fields (e.g. review comment) can reuse the shared component without
+  ad-hoc `OutlinedTextField` wrappers. Default is `singleLine = true` so
+  all existing callers are unaffected.

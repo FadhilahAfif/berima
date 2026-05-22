@@ -30,6 +30,19 @@ class StorageRepository @Inject constructor(
      * Some content providers don't expose a known length (returns -1). In
      * that case we trust Firebase's own limits as a backstop.
      */
+    suspend fun uploadProfilePhoto(userId: String, uri: Uri, context: Context): Result<String> {
+        return try {
+            val rawName = uri.lastPathSegment?.substringAfterLast('/').orEmpty()
+            val filename = if (rawName.isNotBlank()) rawName else "profile-${System.currentTimeMillis()}"
+            val ref = storage.reference.child("users/$userId/profile/$filename")
+            ref.putFile(uri).await()
+            val url = ref.downloadUrl.await().toString()
+            Result.success(url)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun uploadOrderResult(orderId: String, uri: Uri): Result<String> {
         return try {
             val size = runCatching {

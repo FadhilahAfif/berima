@@ -70,6 +70,8 @@ fun BerimaTextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
     supportingText: @Composable (() -> Unit)? = null,
+    singleLine: Boolean = true,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
 ) {
     val berimaColors = LocalBerimaColors.current
     OutlinedTextField(
@@ -95,7 +97,8 @@ fun BerimaTextField(
         trailingIcon = trailingIcon,
         isError = isError,
         supportingText = supportingText,
-        singleLine = true,
+        singleLine = singleLine,
+        maxLines = maxLines,
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,

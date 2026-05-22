@@ -90,10 +90,10 @@ One agent session should update at minimum one item before ending.
 ### Phase 4 — Profile & Review
 | Task | Status | Notes |
 |---|---|---|
-| ProfileScreen + ProfileViewModel | ⬜ Not started | |
-| EditProfileScreen | ⬜ Not started | |
-| UserProfileScreen | ⬜ Not started | |
-| CreateReviewScreen + CreateReviewViewModel | ⬜ Not started | |
+| ProfileScreen + ProfileViewModel | ✅ Done | Own profile: avatar, bio, faculty, role badge, stats, listings column, edit + create buttons |
+| EditProfileScreen + EditProfileViewModel | ✅ Done | Photo picker, multiline bio, role chips, `uploadProfilePhoto` added to StorageRepository |
+| UserProfileScreen + UserProfileViewModel | ✅ Done | Read-only seller profile, active listings, stats row |
+| CreateReviewScreen + CreateReviewViewModel | ✅ Done | Star selector, multiline comment, rating validation, isSubmitted nav |
 
 ### Phase 5 — Polish & Demo Readiness
 | Task | Status | Notes |
