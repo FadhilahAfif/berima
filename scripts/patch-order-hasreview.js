@@ -56,12 +56,17 @@ async function main() {
           ],
         },
       },
+      orderBy: [{ field: { fieldPath: "createTime" }, direction: "ASCENDING" }],
       limit: 1,
     },
   };
 
   console.log("Querying for paid order...");
   const results = await req("POST", `${DB}:runQuery`, queryBody);
+  if (!results || results.length === 0 || !results[0]?.document) {
+    console.error("No results returned from query.");
+    process.exit(1);
+  }
   const doc = results[0]?.document;
   if (!doc) {
     console.error("No paid order found for 'Desain PPT Presentasi Sidang'.");

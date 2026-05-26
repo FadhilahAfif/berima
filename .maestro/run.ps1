@@ -42,10 +42,9 @@ if (-not $envVars.ContainsKey('BERIMA_RUN_ID') -or -not $envVars['BERIMA_RUN_ID'
     $envVars['BERIMA_RUN_ID'] = (Get-Date -Format 'yyyyMMdd-HHmmss')
 }
 
-# --- Build Maestro args -------------------------------------------------------
-$envArgs = @()
+# --- Inject env vars into process environment (avoids passing secrets via CLI) -
 foreach ($key in $envVars.Keys) {
-    $envArgs += @('--env', "$key=$($envVars[$key])")
+    [System.Environment]::SetEnvironmentVariable($key, $envVars[$key], 'Process')
 }
 
 $target = if ($Flow) {
@@ -75,5 +74,5 @@ Write-Host "Run ID: $($envVars['BERIMA_RUN_ID'])" -ForegroundColor Cyan
 Write-Host ''
 
 # --- Invoke -------------------------------------------------------------------
-& maestro test @envArgs @outputArgs $target
+& maestro test @outputArgs $target
 exit $LASTEXITCODE

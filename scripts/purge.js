@@ -37,14 +37,22 @@ function request(method, path) {
 
 async function purgeCollection(name) {
   console.log(`\n[${name}]`);
-  const result = await request("GET", `${DB_PATH}/${name}?pageSize=200`);
-  const docs = result.documents || [];
-  console.log(`  Found ${docs.length} docs`);
-  for (const doc of docs) {
-    const id = doc.name.split("/").pop();
-    await request("DELETE", `${DB_PATH}/${name}/${id}`);
-    console.log(`  ✗ deleted ${name}/${id}`);
-  }
+  let pageToken = null;
+  let totalDeleted = 0;
+  do {
+    const url = `${DB_PATH}/${name}?pageSize=200${pageToken ? `&pageToken=${pageToken}` : ""}`;
+    const result = await request("GET", url);
+    const docs = result.documents || [];
+    console.log(`  Found ${docs.length} docs`);
+    for (const doc of docs) {
+      const id = doc.name.split("/").pop();
+      await request("DELETE", `${DB_PATH}/${name}/${id}`);
+      console.log(`  ✗ deleted ${name}/${id}`);
+      totalDeleted++;
+    }
+    pageToken = result.nextPageToken || null;
+  } while (pageToken);
+  console.log(`  Total deleted: ${totalDeleted}`);
 }
 
 async function main() {

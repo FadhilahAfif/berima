@@ -21,15 +21,15 @@ tags:
     visible: "Sebagai Pembeli"
     timeout: 8000
 
-# TODO: replace with the title of a seeded paid order that has no review yet
+# Requires BERIMA_TEST_PAID_ORDER_TITLE in `.maestro/.env`
 - scrollUntilVisible:
     element:
-      text: "TODO_PAID_ORDER_TITLE"
+      text: ${BERIMA_TEST_PAID_ORDER_TITLE}
     direction: DOWN
     timeout: 8000
     speed: 60
 - tapOn:
-    text: "TODO_PAID_ORDER_TITLE"
+    text: ${BERIMA_TEST_PAID_ORDER_TITLE}
 - extendedWaitUntil:
     visible: "Tulis Ulasan"
     timeout: 8000

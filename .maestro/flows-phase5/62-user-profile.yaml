@@ -30,7 +30,9 @@ tags:
 # ListingDetailScreen.kt is reviewed for the exact target.
 - tapOn:
     id: "seller-card"
-    optional: true
+- extendedWaitUntil:
+    visible: "Profil Penjual"
+    timeout: 8000
 - waitForAnimationToEnd:
     timeout: 2000
 - takeScreenshot: 62-user-profile-01-loaded
