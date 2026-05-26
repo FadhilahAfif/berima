@@ -1,7 +1,7 @@
 // Deletes all documents in users, listings, orders before re-seeding.
 const https = require("https");
 
-const PROJECT_ID = "berima-74938";
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "berima-74938";
 const BASE_URL = "firestore.googleapis.com";
 const DB_PATH = `projects/${PROJECT_ID}/databases/(default)/documents`;
 const ACCESS_TOKEN = process.env.FIREBASE_ACCESS_TOKEN;

@@ -5,10 +5,10 @@
 //
 // Usage:
 //   $env:FIREBASE_ACCESS_TOKEN = <token>
-//   node create-auth-users.js
+//   node scripts/create-auth-users.js
 const https = require("https");
 
-const PROJECT_ID = "berima-74938";
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "berima-74938";
 const ACCESS_TOKEN = process.env.FIREBASE_ACCESS_TOKEN;
 
 if (!ACCESS_TOKEN) {

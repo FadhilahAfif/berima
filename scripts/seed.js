@@ -1,6 +1,6 @@
 const https = require("https");
 
-const PROJECT_ID = "berima-74938";
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "berima-74938";
 const BASE_URL = `firestore.googleapis.com`;
 const DB_PATH = `projects/${PROJECT_ID}/databases/(default)/documents`;
 
@@ -69,7 +69,7 @@ function request(method, path, body) {
       res.on("data", (c) => (raw += c));
       res.on("end", () => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          resolve(JSON.parse(raw));
+          resolve(raw ? JSON.parse(raw) : {});
         } else {
           reject(new Error(`HTTP ${res.statusCode}: ${raw}`));
         }
