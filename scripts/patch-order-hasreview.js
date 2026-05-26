@@ -1,17 +1,17 @@
 // Patches hasReview=false on the paid "Desain PPT Presentasi Sidang" order.
 // Run from repo root: node scripts/patch-order-hasreview.js
-// Requires FIREBASE_ACCESS_TOKEN env var (get via: firebase login:ci)
+// Requires FIREBASE_ACCESS_TOKEN env var (get via: $env:FIREBASE_ACCESS_TOKEN = (firebase auth:print-access-token))
 
 const https = require("https");
 
-const PROJECT_ID = "berima-74938";
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "berima-74938";
 const BASE = "firestore.googleapis.com";
 const DB = `projects/${PROJECT_ID}/databases/(default)/documents`;
 const TOKEN = process.env.FIREBASE_ACCESS_TOKEN;
 
 if (!TOKEN) {
   console.error("Set FIREBASE_ACCESS_TOKEN before running.");
-  console.error("  $env:FIREBASE_ACCESS_TOKEN = firebase login:ci");
+  console.error("  $env:FIREBASE_ACCESS_TOKEN = (firebase auth:print-access-token)");
   process.exit(1);
 }
 
@@ -62,6 +62,10 @@ async function main() {
 
   console.log("Querying for paid order...");
   const results = await req("POST", `${DB}:runQuery`, queryBody);
+  if (!results || results.length === 0 || !results[0]?.document) {
+    console.error("No results returned from query.");
+    process.exit(1);
+  }
   const doc = results[0]?.document;
   if (!doc) {
     console.error("No paid order found for 'Desain PPT Presentasi Sidang'.");

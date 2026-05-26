@@ -65,6 +65,7 @@ tags:
 # Save
 - tapOn:
     text: "Simpan Perubahan"
+- assertNotVisible: "Simpan Perubahan"
 - extendedWaitUntil:
     visible: "Edit Listing"
     timeout: 15000

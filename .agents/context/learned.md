@@ -223,7 +223,7 @@ Each entry must include: what was learned, which file it affects (if any), and d
   title), `"Listing Aktif"` (UserProfileScreen section header),
   `"Catatan untuk penjual (opsional)"` / `"Tulis catatan..."` (CreateOrder note
   field label/placeholder), `"Detail Pesanan"` (OrderDetailScreen title).
-  Test accounts: buyer `test+buyer@berima.dev`, seller `test+seller@berima.dev`,
-  both password `changeme123`. Credentials stored in `.maestro/.env` (gitignored).
+  Test accounts: buyer `test+buyer@berima.dev`, seller `test+seller@berima.dev`.
+  Credentials stored in `.maestro/.env` (gitignored) — never commit passwords.
   `BERIMA_TEST_PAID_ORDER_TITLE` must be set in `.env` to a seeded paid order
   title before running `63-create-review`.

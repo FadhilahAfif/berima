@@ -1,6 +1,9 @@
 # CreateReviewScreen: star selector + comment + submit.
 # Requires a seeded order with status=paid and hasReview=false.
 # Flow: login as buyer -> Pesanan tab -> tap paid order -> Tulis Ulasan.
+#
+# WARNING: this flow mutates the order's hasReview flag to true on success.
+# To rerun, reset it first: node scripts/patch-order-hasreview.js
 appId: upnvj.berima.v1
 tags:
   - review

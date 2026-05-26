@@ -1,6 +1,6 @@
 # EditProfileScreen: form rendering, role chip selection, character counters,
-# save round-trip. Restores the original name/bio/faculty at the end so the
-# test account stays clean.
+# save round-trip. Note: bio/faculty are updated to test values and NOT restored
+# after the flow — the test account will reflect the last saved values.
 appId: upnvj.berima.v1
 tags:
   - profile

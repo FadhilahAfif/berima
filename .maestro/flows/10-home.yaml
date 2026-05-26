@@ -22,39 +22,39 @@ tags:
 # - "Terbaru" should always render.
 - assertVisible: "Terbaru"
 - assertVisible:
-    text: "SEMUA"
+    text: "Semua"
 - assertVisible:
-    text: "ACADEMIC SUPPORT"
+    text: "Academic Support"
 - assertVisible:
-    text: "VISUAL BRANDING"
+    text: "Visual Branding"
 - assertVisible:
-    text: "DATA PROCESSING"
+    text: "Data Processing"
 - takeScreenshot: 10-home-02-default-category-semua
 
 # Filter: Academic Support
 - tapOn:
-    text: "ACADEMIC SUPPORT"
+    text: "Academic Support"
 - waitForAnimationToEnd:
     timeout: 2000
 - takeScreenshot: 10-home-03-category-academic
 
 # Filter: Visual Branding
 - tapOn:
-    text: "VISUAL BRANDING"
+    text: "Visual Branding"
 - waitForAnimationToEnd:
     timeout: 2000
 - takeScreenshot: 10-home-04-category-visual
 
 # Filter: Data Processing
 - tapOn:
-    text: "DATA PROCESSING"
+    text: "Data Processing"
 - waitForAnimationToEnd:
     timeout: 2000
 - takeScreenshot: 10-home-05-category-data
 
 # Back to "Semua"
 - tapOn:
-    text: "SEMUA"
+    text: "Semua"
 - waitForAnimationToEnd:
     timeout: 2000
 - takeScreenshot: 10-home-06-category-semua-again

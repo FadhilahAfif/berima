@@ -5,10 +5,10 @@
 //
 // Usage:
 //   $env:FIREBASE_ACCESS_TOKEN = <token>
-//   node create-auth-users.js
+//   node scripts/create-auth-users.js
 const https = require("https");
 
-const PROJECT_ID = "berima-74938";
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "berima-74938";
 const ACCESS_TOKEN = process.env.FIREBASE_ACCESS_TOKEN;
 
 if (!ACCESS_TOKEN) {
@@ -16,9 +16,17 @@ if (!ACCESS_TOKEN) {
   process.exit(1);
 }
 
+const BUYER_PASSWORD = process.env.TEST_BUYER_PASSWORD;
+const SELLER_PASSWORD = process.env.TEST_SELLER_PASSWORD;
+
+if (!BUYER_PASSWORD || !SELLER_PASSWORD) {
+  console.error("Set TEST_BUYER_PASSWORD and TEST_SELLER_PASSWORD env vars before running.");
+  process.exit(1);
+}
+
 const ACCOUNTS = [
-  { email: "test+buyer@berima.dev", password: "changeme123", label: "buyer" },
-  { email: "test+seller@berima.dev", password: "changeme123", label: "seller" },
+  { email: "test+buyer@berima.dev", password: BUYER_PASSWORD, label: "buyer" },
+  { email: "test+seller@berima.dev", password: SELLER_PASSWORD, label: "seller" },
 ];
 
 function request(method, path, body) {

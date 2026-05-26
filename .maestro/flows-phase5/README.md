@@ -1,25 +1,20 @@
-# Phase 5 Maestro flows (scaffolded)
+# Phase 5 Maestro flows (archived stubs)
 
-These flows depend on seeded Firestore data:
-- 10 listings across 3 sellers
-- 3 orders in various states (pending, in_progress, paid)
-- A second test account that does NOT own any listing the buyer can view
+These flows were scaffolded before Phase 5 seed data was in place. Phase 5 is
+now complete — seeded data, security rules, and indexes are all deployed.
 
-They will fail today because the test account has nothing to look at.
+The active versions of these flows live in `flows/` and are governed by
+`executionOrder.flowsOrder` in `config.yaml`. Do not run this directory directly.
 
-## Activation checklist
+## Remaining manual adjustments
 
-When Phase 5 seed data is in place:
+Some flows still have `# TODO` markers for spots that need a real value:
 
-1. Add to `.maestro/.env`:
-   - `BERIMA_TEST_LISTING_TITLE` - exact title of a seeded listing the test
-     buyer does NOT own
-2. (Optional) Replace the seller account in `.env` if cross-account flows
-   are needed later.
-3. Move flows from `flows-phase5/` into `flows/` so they run in the default
-   suite, and add their names to `executionOrder.flowsOrder` in `config.yaml`.
-4. Adjust the `# TODO` markers inside each flow - they note any spots that
-   need a real value or a wider assertion.
+- `BERIMA_TEST_LISTING_TITLE` — exact title of a seeded listing the buyer does NOT own (set in `.maestro/.env`)
+- `BERIMA_TEST_PAID_ORDER_TITLE` — title of a paid order with `hasReview=false` (set in `.maestro/.env`)
+- Star/submit locators in `63-create-review.yaml` — verify against `CreateReviewScreen.kt`
+
+Credentials are stored in `.maestro/.env` (gitignored). Never commit passwords.
 
 ## Files
 
@@ -29,3 +24,4 @@ When Phase 5 seed data is in place:
 | `61-create-order.yaml` | CreateOrder form + Konfirmasi Pesanan happy path |
 | `62-user-profile.yaml` | Tap a seller's name on listing detail -> UserProfile |
 | `63-create-review.yaml` | Star selector + comment + submit (needs a paid order) |
+

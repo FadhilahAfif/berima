@@ -1,7 +1,7 @@
 // Deletes all documents in users, listings, orders before re-seeding.
 const https = require("https");
 
-const PROJECT_ID = "berima-74938";
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "berima-74938";
 const BASE_URL = "firestore.googleapis.com";
 const DB_PATH = `projects/${PROJECT_ID}/databases/(default)/documents`;
 const ACCESS_TOKEN = process.env.FIREBASE_ACCESS_TOKEN;
@@ -37,14 +37,22 @@ function request(method, path) {
 
 async function purgeCollection(name) {
   console.log(`\n[${name}]`);
-  const result = await request("GET", `${DB_PATH}/${name}?pageSize=200`);
-  const docs = result.documents || [];
-  console.log(`  Found ${docs.length} docs`);
-  for (const doc of docs) {
-    const id = doc.name.split("/").pop();
-    await request("DELETE", `${DB_PATH}/${name}/${id}`);
-    console.log(`  ✗ deleted ${name}/${id}`);
-  }
+  let pageToken = null;
+  let totalDeleted = 0;
+  do {
+    const url = `${DB_PATH}/${name}?pageSize=200${pageToken ? `&pageToken=${pageToken}` : ""}`;
+    const result = await request("GET", url);
+    const docs = result.documents || [];
+    console.log(`  Found ${docs.length} docs`);
+    for (const doc of docs) {
+      const id = doc.name.split("/").pop();
+      await request("DELETE", `${DB_PATH}/${name}/${id}`);
+      console.log(`  ✗ deleted ${name}/${id}`);
+      totalDeleted++;
+    }
+    pageToken = result.nextPageToken || null;
+  } while (pageToken);
+  console.log(`  Total deleted: ${totalDeleted}`);
 }
 
 async function main() {
