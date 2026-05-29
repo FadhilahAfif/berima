@@ -35,18 +35,23 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      # Inject google-services.json from secret so Gradle config doesn't fail.
-      # Secret content is the raw JSON of app/google-services.json (not base64).
+      # Inject google-services.json. For pushes and PRs from branches in this repo
+      # the GOOGLE_SERVICES_JSON secret is available. For PRs opened from forks,
+      # GitHub does not pass repo secrets — fall back to a syntactically valid
+      # placeholder so assembleDebug/lintDebug can still run. The placeholder is
+      # not a real Firebase config and will not authenticate against any project.
       - name: Write google-services.json
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
-            echo "::error::GOOGLE_SERVICES_JSON secret is not set on this repo."
-            exit 1
-          fi
           mkdir -p app
-          printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
+            echo "Using GOOGLE_SERVICES_JSON from secret."
+          else
+            echo "::warning::GOOGLE_SERVICES_JSON secret unavailable (likely a fork PR). Writing placeholder; runtime Firebase calls will fail."
+            printf '%s' '{"project_info":{"project_number":"000000000000","project_id":"berima-ci-placeholder","storage_bucket":"berima-ci-placeholder.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:000000000000:android:0000000000000000000000","android_client_info":{"package_name":"upnvj.berima.v1"}},"oauth_client":[],"api_key":[{"current_key":"AIzaSyA_placeholder_for_ci_builds_only_xxx"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > app/google-services.json
+          fi
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -58,7 +63,7 @@ jobs:
         run: ./gradlew --no-daemon lintDebug
 
       - name: Upload lint report
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: lint-report

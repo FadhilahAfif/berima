@@ -30,7 +30,7 @@ scripts/                   Firestore seed + admin helpers
 firestore.rules            Deployed via `firebase deploy --only firestore:rules`
 firestore.indexes.json     Deployed via `firebase deploy --only firestore:indexes`
 AGENTS.md                  How to work on this repo (read first)
-DESIGN.MD                  Design system tokens & UI components
+DESIGN.md                  Design system tokens & UI components
 ```
 
 ## Local setup
@@ -70,7 +70,7 @@ Read these in order before writing code:
 4. `.agents/context/database.md` — Firestore schema + rules
 5. `.agents/context/architecture.md` — folder structure, deps
 6. `.agents/context/conventions.md` — naming, patterns, language rules
-7. `DESIGN.MD` — visual design system
+7. `DESIGN.md` — visual design system
 
 Hard rules:
 - All user-facing text in **Bahasa Indonesia**

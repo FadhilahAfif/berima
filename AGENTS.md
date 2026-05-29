@@ -12,7 +12,7 @@ Before doing anything, read all context files in order.
 3. `.agents/context/database.md` — Firestore schema, security rules, required indexes
 4. `.agents/context/architecture.md` — tech stack, folder structure, dependencies
 5. `.agents/context/conventions.md` — coding rules, patterns, naming — follow these always
-6. `DESIGN.MD` — design system, colors, typography, UI components
+6. `DESIGN.md` — design system, colors, typography, UI components
 7. `.agents/context/learned.md` — project discoveries and modifications
 
 ---
