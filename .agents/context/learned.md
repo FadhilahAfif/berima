@@ -61,7 +61,7 @@ Each entry must include: what was learned, which file it affects (if any), and d
   `gradle.properties` so Gradle uses only the JVM that launched it.
   Requires setting `JAVA_HOME` to a real JDK (Android Studio JBR at
   `C:\Program Files\Android\Android Studio\jbr` works).
-- [2026-05-17] Design system fully reconciled into DESIGN.MD. All tokens are
+- [2026-05-17] Design system fully reconciled into DESIGN.md. All tokens are
   single source of truth. Berima-only tokens (primary-dim, surface-pressed,
   border-subtle, border-input, surface-raised, container-green, star-rating,
   all status.*) live on `BerimaColors` data class via `LocalBerimaColors`

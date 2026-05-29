@@ -1,0 +1,28 @@
+# CODEOWNERS — auto-request reviews from the right people
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-policies/about-code-owners
+#
+# Order matters: the LAST matching pattern wins.
+# Add area-specific owners below the catch-all as the team grows.
+
+# Default — everything needs Afif's review unless overridden below
+*                                       @FadhilahAfif
+
+# Repo / CI / agent infra
+/.github/                               @FadhilahAfif
+/.agents/                               @FadhilahAfif
+AGENTS.md                               @FadhilahAfif
+
+# Build & dependencies
+/build.gradle.kts                       @FadhilahAfif
+/settings.gradle.kts                    @FadhilahAfif
+/gradle/                                @FadhilahAfif
+/app/build.gradle.kts                   @FadhilahAfif
+
+# Firebase rules / indexes / seed data
+/firestore.rules                        @FadhilahAfif
+/firestore.indexes.json                 @FadhilahAfif
+/firebase.json                          @FadhilahAfif
+/scripts/                               @FadhilahAfif
+
+# E2E flows
+/.maestro/                              @FadhilahAfif
