@@ -1,0 +1,63 @@
+name: Bug report
+description: Something is broken in the app
+title: "bug: <short summary>"
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Fill what you can — short is fine.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug. Include any error message you saw.
+      placeholder: "Tap 'Pesan' on a listing → app crashes / shows blank screen / ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Login as buyer
+        2. Open listing detail
+        3. Tap 'Pesan'
+        4. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: false
+
+  - type: input
+    id: device
+    attributes:
+      label: Device / Android version
+      placeholder: "Pixel 7 / Android 14, or emulator API 34"
+    validations:
+      required: false
+
+  - type: input
+    id: build
+    attributes:
+      label: App build
+      description: git SHA, branch, or PR number you tested
+      placeholder: "main @ a1b2c3d, or PR #12"
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: logcat snippet, screen recording, anything useful
+      render: shell
+    validations:
+      required: false

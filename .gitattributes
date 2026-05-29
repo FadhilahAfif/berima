@@ -1,0 +1,29 @@
+# Default: let git decide based on content, normalize to LF in repo
+* text=auto eol=lf
+
+# Always LF — these get parsed by external tooling that expects Unix endings
+*.yml         text eol=lf
+*.yaml        text eol=lf
+*.json        text eol=lf
+*.sh          text eol=lf
+*.kt          text eol=lf
+*.kts         text eol=lf
+*.md          text eol=lf
+gradlew       text eol=lf
+.gitignore    text eol=lf
+.gitattributes text eol=lf
+
+# Windows-only files keep CRLF
+*.bat         text eol=crlf
+*.cmd         text eol=crlf
+
+# Binary
+*.png         binary
+*.jpg         binary
+*.jpeg        binary
+*.webp        binary
+*.gif         binary
+*.pdf         binary
+*.jar         binary
+*.keystore    binary
+*.jks         binary

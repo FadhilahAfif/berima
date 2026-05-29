@@ -1,0 +1,48 @@
+name: Feature request
+description: Propose a new feature or enhancement
+title: "feat: <short summary>"
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening, check `.agents/context/features.md` — the feature might already be in scope.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem does this solve?
+      placeholder: "Buyers can't tell which sellers are still active."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Sketch the behavior. Reference the screen / data shape if possible.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Which milestone phase?
+      description: See `AGENTS.md` → Milestones
+      options:
+        - Phase 1 — Foundation
+        - Phase 2 — Core Listing
+        - Phase 3 — Order Flow
+        - Phase 4 — Profile & Review
+        - Phase 5 — Polish & Demo Readiness
+        - Post-demo / future
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false

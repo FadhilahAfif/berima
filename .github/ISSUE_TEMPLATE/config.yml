@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Project context & conventions
+    url: https://github.com/FadhilahAfif/berima/blob/main/AGENTS.md
+    about: Architecture, milestones, and rules live in AGENTS.md and .agents/context/
