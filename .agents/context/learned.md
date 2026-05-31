@@ -301,6 +301,31 @@ Each entry must include: what was learned, which file it affects (if any), and d
   affordance; bio switched from a hand-rolled `OutlinedTextField` to the shared
   `BerimaTextField(singleLine=false)`; role pills became a clean 3-up segmented row
   (sentence-case Pembeli/Penjual/Keduanya, forest fill when active). All three
-  screens added `contentWindowInsets = WindowInsets(0)` (same double-inset fix as
-  Home — they're hosted in BerimaApp's Scaffold via NavGraph innerPadding).
-  Build verified: `assembleDebug` BUILD SUCCESSFUL in 38s.
+   screens added `contentWindowInsets = WindowInsets(0)` (same double-inset fix as
+   Home — they're hosted in BerimaApp's Scaffold via NavGraph innerPadding).
+   Build verified: `assembleDebug` BUILD SUCCESSFUL in 38s.
+- [2026-05-31] Orders redesign (list + detail) brought onto the editorial visual
+  generation that Home/Profile already use. KEY CONSTRAINT: the `Order` model
+  (`data/model/Order.kt`) has NO category and NO counterparty photo — only names.
+  So orders can't use the category-tinted glyph language; instead they lead with
+  the counterparty's identity. NEW SHARED COMPONENT: `ui/common/InitialAvatar.kt`
+  → `InitialAvatar(name, size)` draws the first initial in a `containerGreen`
+  circle with `primary` text. Single brand tint (no per-name hue) keeps the
+  palette restrained, and circular = person per DESIGN.md. Reuse for any
+  person-without-photo need. OrdersScreen card: 12dp→16dp radius, 44dp leading
+  InitialAvatar, title bumped labelLarge→headlineSmall, price headlineSmall→
+  headlineMedium, counterparty line reads "Penjual · Name" / "Pembeli · Name".
+  Empty state upgraded to the canonical glyph(ic_orders)+headline+body layout.
+  OrderDetailScreen restructured with a "card for objects, open for content"
+  rhythm to avoid card-soup: summary card (price bumped to displayMedium, +chevron)
+  → OPEN status block on cream (overline label + chip + NEW contextual sentence
+  varying by status×role + haloed-dot timeline) → note card (overline label, no
+  side-stripe) → attachment row (+chevron) → counterparty person row (InitialAvatar
+  + role overline + name, display-only) → actions → chat. Chat empty state fixed:
+  was a 200dp void with one centered line; now a compact ~120dp hint (mail glyph
+  in green circle + "Belum ada pesan" + "Mulai percakapan dengan X"), heightIn min
+  lowered 200dp→120dp. OrderStatusTimeline current dot now gets a containerGreen
+  halo ring ("you are here"). All new copy in AppStrings (ORDERS_*, ORDER_DETAIL_*,
+  ORDER_STATUS_*, ORDER_CHAT_*) per convention #8. NO model/ViewModel/repo logic
+  changes — pure UI. Gotcha: OrdersScreen needed `layout.size` import added for the
+  empty-state icon. Build verified: `assembleDebug` BUILD SUCCESSFUL in 27s.

@@ -83,12 +83,30 @@ fun OrderStatusTimeline(
                 } else {
                     MaterialTheme.colorScheme.outlineVariant
                 }
-                Box(
-                    modifier = Modifier
-                        .size(if (isCurrent) 14.dp else 10.dp)
-                        .clip(CircleShape)
-                        .background(dotColor)
-                )
+                if (isCurrent) {
+                    // "You are here": a soft halo ring around the filled dot.
+                    Box(
+                        modifier = Modifier
+                            .size(22.dp)
+                            .clip(CircleShape)
+                            .background(berimaColors.containerGreen),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(14.dp)
+                                .clip(CircleShape)
+                                .background(dotColor)
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(dotColor)
+                    )
+                }
                 if (index < steps.lastIndex) {
                     val lineColor = if (index < currentIndex) {
                         MaterialTheme.colorScheme.primary

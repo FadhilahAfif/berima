@@ -60,6 +60,8 @@ import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Message
 import upnvj.berima.v1.data.model.Order
 import upnvj.berima.v1.data.model.OrderStatus
+import upnvj.berima.v1.ui.common.AppStrings
+import upnvj.berima.v1.ui.common.InitialAvatar
 import upnvj.berima.v1.ui.common.StatusChip
 import upnvj.berima.v1.ui.order.components.ChatBubble
 import upnvj.berima.v1.ui.order.components.OrderActions
@@ -124,7 +126,7 @@ fun OrderDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Detail Pesanan",
+                        text = AppStrings.ORDER_DETAIL_TITLE,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -168,7 +170,7 @@ fun OrderDetailScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Pesanan tidak ditemukan",
+                        text = AppStrings.ORDER_DETAIL_NOT_FOUND,
                         style = MaterialTheme.typography.bodyMedium,
                         color = berimaColors.textSecondary,
                         textAlign = TextAlign.Center
@@ -242,20 +244,16 @@ private fun OrderDetailContent(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
-        Text(
-            text = "STATUS",
-            style = MaterialTheme.typography.labelSmall,
-            color = berimaColors.textSecondary
+        StatusBlock(
+            status = order.status,
+            isBuyer = isBuyer,
+            modifier = Modifier.fillMaxWidth()
         )
-        Spacer(Modifier.height(8.dp))
-        StatusChip(status = order.status)
-        Spacer(Modifier.height(12.dp))
-        OrderStatusTimeline(currentStatus = order.status)
 
         if (!order.note.isNullOrBlank()) {
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
             NoteCard(note = order.note, modifier = Modifier.fillMaxWidth())
         }
 
@@ -267,19 +265,15 @@ private fun OrderDetailContent(
             )
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(20.dp))
 
-        Text(
-            text = if (isBuyer) {
-                "Penjual: ${order.sellerName}"
-            } else {
-                "Pembeli: ${order.buyerName}"
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
+        CounterpartyRow(
+            name = counterpartyName,
+            isBuyer = isBuyer,
+            modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(20.dp))
 
         OrderActions(
             status = order.status,
@@ -295,11 +289,11 @@ private fun OrderDetailContent(
 
         HorizontalDivider(thickness = 1.dp, color = berimaColors.borderSubtle)
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(20.dp))
 
         Text(
-            text = "Chat dengan $counterpartyName",
-            style = MaterialTheme.typography.titleMedium,
+            text = "${AppStrings.ORDER_CHAT_TITLE_PREFIX} $counterpartyName",
+            style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
 
@@ -311,7 +305,7 @@ private fun OrderDetailContent(
             counterpartyName = counterpartyName,
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 200.dp, max = 480.dp)
+                .heightIn(min = 120.dp, max = 480.dp)
         )
 
         Spacer(Modifier.height(8.dp))
@@ -336,7 +330,7 @@ private fun ListingSummaryCard(
     modifier: Modifier = Modifier
 ) {
     val berimaColors = LocalBerimaColors.current
-    val cardShape = RoundedCornerShape(12.dp)
+    val cardShape = RoundedCornerShape(16.dp)
 
     Row(
         modifier = modifier
@@ -344,39 +338,145 @@ private fun ListingSummaryCard(
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, berimaColors.borderSubtle, cardShape)
             .clickable(onClick = onClick)
-            .padding(12.dp),
+            .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .size(64.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                .clip(RoundedCornerShape(12.dp))
+                .background(berimaColors.containerGreen),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_berima_mark),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.size(24.dp)
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(26.dp)
             )
         }
 
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(14.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
             Text(
                 text = formatRupiah(price),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        Spacer(Modifier.width(8.dp))
+
+        Icon(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            tint = berimaColors.textSecondary,
+            modifier = Modifier.size(22.dp)
+        )
+    }
+}
+
+/**
+ * Open (card-less) status block on cream: an overline label, the status chip
+ * paired with a contextual sentence describing what is happening and the next
+ * step, then the 5-dot timeline. Sits against the white summary card above for
+ * surface contrast without nesting cards.
+ */
+@Composable
+private fun StatusBlock(
+    status: String,
+    isBuyer: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+
+    Column(modifier = modifier) {
+        Text(
+            text = AppStrings.ORDER_DETAIL_STATUS_LABEL,
+            style = MaterialTheme.typography.labelSmall,
+            color = berimaColors.textSecondary
+        )
+        Spacer(Modifier.height(10.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            StatusChip(status = status)
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = statusDescription(status, isBuyer),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(18.dp))
+        OrderStatusTimeline(currentStatus = status)
+    }
+}
+
+private fun statusDescription(status: String, isBuyer: Boolean): String = when (status) {
+    OrderStatus.PENDING ->
+        if (isBuyer) AppStrings.ORDER_STATUS_PENDING_BUYER else AppStrings.ORDER_STATUS_PENDING_SELLER
+    OrderStatus.IN_PROGRESS ->
+        if (isBuyer) AppStrings.ORDER_STATUS_IN_PROGRESS_BUYER else AppStrings.ORDER_STATUS_IN_PROGRESS_SELLER
+    OrderStatus.DELIVERED ->
+        if (isBuyer) AppStrings.ORDER_STATUS_DELIVERED_BUYER else AppStrings.ORDER_STATUS_DELIVERED_SELLER
+    OrderStatus.COMPLETED ->
+        if (isBuyer) AppStrings.ORDER_STATUS_COMPLETED_BUYER else AppStrings.ORDER_STATUS_COMPLETED_SELLER
+    OrderStatus.PAID ->
+        if (isBuyer) AppStrings.ORDER_STATUS_PAID_BUYER else AppStrings.ORDER_STATUS_PAID_SELLER
+    OrderStatus.CANCELLED -> AppStrings.ORDER_STATUS_CANCELLED
+    OrderStatus.REJECTED -> AppStrings.ORDER_STATUS_REJECTED
+    else -> ""
+}
+
+/**
+ * Display-only person row for the counterparty: a circular monogram avatar, an
+ * overline role label, and the name. Replaces the bare "Penjual: X" text line.
+ */
+@Composable
+private fun CounterpartyRow(
+    name: String,
+    isBuyer: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    val roleLabel = if (isBuyer) {
+        AppStrings.ORDER_DETAIL_COUNTERPARTY_SELLER
+    } else {
+        AppStrings.ORDER_DETAIL_COUNTERPARTY_BUYER
+    }
+    val cardShape = RoundedCornerShape(16.dp)
+
+    Row(
+        modifier = modifier
+            .clip(cardShape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle, cardShape)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        InitialAvatar(name = name, size = 44.dp)
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = roleLabel,
+                style = MaterialTheme.typography.labelSmall,
+                color = berimaColors.textSecondary
+            )
+            Spacer(Modifier.height(3.dp))
+            Text(
+                text = name,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -388,24 +488,24 @@ private fun NoteCard(
     modifier: Modifier = Modifier
 ) {
     val berimaColors = LocalBerimaColors.current
-    val cardShape = RoundedCornerShape(12.dp)
+    val cardShape = RoundedCornerShape(16.dp)
 
     Column(
         modifier = modifier
             .clip(cardShape)
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, berimaColors.borderSubtle, cardShape)
-            .padding(12.dp)
+            .padding(14.dp)
     ) {
         Text(
-            text = "Catatan dari pembeli",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            text = AppStrings.ORDER_DETAIL_NOTE_LABEL,
+            style = MaterialTheme.typography.labelSmall,
+            color = berimaColors.textSecondary
         )
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(8.dp))
         Text(
             text = note,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
     }
@@ -417,7 +517,7 @@ private fun AttachmentRow(
     modifier: Modifier = Modifier
 ) {
     val berimaColors = LocalBerimaColors.current
-    val cardShape = RoundedCornerShape(12.dp)
+    val cardShape = RoundedCornerShape(16.dp)
 
     Row(
         modifier = modifier
@@ -425,13 +525,13 @@ private fun AttachmentRow(
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, berimaColors.borderSubtle, cardShape)
             .clickable(onClick = onClick)
-            .padding(12.dp),
+            .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .size(44.dp)
+                .clip(RoundedCornerShape(12.dp))
                 .background(berimaColors.containerGreen),
             contentAlignment = Alignment.Center
         ) {
@@ -445,17 +545,24 @@ private fun AttachmentRow(
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Hasil pekerjaan",
-                style = MaterialTheme.typography.labelLarge,
+                text = AppStrings.ORDER_DETAIL_ATTACHMENT_TITLE,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(2.dp))
             Text(
-                text = "Buka file",
+                text = AppStrings.ORDER_DETAIL_ATTACHMENT_ACTION,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary
             )
         }
+        Spacer(Modifier.width(8.dp))
+        Icon(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            tint = berimaColors.textSecondary,
+            modifier = Modifier.size(22.dp)
+        )
     }
 }
 
@@ -469,12 +576,35 @@ private fun ChatMessageList(
     val berimaColors = LocalBerimaColors.current
 
     if (messages.isEmpty()) {
-        Box(
+        Column(
             modifier = modifier,
-            contentAlignment = Alignment.Center
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(CircleShape)
+                    .background(berimaColors.containerGreen),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_mail),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Spacer(Modifier.height(12.dp))
             Text(
-                text = "Mulai percakapan dengan $counterpartyName",
+                text = AppStrings.ORDER_CHAT_EMPTY_TITLE,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "${AppStrings.ORDER_CHAT_EMPTY_BODY_PREFIX} $counterpartyName",
                 style = MaterialTheme.typography.bodyMedium,
                 color = berimaColors.textSecondary,
                 textAlign = TextAlign.Center
@@ -527,7 +657,7 @@ private fun ChatInputRow(
             onValueChange = onDraftChange,
             label = {
                 Text(
-                    text = "Tulis pesan...",
+                    text = AppStrings.ORDER_CHAT_INPUT_PLACEHOLDER,
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
@@ -618,7 +748,7 @@ private fun OrderDetailScreenPreview() {
                 TopAppBar(
                     title = {
                         Text(
-                            text = "Detail Pesanan",
+                            text = AppStrings.ORDER_DETAIL_TITLE,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )

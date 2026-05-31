@@ -84,8 +84,8 @@ One agent session should update at minimum one item before ending.
 | Task | Status | Notes |
 |---|---|---|
 | CreateOrderScreen + CreateOrderViewModel | ✅ Done | Loads listing via one-shot `getListing`, denormalizes buyer/seller fields onto Order, optional 300-char note |
-| OrdersScreen + OrdersViewModel | ✅ Done | `PrimaryTabRow` with Pembeli / Penjual tabs, BI relative timestamps, empty states per tab |
-| OrderDetailScreen + OrderDetailViewModel | ✅ Done | Two-VM split (detail + chat), centralized `OrderAction` dispatch, role × status action matrix, file picker for result upload |
+| OrdersScreen + OrdersViewModel | ✅ Done | Redesigned (editorial gen): 16dp cards w/ 44dp leading `InitialAvatar`, headlineSmall title + headlineMedium price, "Penjual · Name" line, canonical glyph empty state. `PrimaryTabRow` Pembeli/Penjual. |
+| OrderDetailScreen + OrderDetailViewModel | ✅ Done | Redesigned: card-for-objects/open-for-content rhythm — summary (displayMedium price) → open status block (chip + contextual sentence + haloed-dot timeline) → note → attachment → counterparty person row → actions → chat. |
 | Chat section inside OrderDetailScreen | ✅ Done | Bounded LazyColumn (200–480dp), auto-scroll on new message, ➤ glyph send button (no `material-icons-extended` dep) |
 | StatusChip composable (reusable) | ✅ Done | `ui/common/StatusChip.kt`, all 7 statuses mapped to design tokens, pill shape |
 
