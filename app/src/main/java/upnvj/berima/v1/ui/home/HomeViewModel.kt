@@ -46,15 +46,12 @@ class HomeViewModel @Inject constructor(
 
     // Independent loading flags per query so one resolving early can't blank out the
     // other section. The main list owns the "Terbaru" loading state.
-    private val _featuredLoading = MutableStateFlow(true)
     private val _listLoading = MutableStateFlow(true)
     val isListLoading: StateFlow<Boolean> = _listLoading.asStateFlow()
 
     val featuredListings: StateFlow<List<Listing>> = listingRepository
         .getFeaturedListings(limit = 6L)
-        .onStart { _featuredLoading.value = true }
-        .onEach { _featuredLoading.value = false }
-        .catch { e -> _error.value = e.message; _featuredLoading.value = false }
+        .catch { e -> _error.value = e.message }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -111,7 +111,7 @@ fun ListingCard(
                     )
                     Spacer(Modifier.width(3.dp))
                     Text(
-                        text = String.format(Locale.US, "%.1f", listing.averageRating),
+                        text = String.format(Locale("id", "ID"), "%.1f", listing.averageRating),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
@@ -181,9 +181,7 @@ private fun CategoryTag(
         modifier = modifier
             .clip(RoundedCornerShape(9999.dp))
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.82f))
-            .padding(horizontal = 8.dp, vertical = 3.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+            .padding(horizontal = 8.dp, vertical = 3.dp)
     ) {
         Text(
             text = label.uppercase(),

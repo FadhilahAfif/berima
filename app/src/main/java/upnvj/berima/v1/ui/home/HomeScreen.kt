@@ -281,7 +281,7 @@ private fun CategoryRail(
                         else berimaColors.borderSubtle,
                         shape = RoundedCornerShape(9999.dp)
                     )
-                    .clickable { onCategorySelected(cat.id) }
+                    .clickable { onCategorySelected(if (isSelected && cat.id != null) null else cat.id) }
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(7.dp)

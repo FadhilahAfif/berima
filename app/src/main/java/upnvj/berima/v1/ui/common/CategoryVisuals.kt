@@ -29,18 +29,16 @@ val categoryVisuals: List<CategoryVisual> = listOf(
     CategoryVisual(Category.DATA, "Data", R.drawable.ic_category_data),
 )
 
-@DrawableRes
-fun categoryIconRes(category: String): Int = when (category) {
-    Category.VISUAL -> R.drawable.ic_category_visual
-    Category.DATA -> R.drawable.ic_category_data
-    else -> R.drawable.ic_category_academic
-}
+private val fallbackVisual: CategoryVisual
+    get() = categoryVisuals.first { it.id != null }
 
-fun categoryLabel(category: String): String = when (category) {
-    Category.VISUAL -> "Desain"
-    Category.DATA -> "Data"
-    else -> "Akademik"
-}
+@DrawableRes
+fun categoryIconRes(category: String): Int =
+    (categoryVisuals.firstOrNull { it.id == category } ?: fallbackVisual).iconRes
+        ?: fallbackVisual.iconRes!!
+
+fun categoryLabel(category: String): String =
+    (categoryVisuals.firstOrNull { it.id == category } ?: fallbackVisual).label
 
 @Composable
 @ReadOnlyComposable
