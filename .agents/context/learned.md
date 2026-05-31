@@ -227,3 +227,33 @@ Each entry must include: what was learned, which file it affects (if any), and d
   Credentials stored in `.maestro/.env` (gitignored) — never commit passwords.
   `BERIMA_TEST_PAID_ORDER_TITLE` must be set in `.env` to a seeded paid order
   title before running `63-create-review`.
+- [2026-05-31] HomeScreen redesign (impeccable product register). Root-cause bug
+  found and fixed: `HomeViewModel` shared one `isLoading` flag across the featured
+  and main-list flows. The featured query (totalOrders) resolves first and flips
+  the flag off while the main list (createdAt) is still loading, so "Terbaru"
+  rendered empty even though all 10 seeded listings exist. Fix: split into
+  `_featuredLoading` + `_listLoading`; Home now exposes `isListLoading` and shows
+  skeleton cards for the list region instead of an all-or-nothing center spinner.
+- [2026-05-31] Category-tinted thumbnail placeholders. New `CategoryColors`
+  token type on `BerimaColors` (categoryAcademic/categoryVisual/categoryData),
+  each a (container, glyph) pair, all within the green-only palette constraint
+  (differentiated by lightness/chroma + glyph, never hue). New tokens in
+  `Color.kt` + `Theme.kt`. Shared presentation helpers live in
+  `ui/common/CategoryVisuals.kt`: `categoryColors()`, `categoryIconRes()`,
+  `categoryLabel()`, and `categoryVisuals` (the ordered rail list). New vector
+  glyphs: `ic_category_academic/visual/data.xml`. `ListingCard` now draws a
+  tinted placeholder + glyph + category tag chip when `thumbnailUrl == null`,
+  so listings without images stop reading as loading skeletons. This is shared,
+  so Search/Profile/UserProfile inherit it.
+- [2026-05-31] Home category labels shortened for a scrollable rail: Semua /
+  Akademik / Desain / Data (was the full ALL-CAPS category names that overflowed
+  and wrapped). Rail is a `LazyRow` of glyph+label pills (forest fill when
+  active, white + hairline when not). "Terbaru" is now a 2-column
+  `LazyVerticalGrid` (`GridCells.Fixed(2)`, edge items get the 16dp screen
+  margin via `index % 2` padding, full-width sections use
+  `GridItemSpan(maxLineSpan)`). Header band sits on `surfaceRaised` with a
+  personalized greeting; `HomeViewModel` now injects `AuthRepository` and
+  exposes `userFirstName` (first token of the display name). HomeScreen's inner
+  Scaffold uses `contentWindowInsets = WindowInsets(0)` because the outer
+  `BerimaApp` Scaffold already applies the status-bar inset (double-padding
+  otherwise). Build verified: `assembleDebug` BUILD SUCCESSFUL.
