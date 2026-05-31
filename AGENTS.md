@@ -71,7 +71,7 @@ One agent session should update at minimum one item before ending.
 ### Phase 2 — Core Listing
 | Task | Status | Notes |
 |---|---|---|
-| HomeScreen + HomeViewModel | ✅ Done | Enriched: featured rail + category chips + listing grid |
+| HomeScreen + HomeViewModel | ✅ Done | Redesigned: surfaceRaised header band + personalized greeting, scrollable glyph category rail, featured rail, 2-col grid, skeleton loading, real empty state. Fixed shared-loading bug that blanked "Terbaru". Category-tinted ListingCard placeholders (shared). |
 | SearchScreen | ✅ Done | Client-side title filter, auto-focus, empty/no-results states |
 | ListingDetailScreen + ListingDetailViewModel | ✅ Done | Full detail view, seller card, reviews section, owner/buyer CTA |
 | CreateListingScreen + CreateListingViewModel | ✅ Done | Form with validation, category dropdown, tags |

@@ -10,32 +10,48 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import upnvj.berima.v1.data.model.Listing
+import upnvj.berima.v1.data.repository.AuthRepository
 import upnvj.berima.v1.data.repository.ListingRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val listingRepository: ListingRepository
+    private val listingRepository: ListingRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _selectedCategory = MutableStateFlow<String?>(null)
     val selectedCategory: StateFlow<String?> = _selectedCategory.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    /** First name of the logged-in user, for the home greeting. Empty until loaded. */
+    val userFirstName: StateFlow<String> = run {
+        val uid = authRepository.currentUserId
+        if (uid == null) {
+            MutableStateFlow("")
+        } else {
+            authRepository.observeUser(uid)
+                .map { it?.name?.trim()?.substringBefore(' ').orEmpty() }
+                .catch { emit("") }
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
+        }
+    }
+
+    // Independent loading flags per query so one resolving early can't blank out the
+    // other section. The main list owns the "Terbaru" loading state.
+    private val _listLoading = MutableStateFlow(true)
+    val isListLoading: StateFlow<Boolean> = _listLoading.asStateFlow()
+
     val featuredListings: StateFlow<List<Listing>> = listingRepository
-        .getFeaturedListings(limit = 5L)
-        .onStart { _isLoading.value = true }
-        .onEach { _isLoading.value = false }
-        .catch { e -> _error.value = e.message; _isLoading.value = false }
+        .getFeaturedListings(limit = 6L)
+        .catch { e -> _error.value = e.message }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -46,10 +62,10 @@ class HomeViewModel @Inject constructor(
             } else {
                 listingRepository.getListingsByCategory(category, limit = 20L)
             }
+                .onStart { _listLoading.value = true }
+                .onEach { _listLoading.value = false }
+                .catch { e -> _error.value = e.message; _listLoading.value = false }
         }
-        .onStart { _isLoading.value = true }
-        .onEach { _isLoading.value = false }
-        .catch { e -> _error.value = e.message; _isLoading.value = false }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun selectCategory(category: String?) {
