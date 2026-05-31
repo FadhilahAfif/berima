@@ -74,9 +74,11 @@ One agent session should update at minimum one item before ending.
 | HomeScreen + HomeViewModel | ✅ Done | Redesigned: surfaceRaised header band + personalized greeting, scrollable glyph category rail, featured rail, 2-col grid, skeleton loading, real empty state. Fixed shared-loading bug that blanked "Terbaru". Category-tinted ListingCard placeholders (shared). |
 | SearchScreen | ✅ Done | Client-side title filter, auto-focus, empty/no-results states |
 | ListingDetailScreen + ListingDetailViewModel | ✅ Done | Full detail view, seller card, reviews section, owner/buyer CTA |
-| CreateListingScreen + CreateListingViewModel | ✅ Done | Form with validation, category dropdown, tags |
-| EditListingScreen | ✅ Done | Pre-filled form, reuses CategoryDropdown from CreateListingScreen |
+| CreateListingScreen + CreateListingViewModel | ✅ Done | Redesigned: renders shared `ListingFormContent` (3 labelled sections, char counters, multiline desc, Rp-prefixed price + live preview, bottom-sheet category picker). |
+| EditListingScreen | ✅ Done | Pre-filled form, renders the same shared `ListingFormContent` as Create. |
 | ListingCard composable (reusable) | ✅ Done | `ui/common/ListingCard.kt` |
+| CategoryPicker composable (reusable) | ✅ Done | `ui/common/CategoryPicker.kt` — `CategoryPickerField` + bottom sheet, replaced old `CategoryDropdown`. Reuse for any category selection. |
+| ListingFormContent composable (reusable) | ✅ Done | `ui/listing/ListingFormContent.kt` — stateless full listing form shared by Create + Edit. |
 
 ### Phase 3 — Order Flow
 | Task | Status | Notes |
@@ -90,8 +92,8 @@ One agent session should update at minimum one item before ending.
 ### Phase 4 — Profile & Review
 | Task | Status | Notes |
 |---|---|---|
-| ProfileScreen + ProfileViewModel | ✅ Done | Own profile: avatar, bio, faculty, role badge, stats, listings column, edit + create buttons |
-| EditProfileScreen + EditProfileViewModel | ✅ Done | Photo picker, multiline bio, role chips, `uploadProfilePhoto` added to StorageRepository |
+| ProfileScreen + ProfileViewModel | ✅ Done | Redesigned: IdentityCard (avatar, role chip, bio, faculty, edit affordance), StatsStrip (hairline-divided columns), full-width CTA, compact `ProfileListingRow`s. Fixed logout-button clipping bug + insets. |
+| EditProfileScreen + EditProfileViewModel | ✅ Done | Redesigned: avatar camera badge + "Ubah Foto", multiline bio via shared `BerimaTextField`, 3-up segmented role control, counters. `uploadProfilePhoto` on StorageRepository. |
 | UserProfileScreen + UserProfileViewModel | ✅ Done | Read-only seller profile, active listings, stats row |
 | CreateReviewScreen + CreateReviewViewModel | ✅ Done | Star selector, multiline comment, rating validation, isSubmitted nav |
 

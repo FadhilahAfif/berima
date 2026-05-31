@@ -18,16 +18,24 @@ import upnvj.berima.v1.ui.theme.LocalBerimaColors
 data class CategoryVisual(
     val id: String?,
     val label: String,
-    @DrawableRes val iconRes: Int?
+    @DrawableRes val iconRes: Int?,
+    val fullLabel: String = label
 )
 
 /** Ordered list for the Home category rail. `null` id = "Semua" (all), shown text-only. */
 val categoryVisuals: List<CategoryVisual> = listOf(
     CategoryVisual(null, "Semua", null),
-    CategoryVisual(Category.ACADEMIC, "Akademik", R.drawable.ic_category_academic),
-    CategoryVisual(Category.VISUAL, "Desain", R.drawable.ic_category_visual),
-    CategoryVisual(Category.DATA, "Data", R.drawable.ic_category_data),
+    CategoryVisual(Category.ACADEMIC, "Akademik", R.drawable.ic_category_academic, "Academic Support"),
+    CategoryVisual(Category.VISUAL, "Desain", R.drawable.ic_category_visual, "Visual Branding"),
+    CategoryVisual(Category.DATA, "Data", R.drawable.ic_category_data, "Data Processing"),
 )
+
+/** Concrete (selectable) categories only, excluding the "Semua" sentinel. Used by the category picker. */
+val selectableCategoryVisuals: List<CategoryVisual> = categoryVisuals.filter { it.id != null }
+
+/** Full Bahasa/English category name for a category id, e.g. "Visual Branding". */
+fun categoryFullLabel(category: String): String =
+    (selectableCategoryVisuals.firstOrNull { it.id == category } ?: fallbackVisual).fullLabel
 
 private val fallbackVisual: CategoryVisual
     get() = categoryVisuals.first { it.id != null }

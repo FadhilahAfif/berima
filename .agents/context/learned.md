@@ -257,3 +257,50 @@ Each entry must include: what was learned, which file it affects (if any), and d
   Scaffold uses `contentWindowInsets = WindowInsets(0)` because the outer
   `BerimaApp` Scaffold already applies the status-bar inset (double-padding
   otherwise). Build verified: `assembleDebug` BUILD SUCCESSFUL.
+- [2026-05-31] Profile + listing-form redesign (impeccable product register).
+  Two NEW SHARED COMPONENTS future agents should reuse instead of rebuilding:
+  1. `ui/common/CategoryPicker.kt` → `CategoryPickerField(selected, onSelected)`:
+     a tappable field styled like `BerimaTextField` showing the selected
+     category's glyph + full name, opening a canonical `ModalBottomSheet`
+     (surface-raised, 16dp top corners, handle bar, scrim) per DESIGN.md. This
+     REPLACED the old `ExposedDropdownMenu`-based `CategoryDropdown` (deleted from
+     CreateListingScreen). Use this for any "pick a listing category" need.
+  2. `ui/listing/ListingFormContent.kt` → `ListingFormContent(...)`: the entire
+     listing form (title, category, description, price, delivery, tags), stateless
+     with hoisted value/lambda params + a `submitLabel`. Both CreateListingScreen
+     and EditListingScreen now render this so the field set, grouping, counters,
+     and validation hints stay identical. Edit a field once, both screens update.
+  Supporting additions: `ui/common/Format.kt` gained `formatRupiahInput(raw)`
+  (digit-string → `Rp10.000` preview, blank for empty/zero); `CategoryVisuals.kt`
+  gained `CategoryVisual.fullLabel`, `selectableCategoryVisuals` (rail list minus
+  the "Semua" sentinel), and `categoryFullLabel(id)`. New vectors: `ic_camera`,
+  `ic_edit`, `ic_check`, `ic_chevron_right`, `ic_chevron_down`. All new
+  user-facing copy added to `AppStrings.kt` (PROFILE_*, EDIT_PROFILE_*, LISTING_*,
+  CATEGORY_*) per convention #8 (no hardcoded strings in composables).
+- [2026-05-31] Listing form UX fixes shipped with the redesign: Deskripsi is now
+  multiline (`singleLine=false, maxLines=6`) — it was a single-line field despite
+  a 500-char limit; live `n/max` counters on title (60) + description (500) that
+  turn `error`-colored at the cap; price field gets an "Rp" leadingIcon + a
+  formatted "Pembeli membayar RpX" preview in supportingText (money is the most
+  prominent value per DESIGN.md); delivery field gets a "jam" trailingIcon. No
+  ViewModel-contract or schema changes — all display logic. The shared
+  `BerimaTextField` already supported leadingIcon/trailingIcon/supportingText/
+  maxLines, so no signature change was needed there.
+- [2026-05-31] ProfileScreen redesign details + a real bug fix: the logout action
+  was a `Text("Keluar")` jammed inside a fixed-width `IconButton`, which clipped to
+  "Kelua" + a stray chevron on-device. Replaced with a quiet bordered pill
+  (`Box.clickable`, per the IconButton-sizing note). Layout now: IdentityCard
+  (white surface, 64dp avatar, name, email, green `containerGreen` role chip, bio,
+  faculty, circular edit affordance) → StatsStrip (one card, columns split by 1dp
+  hairline dividers — NOT nested cards — big number + label per stat, shown by
+  role) → full-width "Tambah Listing Baru" pill (was wrapping to 2 lines in a
+  half-width button) → "Listing Saya" with a count → compact `ProfileListingRow`s
+  (64dp category-tinted thumbnail + title + price + rating + chevron) instead of
+  full-width `ListingCard`s, which were built for the grid/rail and read too heavy
+  stacked. EditProfileScreen: avatar gained a forest camera badge + "Ubah Foto"
+  affordance; bio switched from a hand-rolled `OutlinedTextField` to the shared
+  `BerimaTextField(singleLine=false)`; role pills became a clean 3-up segmented row
+  (sentence-case Pembeli/Penjual/Keduanya, forest fill when active). All three
+  screens added `contentWindowInsets = WindowInsets(0)` (same double-inset fix as
+  Home — they're hosted in BerimaApp's Scaffold via NavGraph innerPadding).
+  Build verified: `assembleDebug` BUILD SUCCESSFUL in 38s.
