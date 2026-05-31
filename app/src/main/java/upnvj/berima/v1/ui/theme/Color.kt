@@ -65,6 +65,15 @@ val SemanticOnErrorContainer = Color(0xFF93000A)
 val AccentContainerGreen = Color(0xFFD4EDE3)
 val AccentStarRating = Color(0xFFFBBF24)
 
+// Category thumbnail placeholders. Green-only palette constraint: categories are
+// differentiated by lightness + chroma and the category glyph, never by hue family.
+val CategoryAcademicContainer = Color(0xFFDCE9E1)
+val CategoryAcademicGlyph = Color(0xFF1F5740)
+val CategoryVisualContainer = Color(0xFFCDE9DB)
+val CategoryVisualGlyph = Color(0xFF0F5238)
+val CategoryDataContainer = Color(0xFFE4EAE4)
+val CategoryDataGlyph = Color(0xFF3C5A4B)
+
 val StatusPendingContainer = Color(0xFFFFF4D6)
 val StatusPendingText = Color(0xFF7A5800)
 val StatusInProgressContainer = Color(0xFFE5EFE9)
@@ -84,6 +93,9 @@ val StatusRejectedText = Color(0xFF93000A)
 data class StatusColors(val container: Color, val text: Color)
 
 @Immutable
+data class CategoryColors(val container: Color, val glyph: Color)
+
+@Immutable
 data class BerimaColors(
     val primaryDim: Color,
     val surfaceRaised: Color,
@@ -93,6 +105,9 @@ data class BerimaColors(
     val containerGreen: Color,
     val starRating: Color,
     val textSecondary: Color,
+    val categoryAcademic: CategoryColors,
+    val categoryVisual: CategoryColors,
+    val categoryData: CategoryColors,
     val statusPending: StatusColors,
     val statusInProgress: StatusColors,
     val statusDelivered: StatusColors,
@@ -112,6 +127,9 @@ val LocalBerimaColors = staticCompositionLocalOf {
         containerGreen = AccentContainerGreen,
         starRating = AccentStarRating,
         textSecondary = ContentTextSecondary,
+        categoryAcademic = CategoryColors(CategoryAcademicContainer, CategoryAcademicGlyph),
+        categoryVisual = CategoryColors(CategoryVisualContainer, CategoryVisualGlyph),
+        categoryData = CategoryColors(CategoryDataContainer, CategoryDataGlyph),
         statusPending = StatusColors(StatusPendingContainer, StatusPendingText),
         statusInProgress = StatusColors(StatusInProgressContainer, StatusInProgressText),
         statusDelivered = StatusColors(StatusDeliveredContainer, StatusDeliveredText),
