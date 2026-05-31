@@ -3,10 +3,12 @@ package upnvj.berima.v1.ui.common
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,8 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -37,10 +41,11 @@ fun ListingCard(
     listing: Listing,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    imageHeight: Dp = 120.dp
+    imageHeight: Dp = 124.dp
 ) {
     val berimaColors = LocalBerimaColors.current
-    val cardShape = RoundedCornerShape(12.dp)
+    val cardShape = RoundedCornerShape(16.dp)
+    val hasRating = listing.averageRating > 0.0
 
     Column(
         modifier = modifier
@@ -48,66 +53,46 @@ fun ListingCard(
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, berimaColors.borderSubtle, cardShape)
             .clickable(onClick = onClick)
-            .padding(bottom = 12.dp)
+            .padding(6.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(imageHeight)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-            contentAlignment = Alignment.Center
-        ) {
-            if (listing.thumbnailUrl != null) {
-                AsyncImage(
-                    model = listing.thumbnailUrl,
-                    contentDescription = listing.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(imageHeight)
-                )
-            } else {
-                Icon(
-                    painter = painterResource(R.drawable.ic_berima_mark),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
+        ListingThumbnail(
+            listing = listing,
+            imageHeight = imageHeight
+        )
 
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(12.dp))
 
-        Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 6.dp)) {
             Text(
                 text = listing.title,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(8.dp))
 
             Text(
                 text = formatRupiah(listing.price),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1
             )
 
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(10.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AsyncImage(
                     model = listing.sellerPhotoUrl,
                     contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(16.dp)
+                        .size(20.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 )
-                Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(6.dp))
                 Text(
                     text = listing.sellerName,
                     style = MaterialTheme.typography.bodySmall,
@@ -116,26 +101,97 @@ fun ListingCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(Modifier.width(4.dp))
-                Icon(
-                    painter = painterResource(R.drawable.ic_star),
-                    contentDescription = null,
-                    tint = berimaColors.starRating,
-                    modifier = Modifier.size(12.dp)
-                )
-                Spacer(Modifier.width(2.dp))
-                Text(
-                    text = if (listing.averageRating > 0.0)
-                        String.format(Locale.US, "%.1f", listing.averageRating)
-                    else "-",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = berimaColors.textSecondary
-                )
+                if (hasRating) {
+                    Spacer(Modifier.width(6.dp))
+                    Icon(
+                        painter = painterResource(R.drawable.ic_star),
+                        contentDescription = null,
+                        tint = berimaColors.starRating,
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Spacer(Modifier.width(3.dp))
+                    Text(
+                        text = String.format(Locale.US, "%.1f", listing.averageRating),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
+        }
+
+        Spacer(Modifier.height(8.dp))
+    }
+}
+
+/**
+ * Thumbnail region. When [Listing.thumbnailUrl] is present it is cropped to fill.
+ * Otherwise a category-tinted placeholder is drawn with the category glyph and a
+ * label chip, so listings without an uploaded image still look intentional.
+ */
+@Composable
+private fun ListingThumbnail(
+    listing: Listing,
+    imageHeight: Dp
+) {
+    val thumbShape = RoundedCornerShape(12.dp)
+    val category = categoryColors(listing.category)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(imageHeight)
+            .clip(thumbShape)
+            .background(if (listing.thumbnailUrl != null) MaterialTheme.colorScheme.surfaceContainerHigh else category.container)
+    ) {
+        if (listing.thumbnailUrl != null) {
+            AsyncImage(
+                model = listing.thumbnailUrl,
+                contentDescription = listing.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Icon(
+                painter = painterResource(categoryIconRes(listing.category)),
+                contentDescription = null,
+                tint = category.glyph.copy(alpha = 0.32f),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(40.dp)
+            )
+            CategoryTag(
+                label = categoryLabel(listing.category),
+                glyph = category.glyph,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(8.dp)
+            )
         }
     }
 }
 
+@Composable
+private fun CategoryTag(
+    label: String,
+    glyph: Color,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(9999.dp))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.82f))
+            .padding(horizontal = 8.dp, vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            color = glyph
+        )
+    }
+}
 
 
 @androidx.compose.ui.tooling.preview.Preview(name = "ListingCard · with rating", showBackground = true, backgroundColor = 0xFFF2EFE9)
@@ -154,7 +210,9 @@ private fun ListingCardPreview() {
                 category = upnvj.berima.v1.data.model.Category.VISUAL
             ),
             onClick = {},
-            modifier = androidx.compose.ui.Modifier.padding(16.dp)
+            modifier = androidx.compose.ui.Modifier
+                .width(200.dp)
+                .padding(16.dp)
         )
     }
 }
@@ -175,7 +233,9 @@ private fun ListingCardNoRatingPreview() {
                 category = upnvj.berima.v1.data.model.Category.DATA
             ),
             onClick = {},
-            modifier = androidx.compose.ui.Modifier.padding(16.dp)
+            modifier = androidx.compose.ui.Modifier
+                .width(200.dp)
+                .padding(16.dp)
         )
     }
 }
