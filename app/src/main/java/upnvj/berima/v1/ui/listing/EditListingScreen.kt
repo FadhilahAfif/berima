@@ -2,14 +2,11 @@ package upnvj.berima.v1.ui.listing
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,13 +26,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import upnvj.berima.v1.R
-import upnvj.berima.v1.ui.common.BerimaButton
-import upnvj.berima.v1.ui.common.BerimaTextField
+import upnvj.berima.v1.data.model.Category
+import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,12 +67,13 @@ fun EditListingScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Edit Listing",
-                        style = MaterialTheme.typography.titleMedium,
+                        text = AppStrings.LISTING_EDIT_TITLE,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },
@@ -84,7 +81,7 @@ fun EditListingScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Kembali",
+                            contentDescription = AppStrings.BACK_CONTENT_DESCRIPTION,
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -98,7 +95,9 @@ fun EditListingScreen(
     ) { padding ->
         if (isLoading && title.isBlank()) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
@@ -114,114 +113,81 @@ fun EditListingScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
         ) {
-            BerimaTextField(
-                value = title,
-                onValueChange = viewModel::onTitleChange,
-                label = "Judul",
-                placeholder = "Maks. 60 karakter",
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            CategoryDropdown(
-                selected = category,
-                onSelected = viewModel::onCategoryChange,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            BerimaTextField(
-                value = description,
-                onValueChange = viewModel::onDescriptionChange,
-                label = "Deskripsi",
-                placeholder = "Maks. 500 karakter",
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            BerimaTextField(
-                value = price,
-                onValueChange = viewModel::onPriceChange,
-                label = "Harga (Rp)",
-                placeholder = "Contoh: 50000",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            BerimaTextField(
-                value = deliveryTimeHours,
-                onValueChange = viewModel::onDeliveryTimeChange,
-                label = "Waktu pengerjaan (jam)",
-                placeholder = "Maks. 48 jam",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            BerimaTextField(
-                value = tags,
-                onValueChange = viewModel::onTagsChange,
-                label = "Tags (opsional)",
-                placeholder = "Pisahkan dengan koma, contoh: desain, logo",
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            BerimaButton(
-                text = "Simpan Perubahan",
-                onClick = viewModel::submit,
+            ListingFormContent(
+                title = title,
+                onTitleChange = viewModel::onTitleChange,
+                category = category,
+                onCategoryChange = viewModel::onCategoryChange,
+                description = description,
+                onDescriptionChange = viewModel::onDescriptionChange,
+                price = price,
+                onPriceChange = viewModel::onPriceChange,
+                deliveryTimeHours = deliveryTimeHours,
+                onDeliveryTimeChange = viewModel::onDeliveryTimeChange,
+                tags = tags,
+                onTagsChange = viewModel::onTagsChange,
                 isLoading = isLoading,
-                modifier = Modifier.fillMaxWidth()
+                submitLabel = AppStrings.LISTING_SAVE_EDIT,
+                onSubmit = viewModel::submit
             )
         }
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(name = "EditListingScreen", showBackground = true, showSystemUi = true)
 @OptIn(ExperimentalMaterial3Api::class)
+@androidx.compose.ui.tooling.preview.Preview(name = "EditListingScreen", showBackground = true, showSystemUi = true)
 @Composable
 private fun EditListingScreenPreview() {
     upnvj.berima.v1.ui.theme.BerimaTheme {
-        val berimaColors = upnvj.berima.v1.ui.theme.LocalBerimaColors.current
-        androidx.compose.material3.Scaffold(
+        val berimaColors = LocalBerimaColors.current
+        Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
+            contentWindowInsets = WindowInsets(0),
             topBar = {
-                androidx.compose.material3.TopAppBar(
-                    title = { Text("Edit Listing", style = MaterialTheme.typography.titleMedium) },
+                TopAppBar(
+                    title = {
+                        Text(
+                            AppStrings.LISTING_EDIT_TITLE,
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    },
                     navigationIcon = {
-                        androidx.compose.material3.IconButton(onClick = {}) {
-                            Icon(painter = androidx.compose.ui.res.painterResource(upnvj.berima.v1.R.drawable.ic_arrow_back), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                        IconButton(onClick = {}) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_arrow_back),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     },
-                    colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = berimaColors.surfaceRaised)
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = berimaColors.surfaceRaised)
                 )
             }
         ) { padding ->
-            androidx.compose.foundation.layout.Column(
-                modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
             ) {
-                upnvj.berima.v1.ui.common.BerimaTextField(value = "Desain Logo Profesional", onValueChange = {}, label = "Judul", modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(12.dp))
-                CategoryDropdown(selected = upnvj.berima.v1.data.model.Category.VISUAL, onSelected = {}, modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(12.dp))
-                upnvj.berima.v1.ui.common.BerimaTextField(value = "Saya akan membuat desain logo profesional.", onValueChange = {}, label = "Deskripsi", modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(12.dp))
-                upnvj.berima.v1.ui.common.BerimaTextField(value = "75000", onValueChange = {}, label = "Harga (Rp)", modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(12.dp))
-                upnvj.berima.v1.ui.common.BerimaTextField(value = "24", onValueChange = {}, label = "Waktu pengerjaan (jam)", modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(12.dp))
-                upnvj.berima.v1.ui.common.BerimaTextField(value = "desain, logo", onValueChange = {}, label = "Tags (opsional)", modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(24.dp))
-                upnvj.berima.v1.ui.common.BerimaButton(text = "Simpan Perubahan", onClick = {}, modifier = Modifier.fillMaxWidth())
+                ListingFormContent(
+                    title = "Desain Logo Profesional",
+                    onTitleChange = {},
+                    category = Category.VISUAL,
+                    onCategoryChange = {},
+                    description = "Saya akan membuat desain logo profesional.",
+                    onDescriptionChange = {},
+                    price = "75000",
+                    onPriceChange = {},
+                    deliveryTimeHours = "24",
+                    onDeliveryTimeChange = {},
+                    tags = "desain, logo",
+                    onTagsChange = {},
+                    isLoading = false,
+                    submitLabel = AppStrings.LISTING_SAVE_EDIT,
+                    onSubmit = {}
+                )
             }
         }
     }

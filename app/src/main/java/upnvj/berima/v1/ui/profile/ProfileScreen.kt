@@ -2,6 +2,7 @@ package upnvj.berima.v1.ui.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,12 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,12 +49,15 @@ import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Listing
 import upnvj.berima.v1.data.model.User
 import upnvj.berima.v1.data.model.UserRole
+import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
-import upnvj.berima.v1.ui.common.ListingCard
+import upnvj.berima.v1.ui.common.categoryColors
+import upnvj.berima.v1.ui.common.categoryIconRes
+import upnvj.berima.v1.ui.common.formatRupiah
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 import java.util.Locale
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onNavigateToEditProfile: () -> Unit,
@@ -77,39 +84,29 @@ fun ProfileScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
         topBar = {
-            Column {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "Profil",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                viewModel.signOut()
-                                onLogout()
-                            }
-                        ) {
-                            Text(
-                                text = "Keluar",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = berimaColors.surfaceRaised
+            TopAppBar(
+                title = {
+                    Text(
+                        text = AppStrings.PROFILE_TITLE,
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
+                },
+                actions = {
+                    LogoutButton(
+                        onClick = {
+                            viewModel.signOut()
+                            onLogout()
+                        },
+                        modifier = Modifier.padding(end = 12.dp)
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = berimaColors.surfaceRaised
                 )
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = berimaColors.borderSubtle
-                )
-            }
+            )
         },
         modifier = modifier
     ) { padding ->
@@ -136,7 +133,7 @@ fun ProfileScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Profil tidak ditemukan",
+                        text = AppStrings.PROFILE_NOT_FOUND,
                         style = MaterialTheme.typography.bodyMedium,
                         color = berimaColors.textSecondary,
                         textAlign = TextAlign.Center
@@ -161,6 +158,28 @@ fun ProfileScreen(
 }
 
 @Composable
+private fun LogoutButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(9999.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderInput, RoundedCornerShape(9999.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = AppStrings.PROFILE_LOGOUT,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
 private fun ProfileContent(
     user: User,
     listings: List<Listing>,
@@ -169,125 +188,170 @@ private fun ProfileContent(
     onListingClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val berimaColors = LocalBerimaColors.current
-
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
+        IdentityCard(user = user, onEditClick = onNavigateToEditProfile)
+
+        if (shouldShowStats(user)) {
+            Spacer(Modifier.height(12.dp))
+            StatsStrip(user = user)
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        BerimaButton(
+            text = AppStrings.PROFILE_ADD_LISTING,
+            onClick = onNavigateToCreateListing,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(28.dp))
+
         Row(verticalAlignment = Alignment.CenterVertically) {
-            ProfileAvatar(photoUrl = user.photoUrl)
-            androidx.compose.foundation.layout.Spacer(Modifier.size(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = AppStrings.PROFILE_MY_LISTINGS,
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            if (listings.isNotEmpty()) {
                 Text(
-                    text = user.name,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = user.email,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = berimaColors.textSecondary
+                    text = "${listings.size}",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = LocalBerimaColors.current.textSecondary
                 )
             }
         }
 
+        Spacer(Modifier.height(16.dp))
+
+        if (listings.isEmpty()) {
+            EmptyListingState(
+                onCreate = onNavigateToCreateListing,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 40.dp)
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                listings.forEach { listing ->
+                    ProfileListingRow(
+                        listing = listing,
+                        onClick = { onListingClick(listing.listingId) }
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun IdentityCard(
+    user: User,
+    onEditClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle, RoundedCornerShape(16.dp))
+            .padding(16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            ProfileAvatar(photoUrl = user.photoUrl, size = 64.dp)
+            Spacer(Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = user.name,
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = user.email,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = berimaColors.textSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(8.dp))
+                RoleChip(role = user.role)
+            }
+            EditIconButton(onClick = onEditClick)
+        }
+
         if (!user.bio.isNullOrBlank()) {
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(14.dp))
             Text(
                 text = user.bio,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
 
         if (!user.faculty.isNullOrBlank()) {
             Spacer(Modifier.height(8.dp))
-            Text(
-                text = user.faculty,
-                style = MaterialTheme.typography.bodySmall,
-                color = berimaColors.textSecondary
-            )
-        }
-
-        Spacer(Modifier.height(16.dp))
-        RoleBadge(role = user.role)
-
-        if (shouldShowStats(user)) {
-            Spacer(Modifier.height(16.dp))
-            StatsSection(user = user)
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            androidx.compose.material3.OutlinedButton(
-                onClick = onNavigateToEditProfile,
-                shape = RoundedCornerShape(9999.dp),
-                border = androidx.compose.foundation.BorderStroke(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.primary
-                ),
-                colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = "Edit Profil",
-                    style = MaterialTheme.typography.labelLarge
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_category_academic),
+                    contentDescription = null,
+                    tint = berimaColors.textSecondary,
+                    modifier = Modifier.size(15.dp)
                 )
-            }
-            BerimaButton(
-                text = "Tambah Listing Baru",
-                onClick = onNavigateToCreateListing,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(Modifier.height(24.dp))
-        HorizontalDivider(color = berimaColors.borderSubtle, thickness = 1.dp)
-        Spacer(Modifier.height(24.dp))
-
-        Text(
-            text = "Listing Saya",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        if (listings.isEmpty()) {
-            EmptyListingState(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 48.dp)
-            )
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                listings.forEach { listing ->
-                    ListingCard(
-                        listing = listing,
-                        onClick = { onListingClick(listing.listingId) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = user.faculty,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = berimaColors.textSecondary
+                )
             }
         }
     }
 }
 
 @Composable
+private fun EditIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    Box(
+        modifier = modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(berimaColors.surfaceRaised)
+            .border(1.dp, berimaColors.borderSubtle, CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_edit),
+            contentDescription = AppStrings.PROFILE_EDIT,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(18.dp)
+        )
+    }
+}
+
+@Composable
 private fun ProfileAvatar(
     photoUrl: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    size: androidx.compose.ui.unit.Dp = 64.dp
 ) {
     Box(
         modifier = modifier
-            .size(80.dp)
+            .size(size)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.Center
@@ -297,12 +361,12 @@ private fun ProfileAvatar(
                 painter = painterResource(R.drawable.ic_person),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(size * 0.45f)
             )
         } else {
             AsyncImage(
                 model = photoUrl,
-                contentDescription = "Foto profil",
+                contentDescription = AppStrings.PROFILE_PHOTO_DESCRIPTION,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
@@ -311,80 +375,207 @@ private fun ProfileAvatar(
 }
 
 @Composable
-private fun RoleBadge(
+private fun RoleChip(
     role: String,
     modifier: Modifier = Modifier
 ) {
+    val berimaColors = LocalBerimaColors.current
     val label = when (role) {
-        UserRole.BUYER -> "PEMBELI"
-        UserRole.SELLER -> "PENJUAL"
-        else -> "KEDUANYA"
+        UserRole.BUYER -> AppStrings.ROLE_BUYER.uppercase()
+        UserRole.SELLER -> AppStrings.ROLE_SELLER.uppercase()
+        else -> AppStrings.ROLE_BOTH.uppercase()
     }
 
-    Box(
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.primary,
         modifier = modifier
             .clip(RoundedCornerShape(9999.dp))
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(berimaColors.containerGreen)
             .padding(horizontal = 10.dp, vertical = 4.dp)
+    )
+}
+
+@Composable
+private fun StatsStrip(
+    user: User,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    val isSeller = user.role == UserRole.SELLER || user.role == UserRole.BOTH
+    val showRating = isSeller && user.averageRating > 0.0
+
+    val stats = buildList {
+        if (showRating) {
+            add(StatItem(String.format(Locale("id", "ID"), "%.1f", user.averageRating), AppStrings.PROFILE_STAT_RATING, isRating = true))
+        }
+        if (user.totalOrdersAsSeller > 0) {
+            add(StatItem("${user.totalOrdersAsSeller}", AppStrings.PROFILE_STAT_AS_SELLER))
+        }
+        if (user.totalOrdersAsBuyer > 0) {
+            add(StatItem("${user.totalOrdersAsBuyer}", AppStrings.PROFILE_STAT_AS_BUYER))
+        }
+    }
+
+    if (stats.isEmpty()) return
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle, RoundedCornerShape(16.dp))
+            .padding(vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        stats.forEachIndexed { index, stat ->
+            StatColumn(stat = stat, modifier = Modifier.weight(1f))
+            if (index < stats.lastIndex) {
+                Box(
+                    modifier = Modifier
+                        .height(36.dp)
+                        .width(1.dp)
+                        .background(berimaColors.borderSubtle)
+                )
+            }
+        }
+    }
+}
+
+private data class StatItem(val value: String, val label: String, val isRating: Boolean = false)
+
+@Composable
+private fun StatColumn(
+    stat: StatItem,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (stat.isRating) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_star),
+                    contentDescription = null,
+                    tint = berimaColors.starRating,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+            }
+            Text(
+                text = stat.value,
+                style = MaterialTheme.typography.displayMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        Spacer(Modifier.height(4.dp))
         Text(
-            text = label,
+            text = stat.label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
+            color = berimaColors.textSecondary
         )
     }
 }
 
 @Composable
-private fun StatsSection(
-    user: User,
+private fun ProfileListingRow(
+    listing: Listing,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val berimaColors = LocalBerimaColors.current
+    val hasRating = listing.averageRating > 0.0
+    val category = categoryColors(listing.category)
+    val shape = RoundedCornerShape(16.dp)
 
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle, shape)
+            .clickable(onClick = onClick)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        if ((user.role == UserRole.SELLER || user.role == UserRole.BOTH) && user.averageRating > 0.0) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_star),
-                    contentDescription = null,
-                    tint = berimaColors.starRating,
-                    modifier = Modifier.size(14.dp)
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(if (listing.thumbnailUrl != null) MaterialTheme.colorScheme.surfaceContainerHigh else category.container),
+            contentAlignment = Alignment.Center
+        ) {
+            if (listing.thumbnailUrl != null) {
+                AsyncImage(
+                    model = listing.thumbnailUrl,
+                    contentDescription = listing.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
                 )
-                Spacer(Modifier.size(4.dp))
-                Text(
-                    text = String.format(Locale.US, "%.1f", user.averageRating),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = berimaColors.textSecondary
+            } else {
+                Icon(
+                    painter = painterResource(categoryIconRes(listing.category)),
+                    contentDescription = null,
+                    tint = category.glyph,
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
 
-        if (user.totalOrdersAsBuyer > 0) {
+        Spacer(Modifier.width(14.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "${user.totalOrdersAsBuyer} pesanan sebagai pembeli",
-                style = MaterialTheme.typography.bodySmall,
-                color = berimaColors.textSecondary
+                text = listing.title,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
+            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = formatRupiah(listing.price),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (hasRating) {
+                    Spacer(Modifier.width(10.dp))
+                    Icon(
+                        painter = painterResource(R.drawable.ic_star),
+                        contentDescription = null,
+                        tint = berimaColors.starRating,
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Spacer(Modifier.width(3.dp))
+                    Text(
+                        text = String.format(Locale("id", "ID"), "%.1f", listing.averageRating),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
 
-        if (user.totalOrdersAsSeller > 0) {
-            Text(
-                text = "${user.totalOrdersAsSeller} pesanan sebagai penjual",
-                style = MaterialTheme.typography.bodySmall,
-                color = berimaColors.textSecondary
-            )
-        }
+        Icon(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            tint = berimaColors.textSecondary,
+            modifier = Modifier.size(22.dp)
+        )
     }
 }
 
 @Composable
 private fun EmptyListingState(
+    onCreate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val berimaColors = LocalBerimaColors.current
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -393,19 +584,19 @@ private fun EmptyListingState(
             painter = painterResource(R.drawable.ic_berima_mark),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(44.dp)
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(14.dp))
         Text(
-            text = "Belum ada listing",
-            style = MaterialTheme.typography.titleSmall,
+            text = AppStrings.PROFILE_EMPTY_LISTINGS_TITLE,
+            style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(6.dp))
         Text(
-            text = "Tambah listing pertamamu",
+            text = AppStrings.PROFILE_EMPTY_LISTINGS_BODY,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = berimaColors.textSecondary,
             textAlign = TextAlign.Center
         )
     }
@@ -423,18 +614,18 @@ private fun ProfileScreenPreview() {
         val user = User(
             uid = "u1",
             name = "Andi Pratama",
-            email = "andi@upnvj.ac.id",
-            bio = "Mahasiswa Informatika yang suka bantu desain dan data.",
-            faculty = "Fakultas Ilmu Komputer",
+            email = "test+seller@berima.dev",
+            bio = "Jasa desain PPT dan poster UKM profesional.",
+            faculty = "Teknik Informatika",
             role = UserRole.BOTH,
             averageRating = 4.8,
             totalOrdersAsBuyer = 3,
-            totalOrdersAsSeller = 12
+            totalOrdersAsSeller = 15
         )
         val listings = listOf(
             Listing(
                 listingId = "l1",
-                title = "Desain Poster Acara Kampus",
+                title = "Desain PPT Presentasi Sidang",
                 sellerName = "Andi Pratama",
                 sellerId = "u1",
                 price = 45000,
@@ -443,16 +634,19 @@ private fun ProfileScreenPreview() {
             ),
             Listing(
                 listingId = "l2",
-                title = "Bantu Olah Data SPSS",
+                title = "Bantu Olah Data SPSS Tugas Akhir",
                 sellerName = "Andi Pratama",
                 sellerId = "u1",
                 price = 65000,
-                averageRating = 4.7,
+                averageRating = 0.0,
                 category = "data"
             )
         )
 
-        Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0)
+        ) { padding ->
             ProfileContent(
                 user = user,
                 listings = listings,
