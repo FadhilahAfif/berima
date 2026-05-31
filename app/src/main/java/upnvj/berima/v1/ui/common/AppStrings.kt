@@ -29,8 +29,14 @@ object AppStrings {
 
     const val REVIEW_TITLE = "Tulis Ulasan"
 
+    const val HOME_GREETING_NAMED = "Halo, %s"
+    const val HOME_GREETING_GENERIC = "Halo"
+    const val HOME_SUBTITLE = "Mau tugas apa yang dituntaskan hari ini?"
     const val HOME_SECTION_FEATURED = "Sedang ramai"
+    const val HOME_SECTION_FEATURED_SUB = "Paling banyak dipesan minggu ini"
     const val HOME_SECTION_LATEST = "Terbaru"
+    const val HOME_EMPTY_TITLE = "Belum ada listing"
+    const val HOME_EMPTY_BODY = "Coba kategori lain atau kembali nanti."
 
     const val SEARCH_NO_RESULTS_TITLE_QUERY = "Tidak ada hasil untuk"
 }
