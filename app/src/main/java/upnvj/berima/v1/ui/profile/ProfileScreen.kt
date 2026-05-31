@@ -408,7 +408,7 @@ private fun StatsStrip(
 
     val stats = buildList {
         if (showRating) {
-            add(StatItem(String.format(Locale.US, "%.1f", user.averageRating), AppStrings.PROFILE_STAT_RATING, isRating = true))
+            add(StatItem(String.format(Locale("id", "ID"), "%.1f", user.averageRating), AppStrings.PROFILE_STAT_RATING, isRating = true))
         }
         if (user.totalOrdersAsSeller > 0) {
             add(StatItem("${user.totalOrdersAsSeller}", AppStrings.PROFILE_STAT_AS_SELLER))

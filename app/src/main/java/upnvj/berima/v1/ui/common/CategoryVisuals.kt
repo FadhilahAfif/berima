@@ -25,9 +25,9 @@ data class CategoryVisual(
 /** Ordered list for the Home category rail. `null` id = "Semua" (all), shown text-only. */
 val categoryVisuals: List<CategoryVisual> = listOf(
     CategoryVisual(null, "Semua", null),
-    CategoryVisual(Category.ACADEMIC, "Akademik", R.drawable.ic_category_academic, "Academic Support"),
-    CategoryVisual(Category.VISUAL, "Desain", R.drawable.ic_category_visual, "Visual Branding"),
-    CategoryVisual(Category.DATA, "Data", R.drawable.ic_category_data, "Data Processing"),
+    CategoryVisual(Category.ACADEMIC, "Akademik", R.drawable.ic_category_academic, AppStrings.CATEGORY_ACADEMIC),
+    CategoryVisual(Category.VISUAL, "Desain", R.drawable.ic_category_visual, AppStrings.CATEGORY_VISUAL),
+    CategoryVisual(Category.DATA, "Data", R.drawable.ic_category_data, AppStrings.CATEGORY_DATA),
 )
 
 /** Concrete (selectable) categories only, excluding the "Semua" sentinel. Used by the category picker. */

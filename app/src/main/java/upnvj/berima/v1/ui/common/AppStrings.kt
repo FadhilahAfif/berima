@@ -92,7 +92,7 @@ object AppStrings {
 
     // Category picker (shared)
     const val CATEGORY_SHEET_TITLE = "Pilih Kategori"
-    const val CATEGORY_ACADEMIC = "Academic Support"
-    const val CATEGORY_VISUAL = "Visual Branding"
-    const val CATEGORY_DATA = "Data Processing"
+    const val CATEGORY_ACADEMIC = "Dukungan Akademik"
+    const val CATEGORY_VISUAL = "Branding Visual"
+    const val CATEGORY_DATA = "Pengolahan Data"
 }
