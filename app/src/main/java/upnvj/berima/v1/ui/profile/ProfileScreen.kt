@@ -366,7 +366,7 @@ private fun ProfileAvatar(
         } else {
             AsyncImage(
                 model = photoUrl,
-                contentDescription = "Foto profil",
+                contentDescription = AppStrings.PROFILE_PHOTO_DESCRIPTION,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
@@ -381,9 +381,9 @@ private fun RoleChip(
 ) {
     val berimaColors = LocalBerimaColors.current
     val label = when (role) {
-        UserRole.BUYER -> "PEMBELI"
-        UserRole.SELLER -> "PENJUAL"
-        else -> "KEDUANYA"
+        UserRole.BUYER -> AppStrings.ROLE_BUYER.uppercase()
+        UserRole.SELLER -> AppStrings.ROLE_SELLER.uppercase()
+        else -> AppStrings.ROLE_BOTH.uppercase()
     }
 
     Text(

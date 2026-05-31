@@ -89,6 +89,11 @@ object AppStrings {
     const val LISTING_TAGS_PLACEHOLDER = "Pisahkan dengan koma: desain, logo"
     const val LISTING_SAVE_CREATE = "Simpan Listing"
     const val LISTING_SAVE_EDIT = "Simpan Perubahan"
+    const val LISTING_PRICE_PREVIEW_PREFIX = "Pembeli membayar"
+    const val LISTING_DELIVERY_HINT_PREFIX = "Maksimal"
+    const val LISTING_DELIVERY_HINT_SUFFIX = "jam"
+
+    const val PROFILE_PHOTO_DESCRIPTION = "Foto profil"
 
     // Category picker (shared)
     const val CATEGORY_SHEET_TITLE = "Pilih Kategori"

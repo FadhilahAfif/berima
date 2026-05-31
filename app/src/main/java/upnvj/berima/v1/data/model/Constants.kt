@@ -39,6 +39,7 @@ object Validation {
     const val MAX_ORDER_NOTE_LENGTH = 300
     const val MAX_REVIEW_COMMENT_LENGTH = 300
     const val MAX_MESSAGE_LENGTH = 500
+    const val MAX_NAME_LENGTH = 50
     const val MAX_BIO_LENGTH = 150
 
     fun isValidEmail(email: String): Boolean =

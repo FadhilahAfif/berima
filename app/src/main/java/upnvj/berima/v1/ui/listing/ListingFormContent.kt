@@ -17,6 +17,7 @@ import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.common.BerimaTextField
 import upnvj.berima.v1.ui.common.CategoryPickerField
+import upnvj.berima.v1.ui.common.CounterText
 import upnvj.berima.v1.ui.common.formatRupiahInput
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 
@@ -103,7 +104,7 @@ fun ListingFormContent(
                 supportingText = {
                     val preview = formatRupiahInput(price)
                     Text(
-                        text = if (preview.isNotBlank()) "Pembeli membayar $preview" else " ",
+                        text = if (preview.isNotBlank()) "${AppStrings.LISTING_PRICE_PREVIEW_PREFIX} $preview" else " ",
                         style = MaterialTheme.typography.bodyMedium,
                         color = berimaColors.textSecondary
                     )
@@ -125,7 +126,7 @@ fun ListingFormContent(
                 },
                 supportingText = {
                     Text(
-                        text = "Maksimal ${Validation.MAX_DELIVERY_TIME_HOURS} jam",
+                        text = "${AppStrings.LISTING_DELIVERY_HINT_PREFIX} ${Validation.MAX_DELIVERY_TIME_HOURS} ${AppStrings.LISTING_DELIVERY_HINT_SUFFIX}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = berimaColors.textSecondary
                     )
@@ -174,13 +175,4 @@ private fun FormSection(
     }
 }
 
-@Composable
-private fun CounterText(current: Int, max: Int) {
-    val berimaColors = LocalBerimaColors.current
-    Text(
-        text = "$current/$max",
-        style = MaterialTheme.typography.bodyMedium,
-        color = if (current >= max) MaterialTheme.colorScheme.error else berimaColors.textSecondary,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
+

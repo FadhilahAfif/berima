@@ -53,6 +53,7 @@ import upnvj.berima.v1.data.model.Validation
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.common.BerimaTextField
+import upnvj.berima.v1.ui.common.CounterText
 import upnvj.berima.v1.ui.theme.BerimaTheme
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 
@@ -178,7 +179,7 @@ private fun EditProfileContent(
                 value = name,
                 onValueChange = onNameChange,
                 label = AppStrings.EDIT_PROFILE_FIELD_NAME,
-                supportingText = { CounterText(name.length, 50) },
+                supportingText = { CounterText(name.length, Validation.MAX_NAME_LENGTH) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -293,7 +294,7 @@ private fun AvatarPicker(
                 } else {
                     AsyncImage(
                         model = photoUrl,
-                        contentDescription = "Foto profil",
+                        contentDescription = AppStrings.PROFILE_PHOTO_DESCRIPTION,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxSize()
@@ -348,17 +349,6 @@ private fun AvatarPicker(
                 .padding(horizontal = 12.dp, vertical = 4.dp)
         )
     }
-}
-
-@Composable
-private fun CounterText(current: Int, max: Int) {
-    val berimaColors = LocalBerimaColors.current
-    Text(
-        text = "$current/$max",
-        style = MaterialTheme.typography.bodyMedium,
-        color = if (current >= max) MaterialTheme.colorScheme.error else berimaColors.textSecondary,
-        modifier = Modifier.fillMaxWidth()
-    )
 }
 
 @Composable
