@@ -147,7 +147,7 @@ private fun OrdersTabRow(
     onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("Sebagai Pembeli", "Sebagai Penjual")
+    val tabs = listOf(AppStrings.ORDERS_TAB_BUYER_LABEL, AppStrings.ORDERS_TAB_SELLER_LABEL)
     PrimaryTabRow(
         selectedTabIndex = selectedTab,
         containerColor = MaterialTheme.colorScheme.background,
@@ -298,7 +298,7 @@ private fun formatRelativeTime(timestamp: Timestamp): String {
     val now = System.currentTimeMillis()
     val then = timestamp.toDate().time
     val diffMs = now - then
-    if (diffMs < 0L) return "Baru saja"
+    if (diffMs < 0L) return AppStrings.TIME_JUST_NOW
 
     val seconds = diffMs / 1000L
     val minutes = seconds / 60L
@@ -306,10 +306,10 @@ private fun formatRelativeTime(timestamp: Timestamp): String {
     val days = hours / 24L
 
     return when {
-        minutes < 1L -> "Baru saja"
-        minutes < 60L -> "${minutes}m lalu"
-        hours < 24L -> "${hours}j lalu"
-        days < 7L -> "${days}h lalu"
+        minutes < 1L -> AppStrings.TIME_JUST_NOW
+        minutes < 60L -> "$minutes${AppStrings.TIME_MINUTES_AGO_SUFFIX}"
+        hours < 24L -> "$hours${AppStrings.TIME_HOURS_AGO_SUFFIX}"
+        days < 7L -> "$days${AppStrings.TIME_DAYS_AGO_SUFFIX}"
         else -> SimpleDateFormat("dd MMM yyyy", Locale("id", "ID"))
             .format(Date(then))
     }

@@ -16,6 +16,23 @@ object AppStrings {
     const val ORDERS_TITLE = "Pesanan"
     const val ORDERS_TAB_BUYER = "Pembeli"
     const val ORDERS_TAB_SELLER = "Penjual"
+    const val ORDERS_TAB_BUYER_LABEL = "Sebagai Pembeli"
+    const val ORDERS_TAB_SELLER_LABEL = "Sebagai Penjual"
+
+    // Time formatting
+    const val TIME_JUST_NOW = "Baru saja"
+    const val TIME_MINUTES_AGO_SUFFIX = "m lalu"
+    const val TIME_HOURS_AGO_SUFFIX = "j lalu"
+    const val TIME_DAYS_AGO_SUFFIX = "h lalu"
+
+    // Order status timeline labels
+    const val TIMELINE_CANCELLED = "Dibatalkan"
+    const val TIMELINE_REJECTED = "Ditolak"
+    const val TIMELINE_PENDING = "Menunggu"
+    const val TIMELINE_IN_PROGRESS = "Dikerjakan"
+    const val TIMELINE_DELIVERED = "Terkirim"
+    const val TIMELINE_COMPLETED = "Selesai"
+    const val TIMELINE_PAID = "Dibayar"
 
     // Orders list
     const val ORDERS_ROLE_SELLER_PREFIX = "Penjual"

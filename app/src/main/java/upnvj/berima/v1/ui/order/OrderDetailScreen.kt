@@ -135,7 +135,7 @@ fun OrderDetailScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Kembali",
+                            contentDescription = AppStrings.BACK_CONTENT_DESCRIPTION,
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
