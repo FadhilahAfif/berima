@@ -15,10 +15,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
@@ -35,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,8 +45,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.Timestamp
+import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Order
 import upnvj.berima.v1.data.model.OrderStatus
+import upnvj.berima.v1.ui.common.InitialAvatar
 import upnvj.berima.v1.ui.common.StatusChip
 import upnvj.berima.v1.ui.theme.BerimaTheme
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
@@ -142,7 +147,7 @@ private fun OrdersTabRow(
     onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("Sebagai Pembeli", "Sebagai Penjual")
+    val tabs = listOf(AppStrings.ORDERS_TAB_BUYER_LABEL, AppStrings.ORDERS_TAB_SELLER_LABEL)
     PrimaryTabRow(
         selectedTabIndex = selectedTab,
         containerColor = MaterialTheme.colorScheme.background,
@@ -176,7 +181,13 @@ private fun OrderRow(
     modifier: Modifier = Modifier
 ) {
     val berimaColors = LocalBerimaColors.current
-    val cardShape = RoundedCornerShape(12.dp)
+    val cardShape = RoundedCornerShape(16.dp)
+    val counterpartyName = if (isBuyerView) order.sellerName else order.buyerName
+    val rolePrefix = if (isBuyerView) {
+        AppStrings.ORDERS_ROLE_SELLER_PREFIX
+    } else {
+        AppStrings.ORDERS_ROLE_BUYER_PREFIX
+    }
 
     Column(
         modifier = modifier
@@ -184,39 +195,43 @@ private fun OrderRow(
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, berimaColors.borderSubtle, cardShape)
             .clickable(onClick = onClick)
-            .padding(12.dp)
+            .padding(14.dp)
     ) {
         Row(
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = order.listingTitle,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-            StatusChip(status = order.status)
+            InitialAvatar(name = counterpartyName, size = 44.dp)
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = order.listingTitle,
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatusChip(status = order.status)
+                }
+
+                Spacer(Modifier.height(2.dp))
+
+                Text(
+                    text = "$rolePrefix · $counterpartyName",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = berimaColors.textSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
 
-        Spacer(Modifier.height(6.dp))
-
-        val counterpartyLine = if (isBuyerView) {
-            "Penjual: ${order.sellerName}"
-        } else {
-            "Pembeli: ${order.buyerName}"
-        }
-        Text(
-            text = counterpartyLine,
-            style = MaterialTheme.typography.bodySmall,
-            color = berimaColors.textSecondary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(12.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -225,7 +240,7 @@ private fun OrderRow(
         ) {
             Text(
                 text = formatRupiah(order.price),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
@@ -242,28 +257,35 @@ private fun EmptyOrders(
     isBuyerView: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val title = "Belum ada pesanan"
+    val berimaColors = LocalBerimaColors.current
     val body = if (isBuyerView) {
-        "Mulai pesan layanan dari teman kampusmu"
+        AppStrings.ORDERS_EMPTY_BODY_BUYER
     } else {
-        "Listing kamu belum ada yang dipesan"
+        AppStrings.ORDERS_EMPTY_BODY_SELLER
     }
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                painter = painterResource(R.drawable.ic_orders),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(44.dp)
+            )
+            Spacer(Modifier.height(16.dp))
             Text(
-                text = title,
+                text = AppStrings.ORDERS_EMPTY_TITLE,
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
             Text(
                 text = body,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = berimaColors.textSecondary,
                 textAlign = TextAlign.Center
             )
         }
@@ -276,7 +298,7 @@ private fun formatRelativeTime(timestamp: Timestamp): String {
     val now = System.currentTimeMillis()
     val then = timestamp.toDate().time
     val diffMs = now - then
-    if (diffMs < 0L) return "Baru saja"
+    if (diffMs < 0L) return AppStrings.TIME_JUST_NOW
 
     val seconds = diffMs / 1000L
     val minutes = seconds / 60L
@@ -284,10 +306,10 @@ private fun formatRelativeTime(timestamp: Timestamp): String {
     val days = hours / 24L
 
     return when {
-        minutes < 1L -> "Baru saja"
-        minutes < 60L -> "${minutes}m lalu"
-        hours < 24L -> "${hours}j lalu"
-        days < 7L -> "${days}h lalu"
+        minutes < 1L -> AppStrings.TIME_JUST_NOW
+        minutes < 60L -> "$minutes${AppStrings.TIME_MINUTES_AGO_SUFFIX}"
+        hours < 24L -> "$hours${AppStrings.TIME_HOURS_AGO_SUFFIX}"
+        days < 7L -> "$days${AppStrings.TIME_DAYS_AGO_SUFFIX}"
         else -> SimpleDateFormat("dd MMM yyyy", Locale("id", "ID"))
             .format(Date(then))
     }

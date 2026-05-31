@@ -1,6 +1,7 @@
 package upnvj.berima.v1.ui.order.components
 
 import androidx.compose.foundation.background
+import upnvj.berima.v1.ui.common.AppStrings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +37,7 @@ fun OrderStatusTimeline(
     val berimaColors = LocalBerimaColors.current
 
     if (currentStatus == OrderStatus.CANCELLED || currentStatus == OrderStatus.REJECTED) {
-        val label = if (currentStatus == OrderStatus.CANCELLED) "Dibatalkan" else "Ditolak"
+        val label = if (currentStatus == OrderStatus.CANCELLED) AppStrings.TIMELINE_CANCELLED else AppStrings.TIMELINE_REJECTED
         Row(
             modifier = modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -58,11 +59,11 @@ fun OrderStatusTimeline(
     }
 
     val steps = listOf(
-        OrderStatus.PENDING to "Menunggu",
-        OrderStatus.IN_PROGRESS to "Dikerjakan",
-        OrderStatus.DELIVERED to "Terkirim",
-        OrderStatus.COMPLETED to "Selesai",
-        OrderStatus.PAID to "Dibayar"
+        OrderStatus.PENDING to AppStrings.TIMELINE_PENDING,
+        OrderStatus.IN_PROGRESS to AppStrings.TIMELINE_IN_PROGRESS,
+        OrderStatus.DELIVERED to AppStrings.TIMELINE_DELIVERED,
+        OrderStatus.COMPLETED to AppStrings.TIMELINE_COMPLETED,
+        OrderStatus.PAID to AppStrings.TIMELINE_PAID
     )
     val currentIndex = steps.indexOfFirst { it.first == currentStatus }
         .let { if (it < 0) 0 else it }
@@ -83,12 +84,30 @@ fun OrderStatusTimeline(
                 } else {
                     MaterialTheme.colorScheme.outlineVariant
                 }
-                Box(
-                    modifier = Modifier
-                        .size(if (isCurrent) 14.dp else 10.dp)
-                        .clip(CircleShape)
-                        .background(dotColor)
-                )
+                if (isCurrent) {
+                    // "You are here": a soft halo ring around the filled dot.
+                    Box(
+                        modifier = Modifier
+                            .size(22.dp)
+                            .clip(CircleShape)
+                            .background(berimaColors.containerGreen),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(14.dp)
+                                .clip(CircleShape)
+                                .background(dotColor)
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(dotColor)
+                    )
+                }
                 if (index < steps.lastIndex) {
                     val lineColor = if (index < currentIndex) {
                         MaterialTheme.colorScheme.primary
