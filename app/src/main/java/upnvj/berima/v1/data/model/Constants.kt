@@ -19,6 +19,24 @@ object Category {
     val ALL = listOf(ACADEMIC, VISUAL, DATA)
 }
 
+object VerificationStatus {
+    const val NOT_SUBMITTED = "not_submitted"
+    const val PENDING = "pending"
+    const val APPROVED = "approved"
+    const val REJECTED = "rejected"
+
+    val ALL = listOf(NOT_SUBMITTED, PENDING, APPROVED, REJECTED)
+}
+
+object VerificationType {
+    const val IDENTITY = "identity"
+    const val SKILL = "skill"
+}
+
+object IdentityDocumentType {
+    const val KTM = "ktm"
+}
+
 object OrderStatus {
     const val PENDING = "pending"
     const val IN_PROGRESS = "in_progress"
@@ -41,6 +59,11 @@ object Validation {
     const val MAX_MESSAGE_LENGTH = 500
     const val MAX_NAME_LENGTH = 50
     const val MAX_BIO_LENGTH = 150
+    const val MAX_PORTFOLIO_TITLE_LENGTH = 60
+    const val MAX_PORTFOLIO_DESCRIPTION_LENGTH = 500
+    const val MAX_VERIFICATION_NOTE_LENGTH = 300
+    const val MAX_STORAGE_IMAGE_BYTES = 5L * 1024 * 1024
+    const val MAX_VERIFICATION_FILE_BYTES = 20L * 1024 * 1024
 
     fun isValidEmail(email: String): Boolean =
         android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()

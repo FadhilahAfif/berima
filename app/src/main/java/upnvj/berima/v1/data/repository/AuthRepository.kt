@@ -2,6 +2,7 @@ package upnvj.berima.v1.data.repository
 
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -52,6 +53,51 @@ class AuthRepository @Inject constructor(
             val uid = result.user?.uid
                 ?: return Result.failure(IllegalStateException("UID tidak tersedia"))
             Result.success(uid)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun signInWithGoogle(idToken: String): Result<String> {
+        return try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val result = auth.signInWithCredential(credential).await()
+            val firebaseUser = result.user
+                ?: return Result.failure(IllegalStateException("Akun Google tidak tersedia"))
+            val uid = firebaseUser.uid
+            val userRef = usersCollection.document(uid)
+            val existingProfile = userRef.get().await()
+
+            if (!existingProfile.exists()) {
+                val email = firebaseUser.email.orEmpty().trim().lowercase()
+                val fallbackName = email.substringBefore("@").ifBlank { "Pengguna Berima" }
+                val user = User(
+                    uid = uid,
+                    name = firebaseUser.displayName?.trim().takeUnless { it.isNullOrBlank() }
+                        ?: fallbackName,
+                    email = email,
+                    photoUrl = firebaseUser.photoUrl?.toString(),
+                    role = UserRole.BOTH,
+                    createdAt = Timestamp.now()
+                )
+                userRef.set(user).await()
+            }
+
+            Result.success(uid)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun sendPasswordResetEmail(email: String): Result<Unit> {
+        if (!Validation.isValidEmail(email)) {
+            return Result.failure(
+                IllegalArgumentException("Masukkan email yang valid terlebih dahulu")
+            )
+        }
+        return try {
+            auth.sendPasswordResetEmail(email.trim()).await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

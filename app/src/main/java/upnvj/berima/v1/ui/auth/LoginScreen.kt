@@ -1,9 +1,12 @@
 package upnvj.berima.v1.ui.auth
 
+import android.content.Context
 import upnvj.berima.v1.ui.common.AppStrings
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,9 +21,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,15 +38,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -53,13 +62,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.launch
 import upnvj.berima.v1.R
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.common.BerimaTextField
 import upnvj.berima.v1.ui.theme.BerimaTheme
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
+
+private const val MISSING_WEB_CLIENT_ID = "MISSING_WEB_CLIENT_ID"
 
 @Composable
 fun LoginScreen(
@@ -71,6 +90,9 @@ fun LoginScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val serverClientId = stringResource(R.string.berima_web_client_id)
 
     LaunchedEffect(uiState.navigateToHome) {
         if (uiState.navigateToHome) {
@@ -83,6 +105,13 @@ fun LoginScreen(
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearError()
+        }
+    }
+
+    LaunchedEffect(uiState.message) {
+        uiState.message?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearMessage()
         }
     }
 
@@ -102,6 +131,28 @@ fun LoginScreen(
                 focusManager.clearFocus()
                 viewModel.signIn()
             },
+            onForgotPasswordClick = {
+                focusManager.clearFocus()
+                viewModel.sendPasswordResetEmail()
+            },
+            onGoogleSignInClick = {
+                focusManager.clearFocus()
+                coroutineScope.launch {
+                    if (serverClientId == MISSING_WEB_CLIENT_ID || serverClientId.isBlank()) {
+                        snackbarHostState.showSnackbar(AppStrings.LOGIN_GOOGLE_UNAVAILABLE)
+                        return@launch
+                    }
+                    launchGoogleSignIn(
+                        context = context,
+                        serverClientId = serverClientId,
+                        onIdToken = viewModel::signInWithGoogle,
+                        onCancelled = viewModel::onGoogleSignInCancelled,
+                        onError = { message ->
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    )
+                }
+            },
             onRegisterClick = onNavigateToRegister,
             modifier = Modifier
                 .fillMaxSize()
@@ -118,6 +169,8 @@ private fun LoginContent(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onSubmit: () -> Unit,
+    onForgotPasswordClick: () -> Unit,
+    onGoogleSignInClick: () -> Unit,
     onRegisterClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -201,8 +254,8 @@ private fun LoginContent(
             BerimaTextField(
                 value = email,
                 onValueChange = onEmailChange,
-                label = "Email",
-                placeholder = "nama@email.com",
+                label = AppStrings.LOGIN_EMAIL_LABEL,
+                placeholder = AppStrings.LOGIN_EMAIL_PLACEHOLDER,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next,
@@ -231,8 +284,8 @@ private fun LoginContent(
             BerimaTextField(
                 value = password,
                 onValueChange = onPasswordChange,
-                label = "Password",
-                placeholder = "••••••••",
+                label = AppStrings.LOGIN_PASSWORD_LABEL,
+                placeholder = AppStrings.LOGIN_PASSWORD_PLACEHOLDER,
                 visualTransformation = if (passwordVisible) VisualTransformation.None
                 else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
@@ -256,8 +309,8 @@ private fun LoginContent(
                                 if (passwordVisible) R.drawable.ic_visibility_off
                                 else R.drawable.ic_visibility
                             ),
-                            contentDescription = if (passwordVisible) "Sembunyikan password"
-                            else "Tampilkan password",
+                            contentDescription = if (passwordVisible) AppStrings.LOGIN_PASSWORD_HIDE
+                            else AppStrings.LOGIN_PASSWORD_SHOW,
                             tint = berimaColors.textSecondary,
                         )
                     }
@@ -265,27 +318,147 @@ private fun LoginContent(
             )
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = AppStrings.LOGIN_FORGOT_PASSWORD,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .align(Alignment.End)
+                .clickable(onClick = onForgotPasswordClick)
+                .padding(vertical = 6.dp)
+        )
+
         Spacer(modifier = Modifier.height(32.dp))
 
         Box(modifier = Modifier.alpha(buttonAlpha.value)) {
             BerimaButton(
-                text = "Masuk",
+                text = AppStrings.LOGIN_SUBMIT,
                 onClick = onSubmit,
                 isLoading = isLoading,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
 
+        Spacer(modifier = Modifier.height(18.dp))
+
+        OrDivider(modifier = Modifier.alpha(buttonAlpha.value))
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        GoogleSignInButton(
+            onClick = onGoogleSignInClick,
+            enabled = !isLoading,
+            modifier = Modifier.alpha(buttonAlpha.value)
+        )
+
         Spacer(modifier = Modifier.height(20.dp))
 
         FooterLink(
-            prefix = "Belum punya akun?",
-            actionLabel = "Buat sekarang",
+            prefix = AppStrings.LOGIN_REGISTER_PREFIX,
+            actionLabel = AppStrings.LOGIN_REGISTER_ACTION,
             onClick = onRegisterClick,
             modifier = Modifier.alpha(footerAlpha.value),
         )
 
         Spacer(modifier = Modifier.height(48.dp))
+    }
+}
+
+private suspend fun launchGoogleSignIn(
+    context: Context,
+    serverClientId: String,
+    onIdToken: (String) -> Unit,
+    onCancelled: () -> Unit,
+    onError: suspend (String) -> Unit,
+) {
+    val credentialManager = CredentialManager.create(context)
+    val googleOption = GetSignInWithGoogleOption.Builder(serverClientId).build()
+    val request = GetCredentialRequest.Builder()
+        .addCredentialOption(googleOption)
+        .build()
+
+    try {
+        val result = credentialManager.getCredential(
+            context = context,
+            request = request
+        )
+        val credential = result.credential
+        if (
+            credential is CustomCredential &&
+            credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+        ) {
+            val googleCredential = GoogleIdTokenCredential.createFrom(credential.data)
+            onIdToken(googleCredential.idToken)
+        } else {
+            onError(AppStrings.LOGIN_GOOGLE_INVALID)
+        }
+    } catch (e: GetCredentialCancellationException) {
+        onCancelled()
+        onError(AppStrings.LOGIN_GOOGLE_CANCELLED)
+    } catch (e: GetCredentialException) {
+        onError(AppStrings.LOGIN_GOOGLE_UNAVAILABLE)
+    } catch (e: Exception) {
+        onError(AppStrings.LOGIN_GOOGLE_INVALID)
+    }
+}
+
+@Composable
+private fun OrDivider(modifier: Modifier = Modifier) {
+    val berimaColors = LocalBerimaColors.current
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        HorizontalDivider(
+            color = berimaColors.borderSubtle,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = AppStrings.LOGIN_OR,
+            style = MaterialTheme.typography.labelSmall,
+            color = berimaColors.textSecondary,
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
+        HorizontalDivider(
+            color = berimaColors.borderSubtle,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun GoogleSignInButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val berimaColors = LocalBerimaColors.current
+    val shape = RoundedCornerShape(9999.dp)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderInput, shape)
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 18.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = AppStrings.LOGIN_GOOGLE_MARK,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = AppStrings.LOGIN_WITH_GOOGLE,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -354,6 +527,8 @@ private fun LoginScreenPreview() {
                 onEmailChange = {},
                 onPasswordChange = {},
                 onSubmit = {},
+                onForgotPasswordClick = {},
+                onGoogleSignInClick = {},
                 onRegisterClick = {},
                 modifier = Modifier
                     .fillMaxSize()

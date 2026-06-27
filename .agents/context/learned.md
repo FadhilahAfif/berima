@@ -3,6 +3,44 @@
 Document discoveries here as the project progresses.
 Each entry must include: what was learned, which file it affects (if any), and date.
 
+- [2026-06-27] Phase 8 P1 auth/profile entry points shipped. Login now has
+  Credential Manager Google sign-in wired through Firebase Auth, forgot password
+  via `sendPasswordResetEmail`, and Profile links to a lightweight Verification
+  Center shell that reads public user verification fields. The local
+  `google-services.json` does not currently generate `default_web_client_id`
+  because its `oauth_client` list is empty, so the app uses
+  `app/src/main/res/values/strings.xml` key `berima_web_client_id` with fallback
+  `MISSING_WEB_CLIENT_ID`; Firebase Google provider + Web Client ID must be
+  configured before runtime Google login can complete.
+  → Affects `AuthRepository.kt`, `LoginViewModel.kt`, `LoginScreen.kt`,
+  `VerificationCenterScreen.kt`, `VerificationCenterViewModel.kt`, `ProfileScreen.kt`,
+  `Screen.kt`, `NavGraph.kt`, Gradle dependency files, and `strings.xml`.
+
+- [2026-06-27] Phase 7 P0 foundation started. `VerificationSubmission` and
+  `PortfolioItem` models now exist, `User` has public verification badge fields,
+  `Listing` has optional denormalized seller badge helpers and `policyAcceptedAt`,
+  Firestore rules now protect badge/admin-managed fields, and `storage.rules`
+  defines private owner-only verification paths. Storage and new indexes are
+  configured in source files, and Firebase CLI dry-run against project
+  `berima-74938` compiled the Firestore and Storage rules successfully. Deploy
+  remains a separate Firebase CLI step.
+  → Affects `Constants.kt`, `User.kt`, `Listing.kt`, `VerificationSubmission.kt`,
+  `PortfolioItem.kt`, `firestore.rules`, `storage.rules`, `firebase.json`, and
+  `firestore.indexes.json`.
+
+- [2026-06-27] `.agents/PRD.md` is now the implementation source of truth for
+  the next scope. It adds optional Verification Center, KTM-only Identity
+  Verification, Skill Verification for the existing three categories, public
+  portfolio items, Google login, forgot password, service policy acknowledgement,
+  listing deactivation, and clearer escrow simulation copy. PDD-only items such
+  as order revision, KTP support, admin panel, Cloud Functions badge sync, real
+  payment, and dispute/refund remain out of scope unless explicitly requested.
+  → Updated AGENTS.md and aligned `.agents/context/*.md`.
+- [2026-06-27] Verification privacy rule: KTM and skill-evidence uploads must
+  store private Storage paths in submission documents, never public download URLs
+  in `users`, `listings`, badges, or seller display fields. Admin review is manual
+  through Firebase Console for MVP. → Affects database.md, StorageRepository,
+  future `storage.rules`, and verification UI/repository work.
 
 - [2026-05-11] Package is `upnvj.berima.v1`, not `com.berima.app` as originally
   drafted in architecture.md. All code, applicationId, and namespace standardized

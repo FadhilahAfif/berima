@@ -49,6 +49,7 @@ import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Listing
 import upnvj.berima.v1.data.model.User
 import upnvj.berima.v1.data.model.UserRole
+import upnvj.berima.v1.data.model.VerificationStatus
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.common.categoryColors
@@ -62,6 +63,7 @@ import java.util.Locale
 fun ProfileScreen(
     onNavigateToEditProfile: () -> Unit,
     onNavigateToCreateListing: () -> Unit,
+    onNavigateToVerificationCenter: () -> Unit,
     onListingClick: (String) -> Unit,
     onLogout: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
@@ -147,6 +149,7 @@ fun ProfileScreen(
                     listings = listings,
                     onNavigateToEditProfile = onNavigateToEditProfile,
                     onNavigateToCreateListing = onNavigateToCreateListing,
+                    onNavigateToVerificationCenter = onNavigateToVerificationCenter,
                     onListingClick = onListingClick,
                     modifier = Modifier
                         .fillMaxSize()
@@ -185,6 +188,7 @@ private fun ProfileContent(
     listings: List<Listing>,
     onNavigateToEditProfile: () -> Unit,
     onNavigateToCreateListing: () -> Unit,
+    onNavigateToVerificationCenter: () -> Unit,
     onListingClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -199,6 +203,13 @@ private fun ProfileContent(
             Spacer(Modifier.height(12.dp))
             StatsStrip(user = user)
         }
+
+        Spacer(Modifier.height(16.dp))
+
+        VerificationEntryCard(
+            user = user,
+            onClick = onNavigateToVerificationCenter
+        )
 
         Spacer(Modifier.height(16.dp))
 
@@ -395,6 +406,73 @@ private fun RoleChip(
             .background(berimaColors.containerGreen)
             .padding(horizontal = 10.dp, vertical = 4.dp)
     )
+}
+
+@Composable
+private fun VerificationEntryCard(
+    user: User,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    val shape = RoundedCornerShape(16.dp)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle, shape)
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(berimaColors.containerGreen),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_check),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = AppStrings.PROFILE_VERIFICATION_TITLE,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = AppStrings.PROFILE_VERIFICATION_BODY.format(
+                    verificationStatusLabel(user.identityVerificationStatus),
+                    skillStatusLabel(user.verifiedSkillBadges.size)
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = berimaColors.textSecondary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = AppStrings.PROFILE_VERIFICATION_ACTION,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(6.dp))
+        Icon(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
+    }
 }
 
 @Composable
@@ -607,6 +685,21 @@ private fun shouldShowStats(user: User): Boolean {
     return showSellerRating || user.totalOrdersAsBuyer > 0 || user.totalOrdersAsSeller > 0
 }
 
+private fun verificationStatusLabel(status: String): String = when (status) {
+    VerificationStatus.PENDING -> AppStrings.VERIFICATION_STATUS_PENDING
+    VerificationStatus.APPROVED -> AppStrings.VERIFICATION_STATUS_APPROVED
+    VerificationStatus.REJECTED -> AppStrings.VERIFICATION_STATUS_REJECTED
+    else -> AppStrings.VERIFICATION_STATUS_NOT_SUBMITTED
+}
+
+private fun skillStatusLabel(activeBadgeCount: Int): String {
+    return if (activeBadgeCount > 0) {
+        AppStrings.VERIFICATION_SKILL_ACTIVE.format(activeBadgeCount)
+    } else {
+        AppStrings.VERIFICATION_SKILL_NONE
+    }
+}
+
 @androidx.compose.ui.tooling.preview.Preview(name = "ProfileScreen", showBackground = true, showSystemUi = true)
 @Composable
 private fun ProfileScreenPreview() {
@@ -652,6 +745,7 @@ private fun ProfileScreenPreview() {
                 listings = listings,
                 onNavigateToEditProfile = {},
                 onNavigateToCreateListing = {},
+                onNavigateToVerificationCenter = {},
                 onListingClick = {},
                 modifier = Modifier
                     .fillMaxSize()
