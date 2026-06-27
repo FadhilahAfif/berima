@@ -136,10 +136,10 @@ One agent session should update at minimum one item before ending.
 ### Phase 7 — PRD P0: Security & Schema Foundation
 | Task | Status | Notes |
 |---|---|---|
-| Verification and portfolio models/constants | ⬜ Not started | Add `VerificationSubmission`, `PortfolioItem`, verification status/type constants, user badge fields |
-| Firestore rules for verification, portfolio, and protected badge fields | ⬜ Not started | Users cannot self-approve or edit public verification badge fields |
-| Storage rules configured and deployed | ⬜ Not started | Add `storage.rules` and `firebase.json` storage config; KTM/evidence private |
-| Firestore composite indexes for verification and portfolio | ⬜ Not started | Add indexes from PRD Section 5 |
+| Verification and portfolio models/constants | ✅ Done | Added `VerificationSubmission`, `PortfolioItem`, verification constants, user badge fields, listing badge/policy fields |
+| Firestore rules for verification, portfolio, and protected badge fields | ✅ Done | Source updated: users cannot self-approve/edit badge fields; submissions are owner-only; portfolio is auth-readable owner-writable |
+| Storage rules configured and deployed | 🔄 In progress | `storage.rules` + `firebase.json` storage config added locally; Firebase CLI dry-run passed; deploy still pending |
+| Firestore composite indexes for verification and portfolio | ✅ Done | Added indexes from PRD Section 5 to `firestore.indexes.json`; Firebase CLI dry-run passed |
 
 ### Phase 8 — PRD P1: Auth & Profile Entry Points
 | Task | Status | Notes |

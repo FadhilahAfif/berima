@@ -22,6 +22,9 @@ data class Listing(
     val thumbnailUrl: String? = null,
     val tags: List<String> = emptyList(),
     val isActive: Boolean = true,
+    val sellerIdentityVerified: Boolean = false,
+    val sellerVerifiedSkillBadges: List<String> = emptyList(),
+    val policyAcceptedAt: Timestamp? = null,
     val averageRating: Double = 0.0,
     val totalOrders: Int = 0,
     val createdAt: Timestamp = Timestamp.now()

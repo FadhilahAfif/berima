@@ -1,0 +1,70 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isImageUpload() {
+      return request.resource != null
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    function isVerificationUpload() {
+      return request.resource != null
+        && request.resource.size <= 20 * 1024 * 1024
+        && request.resource.contentType.matches('(image/.*|application/pdf)');
+    }
+
+    function isResultUpload() {
+      return request.resource != null
+        && request.resource.size <= 20 * 1024 * 1024;
+    }
+
+    function orderDoc(orderId) {
+      return firestore.get(/databases/(default)/documents/orders/$(orderId));
+    }
+
+    function isOrderParticipant(orderId) {
+      return isSignedIn()
+        && (orderDoc(orderId).data.buyerId == request.auth.uid
+        || orderDoc(orderId).data.sellerId == request.auth.uid);
+    }
+
+    function isOrderSeller(orderId) {
+      return isSignedIn()
+        && orderDoc(orderId).data.sellerId == request.auth.uid;
+    }
+
+    match /users/{userId}/verification/identity/{submissionId}/{fileName} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isVerificationUpload();
+    }
+
+    match /users/{userId}/verification/skill/{submissionId}/{fileName} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isVerificationUpload();
+    }
+
+    match /users/{userId}/portfolio/{portfolioItemId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId) && isImageUpload();
+    }
+
+    match /users/{userId}/profile/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId) && isImageUpload();
+    }
+
+    match /orders/{orderId}/result/{fileName} {
+      allow read: if isOrderParticipant(orderId);
+      allow write: if isOrderSeller(orderId) && isResultUpload();
+    }
+  }
+}
