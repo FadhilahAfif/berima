@@ -26,6 +26,7 @@ import upnvj.berima.v1.ui.profile.ProfileScreen
 import upnvj.berima.v1.ui.profile.UserProfileScreen
 import upnvj.berima.v1.ui.review.CreateReviewScreen
 import upnvj.berima.v1.ui.splash.SplashScreen
+import upnvj.berima.v1.ui.verification.VerificationCenterScreen
 
 @Composable
 fun BerimaNavGraph(
@@ -111,6 +112,9 @@ fun BerimaNavGraph(
                 },
                 onNavigateToCreateListing = {
                     navController.navigate(Screen.CreateListing.route)
+                },
+                onNavigateToVerificationCenter = {
+                    navController.navigate(Screen.VerificationCenter.route)
                 },
                 onListingClick = { listingId ->
                     navController.navigate(Screen.ListingDetail.createRoute(listingId))
@@ -206,6 +210,12 @@ fun BerimaNavGraph(
 
         composable(Screen.EditProfile.route) {
             EditProfileScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.VerificationCenter.route) {
+            VerificationCenterScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

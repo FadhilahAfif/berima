@@ -144,9 +144,9 @@ One agent session should update at minimum one item before ending.
 ### Phase 8 — PRD P1: Auth & Profile Entry Points
 | Task | Status | Notes |
 |---|---|---|
-| Google login/register | ⬜ Not started | Simple Firebase Google auth; create minimal profile when absent; no account linking |
-| Forgot password | ⬜ Not started | Email/password reset flow from LoginScreen |
-| Verification Center route and Profile entry | ⬜ Not started | Add route, screen shell, status summary entry from Profile |
+| Google login/register | ✅ Done | Credential Manager + Google ID token wired to Firebase Auth; creates minimal profile when absent; requires Firebase Google provider + `berima_web_client_id` Web Client ID |
+| Forgot password | ✅ Done | Email/password reset flow from LoginScreen with Bahasa Indonesia snackbar feedback |
+| Verification Center route and Profile entry | ✅ Done | Route, Profile status summary entry, and lightweight VerificationCenter shell added |
 
 ### Phase 9 — PRD P2: Verification Flows
 | Task | Status | Notes |
@@ -176,3 +176,9 @@ One agent session should update at minimum one item before ending.
 ---
 
 ## Learned
+
+- [2026-06-27] Phase 8 uses Android Credential Manager + Google ID token for
+  Google auth. Runtime login requires Firebase Google provider and a Web Client
+  ID in `app/src/main/res/values/strings.xml` as `berima_web_client_id`; current
+  fallback is `MISSING_WEB_CLIENT_ID` because local `google-services.json` has no
+  OAuth client entries.

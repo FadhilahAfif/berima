@@ -15,6 +15,7 @@ data class LoginUiState(
     val password: String = "",
     val isLoading: Boolean = false,
     val error: String? = null,
+    val message: String? = null,
     val navigateToHome: Boolean = false,
 )
 
@@ -27,11 +28,11 @@ class LoginViewModel @Inject constructor(
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
     fun onEmailChange(value: String) {
-        _uiState.value = _uiState.value.copy(email = value, error = null)
+        _uiState.value = _uiState.value.copy(email = value, error = null, message = null)
     }
 
     fun onPasswordChange(value: String) {
-        _uiState.value = _uiState.value.copy(password = value, error = null)
+        _uiState.value = _uiState.value.copy(password = value, error = null, message = null)
     }
 
     fun signIn() {
@@ -63,8 +64,60 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun signInWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null, message = null)
+            val result = authRepository.signInWithGoogle(idToken)
+            result.fold(
+                onSuccess = {
+                    _uiState.value = _uiState.value.copy(isLoading = false, navigateToHome = true)
+                },
+                onFailure = {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = "Gagal masuk dengan Google. Silakan coba lagi."
+                    )
+                }
+            )
+        }
+    }
+
+    fun sendPasswordResetEmail() {
+        val state = _uiState.value
+        viewModelScope.launch {
+            _uiState.value = state.copy(isLoading = true, error = null, message = null)
+            val result = authRepository.sendPasswordResetEmail(state.email)
+            result.fold(
+                onSuccess = {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        message = "Instruksi reset password sudah dikirim ke email kamu."
+                    )
+                },
+                onFailure = { e ->
+                    val message = when {
+                        e.message?.contains("valid", ignoreCase = true) == true ->
+                            "Masukkan email yang valid terlebih dahulu"
+                        e.message?.contains("user", ignoreCase = true) == true ->
+                            "Email tidak terdaftar"
+                        else -> "Gagal mengirim email reset password. Silakan coba lagi."
+                    }
+                    _uiState.value = _uiState.value.copy(isLoading = false, error = message)
+                }
+            )
+        }
+    }
+
+    fun onGoogleSignInCancelled() {
+        _uiState.value = _uiState.value.copy(isLoading = false)
+    }
+
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    fun clearMessage() {
+        _uiState.value = _uiState.value.copy(message = null)
     }
 
     fun onNavigatedToHome() {

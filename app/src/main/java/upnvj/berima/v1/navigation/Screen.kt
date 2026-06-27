@@ -47,4 +47,8 @@ sealed class Screen(val route: String) {
         const val ARG_USER_ID = "userId"
         fun createRoute(userId: String) = "user/$userId"
     }
+
+    data object VerificationCenter : Screen("verification")
+    data object IdentityVerification : Screen("verification/identity")
+    data object SkillVerification : Screen("verification/skill")
 }

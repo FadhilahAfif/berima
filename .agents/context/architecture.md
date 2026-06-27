@@ -15,10 +15,10 @@
 | Async | Kotlin Coroutines 1.9.0 |
 | Build | AGP 9.2.1, Gradle 9.4.1, Java 11, minSdk 26, targetSdk 36 |
 
-Google login is in the PRD scope. Add Google identity dependencies through the
-version catalog when implementing it; do not hardcode versions in Gradle files.
-Use Firebase Auth as the account backend and create a `users/{uid}` profile when
-a Google-authenticated user has no profile document yet.
+Google login is implemented with Android Credential Manager, Google ID tokens,
+and Firebase Auth. Dependencies live in the version catalog; do not hardcode
+versions in Gradle files. A Google-authenticated user gets a `users/{uid}`
+profile document when one does not already exist.
 
 ## Package
 
@@ -90,7 +90,11 @@ implementation(platform(libs.firebase.bom))            // 34.3.0
 implementation(libs.firebase.auth)
 implementation(libs.firebase.firestore)
 implementation(libs.firebase.storage)
-// Google login dependencies are added via version catalog during PRD P1.
+
+// Google login
+implementation(libs.androidx.credentials)
+implementation(libs.androidx.credentials.play.services.auth)
+implementation(libs.googleid)
 
 // Coil
 implementation(libs.coil.compose)                      // 2.7.0
@@ -181,7 +185,11 @@ sealed class Screen(val route: String) {
    The file is gitignored by `app/.gitignore` (verify before first commit).
 5. In the Firebase console:
    - Authentication → enable **Email/Password**.
-   - Authentication → enable **Google** before implementing Google login.
+   - Authentication → enable **Google** before using Google login.
+   - Create/configure a Web client ID for Google Sign-In and place it in
+     `app/src/main/res/values/strings.xml` as `berima_web_client_id`. The
+     checked-in fallback is `MISSING_WEB_CLIENT_ID` so local builds keep compiling
+     before Firebase OAuth setup is finished.
    - Firestore Database → create in test mode for now. Security rules from
      `database.md` are deployed in Phase 5.
    - Storage → enable default bucket and deploy `storage.rules` before enabling
