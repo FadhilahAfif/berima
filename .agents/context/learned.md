@@ -3,6 +3,19 @@
 Document discoveries here as the project progresses.
 Each entry must include: what was learned, which file it affects (if any), and date.
 
+- [2026-06-27] `.agents/PRD.md` is now the implementation source of truth for
+  the next scope. It adds optional Verification Center, KTM-only Identity
+  Verification, Skill Verification for the existing three categories, public
+  portfolio items, Google login, forgot password, service policy acknowledgement,
+  listing deactivation, and clearer escrow simulation copy. PDD-only items such
+  as order revision, KTP support, admin panel, Cloud Functions badge sync, real
+  payment, and dispute/refund remain out of scope unless explicitly requested.
+  → Updated AGENTS.md and aligned `.agents/context/*.md`.
+- [2026-06-27] Verification privacy rule: KTM and skill-evidence uploads must
+  store private Storage paths in submission documents, never public download URLs
+  in `users`, `listings`, badges, or seller display fields. Admin review is manual
+  through Firebase Console for MVP. → Affects database.md, StorageRepository,
+  future `storage.rules`, and verification UI/repository work.
 
 - [2026-05-11] Package is `upnvj.berima.v1`, not `com.berima.app` as originally
   drafted in architecture.md. All code, applicationId, and namespace standardized

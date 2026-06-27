@@ -180,3 +180,7 @@ fun ListingCard(
 8. **No hardcoded strings** in composables — use string resources or constants
 9. **Every PR must compile** — do not merge broken code
 10. **One screen per PR** — do not mix multiple screens in one commit
+11. **No public identity document URLs** — KTM and verification evidence use private Storage paths, not public profile/listing fields
+12. **Protect admin-managed fields** — users must never be able to update verification approval status or public badge fields from the client
+13. **PRD requirements need traceability** — when implementing PRD work, mention the relevant requirement IDs in code review notes, PR descriptions, or task summaries
+14. **Google auth is profile-compatible** — if a Google-authenticated user has no `users/{uid}` document, create the same default profile shape used by email registration

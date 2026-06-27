@@ -13,7 +13,12 @@
 | Backend | Firebase (Auth, Firestore, Storage) — BOM 34.3.0 |
 | Image loading | Coil 2.7.0 |
 | Async | Kotlin Coroutines 1.9.0 |
-| Build | AGP 9.2.1, Gradle 9.4.1, Java 11, minSdk 24, targetSdk 36 |
+| Build | AGP 9.2.1, Gradle 9.4.1, Java 11, minSdk 26, targetSdk 36 |
+
+Google login is in the PRD scope. Add Google identity dependencies through the
+version catalog when implementing it; do not hardcode versions in Gradle files.
+Use Firebase Auth as the account backend and create a `users/{uid}` profile when
+a Google-authenticated user has no profile document yet.
 
 ## Package
 
@@ -26,9 +31,11 @@ app/src/main/java/upnvj/berima/v1/
 ├── BerimaApplication.kt   # @HiltAndroidApp entry point
 ├── MainActivity.kt        # @AndroidEntryPoint, hosts BerimaApp()
 ├── data/
-│   ├── model/             # User, Listing, Order, Review, Message, Constants
+│   ├── model/             # User, Listing, Order, Review, Message, VerificationSubmission,
+│   │                      # PortfolioItem, Constants
 │   ├── repository/        # AuthRepository, ListingRepository, OrderRepository,
-│   │                      # ReviewRepository, MessageRepository
+│   │                      # ReviewRepository, MessageRepository, VerificationRepository,
+│   │                      # PortfolioRepository
 │   └── remote/            # Optional Firebase datasource wrappers (not created yet)
 ├── ui/
 │   ├── BerimaApp.kt       # Root composable, owns NavController + Scaffold
@@ -38,6 +45,8 @@ app/src/main/java/upnvj/berima/v1/
 │   ├── order/             # CreateOrder, Orders, OrderDetail (Phase 3)
 │   ├── review/            # CreateReview (Phase 4)
 │   ├── profile/           # Profile, EditProfile, UserProfile (Phase 4)
+│   ├── verification/      # VerificationCenter, IdentityVerification, SkillVerification (PRD)
+│   ├── portfolio/         # Portfolio create/edit/manage screens (PRD)
 │   ├── splash/            # SplashScreen (Phase 1 UI)
 │   ├── common/            # Reusable composables (ListingCard, StatusChip, ...)
 │   └── theme/             # BerimaTheme, Color, Type
@@ -81,6 +90,7 @@ implementation(platform(libs.firebase.bom))            // 34.3.0
 implementation(libs.firebase.auth)
 implementation(libs.firebase.firestore)
 implementation(libs.firebase.storage)
+// Google login dependencies are added via version catalog during PRD P1.
 
 // Coil
 implementation(libs.coil.compose)                      // 2.7.0
@@ -121,6 +131,7 @@ sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Register : Screen("register")
     data object Home : Screen("home")
+    data object Search : Screen("search")
     data object Orders : Screen("orders")
     data object Profile : Screen("profile")
     data object ListingDetail : Screen("listing/{listingId}") {
@@ -149,6 +160,14 @@ sealed class Screen(val route: String) {
         const val ARG_USER_ID = "userId"
         fun createRoute(userId: String) = "user/$userId"
     }
+    data object VerificationCenter : Screen("verification")
+    data object IdentityVerification : Screen("verification/identity")
+    data object SkillVerification : Screen("verification/skill")
+    data object PortfolioCreate : Screen("portfolio/create")
+    data object PortfolioEdit : Screen("portfolio/edit/{portfolioItemId}") {
+        const val ARG_PORTFOLIO_ITEM_ID = "portfolioItemId"
+        fun createRoute(portfolioItemId: String) = "portfolio/edit/$portfolioItemId"
+    }
 }
 ```
 
@@ -162,8 +181,10 @@ sealed class Screen(val route: String) {
    The file is gitignored by `app/.gitignore` (verify before first commit).
 5. In the Firebase console:
    - Authentication → enable **Email/Password**.
+   - Authentication → enable **Google** before implementing Google login.
    - Firestore Database → create in test mode for now. Security rules from
      `database.md` are deployed in Phase 5.
-   - Storage → enable default bucket.
+   - Storage → enable default bucket and deploy `storage.rules` before enabling
+     KTM or skill-evidence uploads.
 6. Build will fail with `File google-services.json is missing` until step 4 is
    done — this is expected.

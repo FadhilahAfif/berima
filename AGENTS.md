@@ -14,17 +14,33 @@ Before doing anything, read all context files in order.
 5. `.agents/context/conventions.md` — coding rules, patterns, naming — follow these always
 6. `DESIGN.md` — design system, colors, typography, UI components
 7. `.agents/context/learned.md` — project discoveries and modifications
+8. `.agents/PDD.md` — product direction and long-term product intent
+9. `.agents/PRD.md` — implementable requirements for the next development scope
+
+---
+
+## Source of Truth
+
+- `AGENTS.md` defines how agents must work in this repository.
+- `.agents/PRD.md` is the implementation source of truth for the next feature scope.
+- `.agents/PDD.md` is product direction only. Do not implement PDD items that PRD marks out of scope.
+- `.agents/context/features.md` and `.agents/context/database.md` describe the already-built MVP baseline. When implementing PRD work, use them to understand existing behavior, then update them as the implementation changes.
+- `architecture.md`, `conventions.md`, and `DESIGN.md` remain hard technical and UI constraints.
+- If documents conflict: follow `AGENTS.md` first, then `.agents/PRD.md`, then the context files, then `.agents/PDD.md`.
 
 ---
 
 ## Hard Rules
 
-- Read ALL context files before writing any code
+- Read ALL required files before writing any code
 - Never deviate from the architecture in `architecture.md`
-- Never add features outside the scope in `features.md` unless explicitly told to
+- Never add features outside `.agents/PRD.md` or `.agents/context/features.md` unless explicitly told to
+- Never implement PDD-only items that PRD explicitly defers or rejects
 - Always follow patterns in `conventions.md` — no exceptions
 - All user-facing text must be in **Bahasa Indonesia**
 - All code, comments, and variable names must be in **English**
+- Verification identity documents are private. Never store KTM download URLs in public profile, listing, or badge fields.
+- Admin review for verification is manual through Firebase Console only for MVP. Do not build an in-app admin panel unless explicitly requested.
 
 ---
 
@@ -32,11 +48,13 @@ Before doing anything, read all context files in order.
 
 1. Check the **Milestone** section below — understand what is done and what is not
 2. Identify which screen or feature is being requested
-3. Cross-reference `features.md` for behavior spec
-4. Cross-reference `database.md` for data shape
+3. Cross-reference `.agents/PRD.md` for requirement IDs and acceptance criteria
+4. Cross-reference `features.md` for existing behavior and `database.md` for current data shape
 5. Cross-reference `conventions.md` for implementation pattern
-6. Build it — do not ask unnecessary clarifying questions if the answer is in the context files
-7. After completing a task, **update the Milestone section** to reflect current progress
+6. Cross-reference `DESIGN.md` for UI decisions and reusable component expectations
+7. Build it — do not ask unnecessary clarifying questions if the answer is in the required files
+8. After completing a task, **update the Milestone section** to reflect current progress
+9. If the task changes implemented behavior, update the relevant context doc and add a note to `.agents/context/learned.md`
 
 ---
 
@@ -106,6 +124,52 @@ One agent session should update at minimum one item before ending.
 | Maestro E2E test suite scaffolded | ✅ Done | `.maestro/` — 15 flows across `flows/` (Phase 4 + Phase 5 active), stubs archived in `flows-phase5/` |
 | App tested on 2 physical Android devices | ⬜ Not started | |
 | No crash on full demo flow (browse → order → review) | ⬜ Not started | |
+
+### Phase 6 — PRD Alignment
+| Task | Status | Notes |
+|---|---|---|
+| Product Definition Document reviewed | ✅ Done | `.agents/PDD.md` audited against the existing app |
+| Product Requirements Document created | ✅ Done | `.agents/PRD.md` is the next-scope implementation source of truth |
+| AGENTS.md aligned to PRD scope | ✅ Done | Required reading, source-of-truth rules, and future milestones updated |
+| Context docs aligned to PRD scope | ✅ Done | `.agents/context/*.md` updated so future implementation does not follow stale PDD/context conflicts |
+
+### Phase 7 — PRD P0: Security & Schema Foundation
+| Task | Status | Notes |
+|---|---|---|
+| Verification and portfolio models/constants | ⬜ Not started | Add `VerificationSubmission`, `PortfolioItem`, verification status/type constants, user badge fields |
+| Firestore rules for verification, portfolio, and protected badge fields | ⬜ Not started | Users cannot self-approve or edit public verification badge fields |
+| Storage rules configured and deployed | ⬜ Not started | Add `storage.rules` and `firebase.json` storage config; KTM/evidence private |
+| Firestore composite indexes for verification and portfolio | ⬜ Not started | Add indexes from PRD Section 5 |
+
+### Phase 8 — PRD P1: Auth & Profile Entry Points
+| Task | Status | Notes |
+|---|---|---|
+| Google login/register | ⬜ Not started | Simple Firebase Google auth; create minimal profile when absent; no account linking |
+| Forgot password | ⬜ Not started | Email/password reset flow from LoginScreen |
+| Verification Center route and Profile entry | ⬜ Not started | Add route, screen shell, status summary entry from Profile |
+
+### Phase 9 — PRD P2: Verification Flows
+| Task | Status | Notes |
+|---|---|---|
+| VerificationCenterScreen + ViewModel | ⬜ Not started | Identity and skill cards with status, rejection reason, CTA |
+| IdentityVerificationScreen + ViewModel | ⬜ Not started | KTM-only upload, pending/rejected/approved states, resubmission |
+| SkillVerificationScreen + ViewModel | ⬜ Not started | Existing categories only: academic, visual, data; portfolio/link/evidence |
+| VerificationRepository | ⬜ Not started | Submission CRUD/read flows, no Firebase types exposed to ViewModels |
+
+### Phase 10 — PRD P3: Portfolio & Badges
+| Task | Status | Notes |
+|---|---|---|
+| Portfolio CRUD | ⬜ Not started | Title, description, category, optional link, one optional image |
+| Public portfolio display | ⬜ Not started | Own Profile management + read-only UserProfile display |
+| Identity and skill badge components | ⬜ Not started | Reusable badge UI, Bahasa Indonesia labels, no document data exposed |
+| Badge placement across marketplace | ⬜ Not started | Profile, UserProfile, ListingCard, ListingDetail seller info |
+
+### Phase 11 — PRD P4: Listing & Order Polish
+| Task | Status | Notes |
+|---|---|---|
+| Service policy acknowledgement | ⬜ Not started | Required in Create/Edit Listing; prohibits joki/plagiarism/document falsification |
+| Listing deactivation UI | ⬜ Not started | Use existing `setListingActive`; do not expose hard delete in MVP client |
+| Escrow simulation copy update | ⬜ Not started | Keep existing lifecycle; clarify no real payment is processed |
 
 **Status legend:** ⬜ Not started · 🔄 In progress · ✅ Done · ⚠️ Blocked
 

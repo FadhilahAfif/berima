@@ -15,6 +15,10 @@ photoUrl:             String?     // Firebase Storage URL
 bio:                  String?     // max 150 chars
 faculty:              String?
 role:                 String      // "buyer" | "seller" | "both"
+identityVerificationStatus: String // "not_submitted" | "pending" | "approved" | "rejected"
+isIdentityVerified:  Boolean     // public badge flag; admin-managed
+verifiedSkillBadges: List<String> // category IDs: "academic" | "visual" | "data"; admin-managed
+verificationUpdatedAt: Timestamp?
 averageRating:        Double      // default 0.0
 totalReviews:         Int         // default 0
 totalOrdersAsBuyer:   Int         // default 0
@@ -40,7 +44,11 @@ deliveryTimeHours:    Int         // max 48
 thumbnailUrl:         String?     // Firebase Storage URL
 tags:                 List<String>
 isActive:             Boolean     // default true
+sellerIdentityVerified: Boolean   // denormalized display helper
+sellerVerifiedSkillBadges: List<String> // denormalized display helper
+policyAcceptedAt:     Timestamp?  // set when seller accepts service policy
 averageRating:        Double      // default 0.0
+reviewCount:          Int         // default 0; used as rating divisor
 totalOrders:          Int         // default 0
 createdAt:            Timestamp
 ```
@@ -110,53 +118,104 @@ createdAt:    Timestamp
 
 ---
 
-## Firestore Security Rules
+### `verificationSubmissions/{submissionId}`
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
+Manual-review verification submissions for Identity Verification and Skill Verification.
 
-    match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    match /listings/{listingId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null
-        && request.auth.uid == resource.data.sellerId;
-    }
-
-    match /orders/{orderId} {
-      allow read: if request.auth != null
-        && (request.auth.uid == resource.data.buyerId
-        || request.auth.uid == resource.data.sellerId);
-      allow create: if request.auth != null;
-      allow update: if request.auth != null
-        && (request.auth.uid == resource.data.buyerId
-        || request.auth.uid == resource.data.sellerId);
-    }
-
-    match /reviews/{reviewId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null
-        && request.auth.uid == request.resource.data.buyerId;
-    }
-
-    match /messages/{orderId}/chats/{messageId} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}
 ```
+submissionId:    String      // same as document ID
+userId:          String      // owner UID
+type:            String      // "identity" | "skill"
+status:          String      // "pending" | "approved" | "rejected"
+documentType:    String?     // identity only: "ktm"
+skillCategory:   String?     // skill only: "academic" | "visual" | "data"
+portfolioItemId: String?     // optional supporting portfolio item
+externalLink:    String?     // optional supporting link
+storagePath:     String?     // private Storage path, never a public KTM URL
+fileName:        String?
+contentType:     String?
+note:            String?
+rejectionReason: String?
+reviewedBy:      String?     // admin-entered in Firebase Console
+reviewedAt:      Timestamp?
+createdAt:       Timestamp
+updatedAt:       Timestamp
+```
+
+Rules:
+- Users can create/read their own submissions.
+- Users cannot set `approved`, `rejected`, `reviewedBy`, `reviewedAt`, or public badge fields from the app.
+- Pending and approved submissions cannot be overwritten by the user.
+- Rejected submissions can be resubmitted by creating/updating a new pending submission.
+- Admin review is manual through Firebase Console.
 
 ---
 
+### `portfolioItems/{portfolioItemId}`
+
+Public portfolio items displayed on user profiles and optionally used as skill verification evidence.
+
+```
+portfolioItemId: String      // same as document ID
+userId:          String      // owner UID
+title:           String
+description:     String
+category:        String      // "academic" | "visual" | "data"
+externalLink:    String?
+imageUrl:        String?     // readable by authenticated users
+imageStoragePath:String?
+createdAt:       Timestamp
+updatedAt:       Timestamp
+```
+
+Rules:
+- Authenticated users can read portfolio items.
+- Owners can create/update/delete their own portfolio items.
+- One optional image per portfolio item in MVP.
+
+---
+
+## Firestore Security Rules
+
+`firestore.rules` is the source file to deploy. Keep it stricter than this document's summaries.
+
+Required behavior:
+- Authenticated users can read user/listing/review public data.
+- Users can update their own editable profile fields only.
+- Users cannot update their own `isIdentityVerified`, `verifiedSkillBadges`, admin review fields, or any public badge fields.
+- Listing create/update must preserve `sellerId == request.auth.uid`; owners can deactivate via `isActive = false`.
+- Order create/update must preserve buyer, seller, listing, and price invariants already enforced in `firestore.rules`.
+- Chat read/write remains limited to the order buyer and seller.
+- Verification submissions are readable/writable only by their owner from the app, with admin-only fields protected from client writes.
+- Portfolio items are readable by authenticated users and writable only by their owner.
+
+---
+
+## Firebase Storage Schema and Rules
+
+`firebase.json` must include Storage rules before identity/skill evidence upload is implemented.
+
+Storage paths:
+
+```
+users/{userId}/verification/identity/{submissionId}/{filename}
+users/{userId}/verification/skill/{submissionId}/{filename}
+users/{userId}/portfolio/{portfolioItemId}/{filename}
+users/{userId}/profile/{filename}
+orders/{orderId}/result/{filename}
+```
+
+Required behavior:
+- KTM files under `verification/identity` are private. Never expose public download URLs in user/listing/profile data.
+- Skill evidence files under `verification/skill` are private to the owner from the app.
+- Admin inspection happens through Firebase Console project access.
+- Portfolio images can be readable by authenticated users.
+- Profile photos remain readable where needed for profile/listing display.
+- Order result files must be accessible only to the order buyer and seller.
+
 ## Required Composite Indexes
 
-Create these in Firebase Console → Firestore → Indexes:
+Create or deploy these via `firestore.indexes.json`:
 
 | Collection | Fields | Order |
 |---|---|---|
@@ -168,3 +227,7 @@ Create these in Firebase Console → Firestore → Indexes:
 | `orders` | `sellerId` ASC, `createdAt` DESC | — |
 | `reviews` | `sellerId` ASC, `createdAt` DESC | — |
 | `reviews` | `listingId` ASC, `createdAt` DESC | — |
+| `verificationSubmissions` | `userId` ASC, `createdAt` DESC | PRD P0 |
+| `verificationSubmissions` | `userId` ASC, `type` ASC, `createdAt` DESC | PRD P0 |
+| `portfolioItems` | `userId` ASC, `createdAt` DESC | PRD P0 |
+| `portfolioItems` | `userId` ASC, `category` ASC, `createdAt` DESC | PRD P0 |
