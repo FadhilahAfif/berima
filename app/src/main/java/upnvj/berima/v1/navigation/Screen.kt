@@ -51,4 +51,5 @@ sealed class Screen(val route: String) {
     data object VerificationCenter : Screen("verification")
     data object IdentityVerification : Screen("verification/identity")
     data object SkillVerification : Screen("verification/skill")
+    data object PortfolioManager : Screen("portfolio")
 }

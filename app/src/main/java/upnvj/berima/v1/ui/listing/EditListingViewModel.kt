@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import upnvj.berima.v1.data.model.Validation
+import upnvj.berima.v1.data.repository.AuthRepository
 import upnvj.berima.v1.data.repository.ListingRepository
 import upnvj.berima.v1.navigation.Screen
 import javax.inject.Inject
@@ -16,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class EditListingViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val listingRepository: ListingRepository
+    private val listingRepository: ListingRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val listingId: String =
@@ -115,6 +117,8 @@ class EditListingViewModel @Inject constructor(
 
         viewModelScope.launch {
             _isLoading.value = true
+            val user = authRepository.currentUserId
+                ?.let { authRepository.getUser(it).getOrNull() }
             val result = listingRepository.updateListing(
                 listingId = listingId,
                 title = titleVal,
@@ -123,7 +127,9 @@ class EditListingViewModel @Inject constructor(
                 price = priceVal,
                 deliveryTimeHours = deliveryVal,
                 tags = tagList,
-                thumbnailUrl = null
+                thumbnailUrl = null,
+                sellerIdentityVerified = user?.isIdentityVerified,
+                sellerVerifiedSkillBadges = user?.verifiedSkillBadges
             )
             _isLoading.value = false
             result.fold(

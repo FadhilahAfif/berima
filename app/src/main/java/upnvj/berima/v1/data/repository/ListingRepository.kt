@@ -136,7 +136,9 @@ class ListingRepository @Inject constructor(
         price: Long,
         deliveryTimeHours: Int,
         tags: List<String>,
-        thumbnailUrl: String?
+        thumbnailUrl: String?,
+        sellerIdentityVerified: Boolean? = null,
+        sellerVerifiedSkillBadges: List<String>? = null
     ): Result<Unit> {
         return try {
             val updates = mutableMapOf<String, Any?>(
@@ -149,6 +151,12 @@ class ListingRepository @Inject constructor(
             )
             if (thumbnailUrl != null) {
                 updates["thumbnailUrl"] = thumbnailUrl
+            }
+            sellerIdentityVerified?.let {
+                updates["sellerIdentityVerified"] = it
+            }
+            sellerVerifiedSkillBadges?.let {
+                updates["sellerVerifiedSkillBadges"] = it
             }
             listingsCollection.document(listingId).update(updates).await()
             Result.success(Unit)

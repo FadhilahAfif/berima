@@ -47,11 +47,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Listing
+import upnvj.berima.v1.data.model.PortfolioItem
 import upnvj.berima.v1.data.model.User
 import upnvj.berima.v1.data.model.UserRole
 import upnvj.berima.v1.data.model.VerificationStatus
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
+import upnvj.berima.v1.ui.common.PortfolioSection
+import upnvj.berima.v1.ui.common.VerificationBadgeRow
 import upnvj.berima.v1.ui.common.categoryColors
 import upnvj.berima.v1.ui.common.categoryIconRes
 import upnvj.berima.v1.ui.common.formatRupiah
@@ -64,6 +67,7 @@ fun ProfileScreen(
     onNavigateToEditProfile: () -> Unit,
     onNavigateToCreateListing: () -> Unit,
     onNavigateToVerificationCenter: () -> Unit,
+    onNavigateToPortfolio: () -> Unit,
     onListingClick: (String) -> Unit,
     onLogout: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
@@ -71,6 +75,7 @@ fun ProfileScreen(
 ) {
     val user by viewModel.user.collectAsStateWithLifecycle()
     val listings by viewModel.listings.collectAsStateWithLifecycle()
+    val portfolioItems by viewModel.portfolioItems.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -147,9 +152,11 @@ fun ProfileScreen(
                 ProfileContent(
                     user = user!!,
                     listings = listings,
+                    portfolioItems = portfolioItems,
                     onNavigateToEditProfile = onNavigateToEditProfile,
                     onNavigateToCreateListing = onNavigateToCreateListing,
                     onNavigateToVerificationCenter = onNavigateToVerificationCenter,
+                    onNavigateToPortfolio = onNavigateToPortfolio,
                     onListingClick = onListingClick,
                     modifier = Modifier
                         .fillMaxSize()
@@ -186,9 +193,11 @@ private fun LogoutButton(
 private fun ProfileContent(
     user: User,
     listings: List<Listing>,
+    portfolioItems: List<PortfolioItem>,
     onNavigateToEditProfile: () -> Unit,
     onNavigateToCreateListing: () -> Unit,
     onNavigateToVerificationCenter: () -> Unit,
+    onNavigateToPortfolio: () -> Unit,
     onListingClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -209,6 +218,25 @@ private fun ProfileContent(
         VerificationEntryCard(
             user = user,
             onClick = onNavigateToVerificationCenter
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        PortfolioSection(
+            title = AppStrings.PROFILE_PORTFOLIO_TITLE,
+            items = portfolioItems.take(3),
+            emptyText = AppStrings.PROFILE_PORTFOLIO_EMPTY,
+            action = {
+                Text(
+                    text = AppStrings.PROFILE_PORTFOLIO_ACTION,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(9999.dp))
+                        .clickable(onClick = onNavigateToPortfolio)
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                )
+            }
         )
 
         Spacer(Modifier.height(16.dp))
@@ -300,6 +328,12 @@ private fun IdentityCard(
             }
             EditIconButton(onClick = onEditClick)
         }
+
+        VerificationBadgeRow(
+            isIdentityVerified = user.isIdentityVerified,
+            skillBadges = user.verifiedSkillBadges,
+            modifier = Modifier.padding(top = 14.dp)
+        )
 
         if (!user.bio.isNullOrBlank()) {
             Spacer(Modifier.height(14.dp))
@@ -713,7 +747,9 @@ private fun ProfileScreenPreview() {
             role = UserRole.BOTH,
             averageRating = 4.8,
             totalOrdersAsBuyer = 3,
-            totalOrdersAsSeller = 15
+            totalOrdersAsSeller = 15,
+            isIdentityVerified = true,
+            verifiedSkillBadges = listOf("visual", "data")
         )
         val listings = listOf(
             Listing(
@@ -743,9 +779,18 @@ private fun ProfileScreenPreview() {
             ProfileContent(
                 user = user,
                 listings = listings,
+                portfolioItems = listOf(
+                    PortfolioItem(
+                        portfolioItemId = "p1",
+                        title = "Poster UKM",
+                        description = "Poster acara kampus untuk publikasi Instagram.",
+                        category = "visual"
+                    )
+                ),
                 onNavigateToEditProfile = {},
                 onNavigateToCreateListing = {},
                 onNavigateToVerificationCenter = {},
+                onNavigateToPortfolio = {},
                 onListingClick = {},
                 modifier = Modifier
                     .fillMaxSize()

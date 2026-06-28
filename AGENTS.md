@@ -137,7 +137,7 @@ One agent session should update at minimum one item before ending.
 | Task | Status | Notes |
 |---|---|---|
 | Verification and portfolio models/constants | ✅ Done | Added `VerificationSubmission`, `PortfolioItem`, verification constants, user badge fields, listing badge/policy fields |
-| Firestore rules for verification, portfolio, and protected badge fields | ✅ Done | Source updated: users cannot self-approve/edit badge fields; submissions are owner-only; portfolio is auth-readable owner-writable |
+| Firestore rules for verification, portfolio, and protected badge fields | 🔄 In progress | Source updated: users cannot self-approve/edit badge fields; submissions are owner-only; portfolio is auth-readable owner-writable. Physical-device QA still gets PERMISSION_DENIED, so deploy/verify against Firebase project remains pending |
 | Storage rules configured and deployed | 🔄 In progress | `storage.rules` + `firebase.json` storage config added locally; Firebase CLI dry-run passed; deploy still pending |
 | Firestore composite indexes for verification and portfolio | ✅ Done | Added indexes from PRD Section 5 to `firestore.indexes.json`; Firebase CLI dry-run passed |
 
@@ -151,18 +151,18 @@ One agent session should update at minimum one item before ending.
 ### Phase 9 — PRD P2: Verification Flows
 | Task | Status | Notes |
 |---|---|---|
-| VerificationCenterScreen + ViewModel | ⬜ Not started | Identity and skill cards with status, rejection reason, CTA |
-| IdentityVerificationScreen + ViewModel | ⬜ Not started | KTM-only upload, pending/rejected/approved states, resubmission |
-| SkillVerificationScreen + ViewModel | ⬜ Not started | Existing categories only: academic, visual, data; portfolio/link/evidence |
-| VerificationRepository | ⬜ Not started | Submission CRUD/read flows, no Firebase types exposed to ViewModels |
+| VerificationCenterScreen + ViewModel | ✅ Done | Reads latest submission docs for identity/skill status, shows rejection reason, active badges, and CTAs |
+| IdentityVerificationScreen + ViewModel | ✅ Done | KTM-only private upload, optional note, pending/rejected/approved states, rejected resubmission |
+| SkillVerificationScreen + ViewModel | ✅ Done | Existing categories only; supports portfolio item, optional link, optional private evidence file |
+| VerificationRepository | ✅ Done | Submission read/create flows plus read-only own portfolio stream; no Firebase types exposed to ViewModels |
 
 ### Phase 10 — PRD P3: Portfolio & Badges
 | Task | Status | Notes |
 |---|---|---|
-| Portfolio CRUD | ⬜ Not started | Title, description, category, optional link, one optional image |
-| Public portfolio display | ⬜ Not started | Own Profile management + read-only UserProfile display |
-| Identity and skill badge components | ⬜ Not started | Reusable badge UI, Bahasa Indonesia labels, no document data exposed |
-| Badge placement across marketplace | ⬜ Not started | Profile, UserProfile, ListingCard, ListingDetail seller info |
+| Portfolio CRUD | ✅ Done | `PortfolioRepository` + `PortfolioManagerScreen`; title, description, category, optional link, one optional image; edit/delete supported |
+| Public portfolio display | ✅ Done | Profile shows own portfolio preview + manage entry; UserProfile shows public portfolio with images and safe external links |
+| Identity and skill badge components | ✅ Done | `VerificationBadgeRow` + listing skill badge, Bahasa Indonesia labels, no document data exposed |
+| Badge placement across marketplace | ✅ Done | Profile, UserProfile, ListingCard, and ListingDetail seller info wired; ListingDetail reads seller user badge fields as display source |
 
 ### Phase 11 — PRD P4: Listing & Order Polish
 | Task | Status | Notes |
@@ -182,3 +182,7 @@ One agent session should update at minimum one item before ending.
   ID in `app/src/main/res/values/strings.xml` as `berima_web_client_id`; current
   fallback is `MISSING_WEB_CLIENT_ID` because local `google-services.json` has no
   OAuth client entries.
+- [2026-06-28] Phase 10 P3 portfolio and badges shipped. Portfolio CRUD lives in
+  `ui/portfolio/PortfolioManagerScreen.kt` with `PortfolioRepository`; Profile
+  shows a preview and management entry, UserProfile shows public portfolio items,
+  and badge display is centralized in `ui/common/VerificationBadges.kt`.

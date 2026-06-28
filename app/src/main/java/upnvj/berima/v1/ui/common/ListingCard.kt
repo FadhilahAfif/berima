@@ -80,6 +80,12 @@ fun ListingCard(
                 maxLines = 1
             )
 
+            ListingSkillBadge(
+                category = listing.category,
+                verifiedSkillBadges = listing.sellerVerifiedSkillBadges,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
             Spacer(Modifier.height(10.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {

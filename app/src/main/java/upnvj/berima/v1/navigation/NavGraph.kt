@@ -21,11 +21,14 @@ import upnvj.berima.v1.ui.listing.ListingDetailScreen
 import upnvj.berima.v1.ui.order.CreateOrderScreen
 import upnvj.berima.v1.ui.order.OrderDetailScreen
 import upnvj.berima.v1.ui.order.OrdersScreen
+import upnvj.berima.v1.ui.portfolio.PortfolioManagerScreen
 import upnvj.berima.v1.ui.profile.EditProfileScreen
 import upnvj.berima.v1.ui.profile.ProfileScreen
 import upnvj.berima.v1.ui.profile.UserProfileScreen
 import upnvj.berima.v1.ui.review.CreateReviewScreen
 import upnvj.berima.v1.ui.splash.SplashScreen
+import upnvj.berima.v1.ui.verification.IdentityVerificationScreen
+import upnvj.berima.v1.ui.verification.SkillVerificationScreen
 import upnvj.berima.v1.ui.verification.VerificationCenterScreen
 
 @Composable
@@ -115,6 +118,9 @@ fun BerimaNavGraph(
                 },
                 onNavigateToVerificationCenter = {
                     navController.navigate(Screen.VerificationCenter.route)
+                },
+                onNavigateToPortfolio = {
+                    navController.navigate(Screen.PortfolioManager.route)
                 },
                 onListingClick = { listingId ->
                     navController.navigate(Screen.ListingDetail.createRoute(listingId))
@@ -216,6 +222,30 @@ fun BerimaNavGraph(
 
         composable(Screen.VerificationCenter.route) {
             VerificationCenterScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToIdentity = {
+                    navController.navigate(Screen.IdentityVerification.route)
+                },
+                onNavigateToSkill = {
+                    navController.navigate(Screen.SkillVerification.route)
+                }
+            )
+        }
+
+        composable(Screen.IdentityVerification.route) {
+            IdentityVerificationScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.SkillVerification.route) {
+            SkillVerificationScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.PortfolioManager.route) {
+            PortfolioManagerScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

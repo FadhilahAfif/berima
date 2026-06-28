@@ -11,9 +11,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import upnvj.berima.v1.data.model.Listing
 import upnvj.berima.v1.data.model.Review
+import upnvj.berima.v1.data.model.User
+import upnvj.berima.v1.data.repository.AuthRepository
 import upnvj.berima.v1.data.repository.ListingRepository
 import upnvj.berima.v1.data.repository.ReviewRepository
 import upnvj.berima.v1.navigation.Screen
@@ -24,6 +27,7 @@ class ListingDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val listingRepository: ListingRepository,
     private val reviewRepository: ReviewRepository,
+    private val authRepository: AuthRepository,
     private val auth: FirebaseAuth
 ) : ViewModel() {
 
@@ -32,6 +36,9 @@ class ListingDetailViewModel @Inject constructor(
 
     private val _listing = MutableStateFlow<Listing?>(null)
     val listing: StateFlow<Listing?> = _listing.asStateFlow()
+
+    private val _seller = MutableStateFlow<User?>(null)
+    val seller: StateFlow<User?> = _seller.asStateFlow()
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -45,6 +52,7 @@ class ListingDetailViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val currentUserId: String? get() = auth.currentUser?.uid
+    private var sellerJob: Job? = null
 
     init {
         loadListing()
@@ -57,8 +65,21 @@ class ListingDetailViewModel @Inject constructor(
                 .catch { e -> _error.value = e.message }
                 .collect { listing ->
                     _listing.value = listing
+                    observeSeller(listing?.sellerId)
                     _isLoading.value = false
                 }
+        }
+    }
+
+    private fun observeSeller(sellerId: String?) {
+        if (sellerId.isNullOrBlank() || sellerJob?.isActive == true && _seller.value?.uid == sellerId) {
+            return
+        }
+        sellerJob?.cancel()
+        sellerJob = viewModelScope.launch {
+            authRepository.observeUser(sellerId)
+                .catch { e -> _error.value = e.message }
+                .collect { user -> _seller.value = user }
         }
     }
 

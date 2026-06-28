@@ -8,15 +8,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import upnvj.berima.v1.data.model.Listing
+import upnvj.berima.v1.data.model.PortfolioItem
 import upnvj.berima.v1.data.model.User
 import upnvj.berima.v1.data.repository.AuthRepository
 import upnvj.berima.v1.data.repository.ListingRepository
+import upnvj.berima.v1.data.repository.PortfolioRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val listingRepository: ListingRepository
+    private val listingRepository: ListingRepository,
+    private val portfolioRepository: PortfolioRepository
 ) : ViewModel() {
 
     val currentUserId: String? = authRepository.currentUserId
@@ -26,6 +29,9 @@ class ProfileViewModel @Inject constructor(
 
     private val _listings = MutableStateFlow<List<Listing>>(emptyList())
     val listings: StateFlow<List<Listing>> = _listings.asStateFlow()
+
+    private val _portfolioItems = MutableStateFlow<List<PortfolioItem>>(emptyList())
+    val portfolioItems: StateFlow<List<PortfolioItem>> = _portfolioItems.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -49,6 +55,13 @@ class ProfileViewModel @Inject constructor(
             viewModelScope.launch {
                 try {
                     listingRepository.getListingsBySeller(uid).collect { _listings.value = it }
+                } catch (e: Exception) {
+                    _error.value = e.message
+                }
+            }
+            viewModelScope.launch {
+                try {
+                    portfolioRepository.observePortfolioItems(uid).collect { _portfolioItems.value = it }
                 } catch (e: Exception) {
                     _error.value = e.message
                 }

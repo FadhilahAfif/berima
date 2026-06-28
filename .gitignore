@@ -15,3 +15,7 @@ docs/
 .cxx
 local.properties
 gradle/gradle-daemon-jvm.properties
+
+# Local QA artifacts
+.qa/
+qa-*.png

@@ -48,6 +48,7 @@ import coil.compose.AsyncImage
 import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Review
 import upnvj.berima.v1.ui.common.BerimaButton
+import upnvj.berima.v1.ui.common.VerificationBadgeRow
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 import java.util.Locale
 
@@ -62,6 +63,7 @@ fun ListingDetailScreen(
     modifier: Modifier = Modifier
 ) {
     val listing by viewModel.listing.collectAsStateWithLifecycle()
+    val seller by viewModel.seller.collectAsStateWithLifecycle()
     val reviews by viewModel.reviews.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
@@ -127,6 +129,7 @@ fun ListingDetailScreen(
             else -> {
                 val l = listing!!
                 val isOwner = viewModel.currentUserId == l.sellerId
+                val sellerUser = seller
 
                 Column(
                     modifier = Modifier
@@ -266,6 +269,14 @@ fun ListingDetailScreen(
                                         color = berimaColors.textSecondary
                                     )
                                 }
+                                VerificationBadgeRow(
+                                    isIdentityVerified = sellerUser?.isIdentityVerified
+                                        ?: l.sellerIdentityVerified,
+                                    skillBadges = sellerUser?.verifiedSkillBadges
+                                        ?: l.sellerVerifiedSkillBadges,
+                                    relevantSkillCategory = l.category,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
                             }
                             IconButton(onClick = { onSellerClick(l.sellerId) }) {
                                 Icon(

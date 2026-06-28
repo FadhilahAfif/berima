@@ -2,6 +2,7 @@ package upnvj.berima.v1.ui.verification
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,6 +48,7 @@ import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Category
 import upnvj.berima.v1.data.model.User
 import upnvj.berima.v1.data.model.VerificationStatus
+import upnvj.berima.v1.data.model.VerificationSubmission
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.categoryFullLabel
 import upnvj.berima.v1.ui.common.categoryIconRes
@@ -59,10 +61,14 @@ import java.util.Locale
 @Composable
 fun VerificationCenterScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToIdentity: () -> Unit,
+    onNavigateToSkill: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: VerificationCenterViewModel = hiltViewModel()
 ) {
     val user by viewModel.user.collectAsStateWithLifecycle()
+    val identitySubmission by viewModel.identitySubmission.collectAsStateWithLifecycle()
+    val skillSubmissions by viewModel.skillSubmissions.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -138,6 +144,10 @@ fun VerificationCenterScreen(
             else -> {
                 VerificationCenterContent(
                     user = user!!,
+                    identitySubmission = identitySubmission,
+                    skillSubmissions = skillSubmissions,
+                    onIdentityClick = onNavigateToIdentity,
+                    onSkillClick = onNavigateToSkill,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
@@ -150,9 +160,16 @@ fun VerificationCenterScreen(
 @Composable
 private fun VerificationCenterContent(
     user: User,
+    identitySubmission: VerificationSubmission?,
+    skillSubmissions: List<VerificationSubmission>,
+    onIdentityClick: () -> Unit,
+    onSkillClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val berimaColors = LocalBerimaColors.current
+    val identityStatus = identitySubmission?.status ?: user.identityVerificationStatus
+    val skillSubmission = skillSubmissions.firstOrNull()
+    val skillStatus = skillStatus(user.verifiedSkillBadges, skillSubmission)
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -167,16 +184,20 @@ private fun VerificationCenterContent(
         VerificationSectionCard(
             title = AppStrings.VERIFICATION_IDENTITY_TITLE,
             body = AppStrings.VERIFICATION_IDENTITY_BODY,
-            status = user.identityVerificationStatus,
-            iconRes = R.drawable.ic_person
+            status = identityStatus,
+            iconRes = R.drawable.ic_person,
+            rejectionReason = identitySubmission?.rejectionReason,
+            onClick = onIdentityClick
         )
         Spacer(Modifier.height(12.dp))
         VerificationSectionCard(
             title = AppStrings.VERIFICATION_SKILL_TITLE,
             body = AppStrings.VERIFICATION_SKILL_BODY,
-            status = skillStatus(user.verifiedSkillBadges),
+            status = skillStatus,
             iconRes = R.drawable.ic_check,
-            skillBadges = user.verifiedSkillBadges
+            skillBadges = user.verifiedSkillBadges,
+            rejectionReason = skillSubmission?.rejectionReason,
+            onClick = onSkillClick
         )
     }
 }
@@ -188,7 +209,9 @@ private fun VerificationSectionCard(
     status: String,
     iconRes: Int,
     modifier: Modifier = Modifier,
-    skillBadges: List<String> = emptyList()
+    skillBadges: List<String> = emptyList(),
+    rejectionReason: String? = null,
+    onClick: () -> Unit = {}
 ) {
     val berimaColors = LocalBerimaColors.current
     val shape = RoundedCornerShape(16.dp)
@@ -198,6 +221,7 @@ private fun VerificationSectionCard(
             .clip(shape)
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, berimaColors.borderSubtle, shape)
+            .clickable(onClick = onClick)
             .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.Top) {
@@ -246,6 +270,11 @@ private fun VerificationSectionCard(
             VerificationStatusPill(status = status)
         }
 
+        if (status == VerificationStatus.REJECTED) {
+            Spacer(Modifier.height(14.dp))
+            RejectionCallout(reason = rejectionReason)
+        }
+
         if (skillBadges.isNotEmpty()) {
             Spacer(Modifier.height(14.dp))
             FlowRow(
@@ -257,6 +286,53 @@ private fun VerificationSectionCard(
                 }
             }
         }
+
+        Spacer(Modifier.height(16.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = verificationActionLabel(status),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                painter = painterResource(R.drawable.ic_chevron_right),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun RejectionCallout(
+    reason: String?,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.errorContainer)
+            .padding(12.dp)
+    ) {
+        Text(
+            text = AppStrings.VERIFICATION_REJECTION_LABEL,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onErrorContainer
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = reason?.takeIf { it.isNotBlank() }
+                ?: AppStrings.VERIFICATION_REJECTION_FALLBACK,
+            style = MaterialTheme.typography.bodyMedium,
+            color = berimaColors.textSecondary
+        )
     }
 }
 
@@ -323,12 +399,22 @@ private fun verificationStatusLabel(status: String): String = when (status) {
     else -> AppStrings.VERIFICATION_STATUS_NOT_SUBMITTED
 }
 
-private fun skillStatus(skillBadges: List<String>): String {
-    return if (skillBadges.isEmpty()) {
-        VerificationStatus.NOT_SUBMITTED
-    } else {
-        VerificationStatus.APPROVED
+private fun skillStatus(
+    skillBadges: List<String>,
+    latestSubmission: VerificationSubmission?
+): String {
+    return when {
+        skillBadges.isNotEmpty() -> VerificationStatus.APPROVED
+        latestSubmission != null -> latestSubmission.status
+        else -> VerificationStatus.NOT_SUBMITTED
     }
+}
+
+private fun verificationActionLabel(status: String): String = when (status) {
+    VerificationStatus.REJECTED -> AppStrings.VERIFICATION_ACTION_RESUBMIT
+    VerificationStatus.PENDING,
+    VerificationStatus.APPROVED -> AppStrings.VERIFICATION_ACTION_VIEW_STATUS
+    else -> AppStrings.VERIFICATION_ACTION_SUBMIT
 }
 
 @Preview(name = "Verification Center", showBackground = true, showSystemUi = true)
@@ -346,6 +432,10 @@ private fun VerificationCenterScreenPreview() {
                     identityVerificationStatus = VerificationStatus.PENDING,
                     verifiedSkillBadges = listOf(Category.VISUAL, Category.DATA)
                 ),
+                identitySubmission = VerificationSubmission(status = VerificationStatus.PENDING),
+                skillSubmissions = listOf(VerificationSubmission(status = VerificationStatus.APPROVED)),
+                onIdentityClick = {},
+                onSkillClick = {},
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
