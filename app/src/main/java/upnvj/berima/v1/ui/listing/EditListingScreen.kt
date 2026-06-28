@@ -1,13 +1,19 @@
 package upnvj.berima.v1.ui.listing
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -17,12 +23,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -32,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Category
 import upnvj.berima.v1.ui.common.AppStrings
+import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,11 +57,22 @@ fun EditListingScreen(
     val price by viewModel.price.collectAsStateWithLifecycle()
     val deliveryTimeHours by viewModel.deliveryTimeHours.collectAsStateWithLifecycle()
     val tags by viewModel.tags.collectAsStateWithLifecycle()
+    val existingThumbnailUrl by viewModel.existingThumbnailUrl.collectAsStateWithLifecycle()
+    val selectedThumbnailUri by viewModel.selectedThumbnailUri.collectAsStateWithLifecycle()
+    val removeExistingThumbnail by viewModel.removeExistingThumbnail.collectAsStateWithLifecycle()
+    val isPolicyAccepted by viewModel.isPolicyAccepted.collectAsStateWithLifecycle()
+    val isActive by viewModel.isActive.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val success by viewModel.success.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val berimaColors = LocalBerimaColors.current
+    var showDeactivateDialog by remember { mutableStateOf(false) }
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        viewModel.onThumbnailSelected(uri)
+    }
 
     LaunchedEffect(success) {
         if (success) onNavigateBack()
@@ -62,6 +83,29 @@ fun EditListingScreen(
             snackbarHostState.showSnackbar(it)
             viewModel.clearError()
         }
+    }
+
+    if (showDeactivateDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeactivateDialog = false },
+            title = { Text(AppStrings.LISTING_DEACTIVATE_TITLE) },
+            text = { Text(AppStrings.LISTING_DEACTIVATE_BODY) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeactivateDialog = false
+                        viewModel.deactivateListing()
+                    }
+                ) {
+                    Text(AppStrings.LISTING_DEACTIVATE_CONFIRM)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeactivateDialog = false }) {
+                    Text(AppStrings.LISTING_DEACTIVATE_CANCEL)
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -127,10 +171,28 @@ fun EditListingScreen(
                 onDeliveryTimeChange = viewModel::onDeliveryTimeChange,
                 tags = tags,
                 onTagsChange = viewModel::onTagsChange,
+                selectedThumbnailUri = selectedThumbnailUri,
+                existingThumbnailUrl = existingThumbnailUrl,
+                isRemovingExistingThumbnail = removeExistingThumbnail,
+                onPickThumbnail = { imagePicker.launch("image/*") },
+                onRemoveThumbnail = viewModel::removeThumbnail,
+                isPolicyAccepted = isPolicyAccepted,
+                onPolicyAcceptedChange = viewModel::onPolicyAcceptedChange,
                 isLoading = isLoading,
                 submitLabel = AppStrings.LISTING_SAVE_EDIT,
                 onSubmit = viewModel::submit
             )
+            if (isActive) {
+                BerimaButton(
+                    text = AppStrings.LISTING_DEACTIVATE,
+                    onClick = { showDeactivateDialog = true },
+                    enabled = !isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )
+                Spacer(Modifier.height(24.dp))
+            }
         }
     }
 }
@@ -184,6 +246,13 @@ private fun EditListingScreenPreview() {
                     onDeliveryTimeChange = {},
                     tags = "desain, logo",
                     onTagsChange = {},
+                    selectedThumbnailUri = null,
+                    existingThumbnailUrl = null,
+                    isRemovingExistingThumbnail = false,
+                    onPickThumbnail = {},
+                    onRemoveThumbnail = {},
+                    isPolicyAccepted = true,
+                    onPolicyAcceptedChange = {},
                     isLoading = false,
                     submitLabel = AppStrings.LISTING_SAVE_EDIT,
                     onSubmit = {}

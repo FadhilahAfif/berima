@@ -3,6 +3,7 @@ package upnvj.berima.v1.ui.listing
 import upnvj.berima.v1.ui.common.formatRupiah
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -29,12 +31,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,8 +52,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Review
+import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.common.VerificationBadgeRow
+import upnvj.berima.v1.ui.common.categoryThumbnailRes
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 import java.util.Locale
 
@@ -67,14 +74,46 @@ fun ListingDetailScreen(
     val reviews by viewModel.reviews.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
+    val success by viewModel.success.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val berimaColors = LocalBerimaColors.current
+    var showDeactivateDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(error) {
         error?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearError()
         }
+    }
+
+    LaunchedEffect(success) {
+        success?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearSuccess()
+        }
+    }
+
+    if (showDeactivateDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeactivateDialog = false },
+            title = { Text(AppStrings.LISTING_DEACTIVATE_TITLE) },
+            text = { Text(AppStrings.LISTING_DEACTIVATE_BODY) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeactivateDialog = false
+                        viewModel.deactivateListing()
+                    }
+                ) {
+                    Text(AppStrings.LISTING_DEACTIVATE_CONFIRM)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeactivateDialog = false }) {
+                    Text(AppStrings.LISTING_DEACTIVATE_CANCEL)
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -87,7 +126,7 @@ fun ListingDetailScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Kembali",
+                            contentDescription = AppStrings.BACK_CONTENT_DESCRIPTION,
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -118,7 +157,7 @@ fun ListingDetailScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Listing tidak ditemukan.",
+                        text = AppStrings.LISTING_NOT_FOUND,
                         style = MaterialTheme.typography.bodyMedium,
                         color = berimaColors.textSecondary,
                         textAlign = TextAlign.Center
@@ -152,11 +191,11 @@ fun ListingDetailScreen(
                                 modifier = Modifier.fillMaxSize()
                             )
                         } else {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_berima_mark),
+                            androidx.compose.foundation.Image(
+                                painter = painterResource(categoryThumbnailRes(l.category)),
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.outline,
-                                modifier = Modifier.size(48.dp)
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
@@ -179,7 +218,7 @@ fun ListingDetailScreen(
                         Spacer(Modifier.height(4.dp))
 
                         Text(
-                            text = "Estimasi selesai: ${l.deliveryTimeHours} jam",
+                            text = "${AppStrings.LISTING_ESTIMATE_PREFIX} ${l.deliveryTimeHours} jam",
                             style = MaterialTheme.typography.bodyMedium,
                             color = berimaColors.textSecondary
                         )
@@ -215,7 +254,7 @@ fun ListingDetailScreen(
                         Spacer(Modifier.height(24.dp))
 
                         Text(
-                            text = "Penjual",
+                            text = AppStrings.ORDERS_ROLE_SELLER_PREFIX,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -306,21 +345,63 @@ fun ListingDetailScreen(
 
                         if (isOwner) {
                             BerimaButton(
-                                text = "Edit Listing",
+                                text = AppStrings.LISTING_EDIT_ACTION,
                                 onClick = { onEditClick(l.listingId) },
                                 modifier = Modifier.fillMaxWidth()
                             )
-                        } else {
+                            if (l.isActive) {
+                                Spacer(Modifier.height(10.dp))
+                                Text(
+                                    text = AppStrings.LISTING_DEACTIVATE,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(9999.dp))
+                                        .clickable { showDeactivateDialog = true }
+                                        .align(Alignment.CenterHorizontally)
+                                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                                )
+                            } else {
+                                Spacer(Modifier.height(10.dp))
+                                InactiveListingNotice(modifier = Modifier.fillMaxWidth())
+                            }
+                        } else if (l.isActive) {
                             BerimaButton(
-                                text = "Pesan Sekarang",
+                                text = AppStrings.LISTING_ORDER_ACTION,
                                 onClick = { onOrderClick(l.listingId) },
                                 modifier = Modifier.fillMaxWidth()
                             )
+                        } else {
+                            InactiveListingNotice(modifier = Modifier.fillMaxWidth())
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun InactiveListingNotice(modifier: Modifier = Modifier) {
+    val berimaColors = LocalBerimaColors.current
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle, RoundedCornerShape(12.dp))
+            .padding(12.dp)
+    ) {
+        Text(
+            text = AppStrings.LISTING_INACTIVE_LABEL,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = AppStrings.LISTING_INACTIVE_BODY,
+            style = MaterialTheme.typography.bodyMedium,
+            color = berimaColors.textSecondary
+        )
     }
 }
 

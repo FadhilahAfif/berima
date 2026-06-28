@@ -1,5 +1,6 @@
 package upnvj.berima.v1.ui.listing
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
@@ -14,11 +15,14 @@ import upnvj.berima.v1.data.model.Listing
 import upnvj.berima.v1.data.model.Validation
 import upnvj.berima.v1.data.repository.AuthRepository
 import upnvj.berima.v1.data.repository.ListingRepository
+import upnvj.berima.v1.data.repository.StorageRepository
+import upnvj.berima.v1.ui.common.AppStrings
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateListingViewModel @Inject constructor(
     private val listingRepository: ListingRepository,
+    private val storageRepository: StorageRepository,
     private val authRepository: AuthRepository,
     private val auth: FirebaseAuth
 ) : ViewModel() {
@@ -40,6 +44,12 @@ class CreateListingViewModel @Inject constructor(
 
     private val _tags = MutableStateFlow("")
     val tags: StateFlow<String> = _tags.asStateFlow()
+
+    private val _selectedThumbnailUri = MutableStateFlow<Uri?>(null)
+    val selectedThumbnailUri: StateFlow<Uri?> = _selectedThumbnailUri.asStateFlow()
+
+    private val _isPolicyAccepted = MutableStateFlow(false)
+    val isPolicyAccepted: StateFlow<Boolean> = _isPolicyAccepted.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -70,6 +80,18 @@ class CreateListingViewModel @Inject constructor(
 
     fun onTagsChange(value: String) { _tags.value = value }
 
+    fun onThumbnailSelected(uri: Uri?) {
+        _selectedThumbnailUri.value = uri
+    }
+
+    fun removeThumbnail() {
+        _selectedThumbnailUri.value = null
+    }
+
+    fun onPolicyAcceptedChange(value: Boolean) {
+        _isPolicyAccepted.value = value
+    }
+
     fun submit() {
         val titleVal = _title.value.trim()
         val descVal = _description.value.trim()
@@ -84,6 +106,11 @@ class CreateListingViewModel @Inject constructor(
             return
         }
 
+        if (!_isPolicyAccepted.value) {
+            _error.value = AppStrings.LISTING_POLICY_ERROR
+            return
+        }
+
         val uid = auth.currentUser?.uid ?: run {
             _error.value = "Sesi berakhir, silakan login ulang"
             return
@@ -93,6 +120,15 @@ class CreateListingViewModel @Inject constructor(
             _isLoading.value = true
             val userResult = authRepository.getUser(uid)
             val user = userResult.getOrNull()
+            val listingId = listingRepository.newListingId()
+            val thumbnailUrl = _selectedThumbnailUri.value?.let { uri ->
+                val uploadResult = storageRepository.uploadListingThumbnail(uid, listingId, uri)
+                uploadResult.getOrElse {
+                    _isLoading.value = false
+                    _error.value = it.message ?: "Gagal mengunggah gambar listing"
+                    return@launch
+                }.downloadUrl
+            }
 
             val tagList = _tags.value
                 .split(",")
@@ -111,12 +147,14 @@ class CreateListingViewModel @Inject constructor(
                 category = _category.value,
                 price = priceVal,
                 deliveryTimeHours = deliveryVal,
+                thumbnailUrl = thumbnailUrl,
                 tags = tagList,
                 isActive = true,
+                policyAcceptedAt = Timestamp.now(),
                 createdAt = Timestamp.now()
             )
 
-            val result = listingRepository.createListing(listing)
+            val result = listingRepository.createListing(listing, listingId)
             _isLoading.value = false
             result.fold(
                 onSuccess = { _success.value = true },

@@ -3,6 +3,7 @@ package upnvj.berima.v1.data.repository
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -118,15 +119,18 @@ class ListingRepository @Inject constructor(
      * Creates a new listing. The document ID is generated client-side so we
      * can store it inside the document as `listingId`.
      */
-    suspend fun createListing(listing: Listing): Result<String> {
+    suspend fun createListing(listing: Listing, listingId: String? = null): Result<String> {
         return try {
-            val ref = listingsCollection.document()
+            val ref = listingId?.let { listingsCollection.document(it) }
+                ?: listingsCollection.document()
             ref.set(listing.copy(listingId = ref.id)).await()
             Result.success(ref.id)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
+
+    fun newListingId(): String = listingsCollection.document().id
 
     suspend fun updateListing(
         listingId: String,
@@ -137,8 +141,10 @@ class ListingRepository @Inject constructor(
         deliveryTimeHours: Int,
         tags: List<String>,
         thumbnailUrl: String?,
+        clearThumbnail: Boolean = false,
         sellerIdentityVerified: Boolean? = null,
-        sellerVerifiedSkillBadges: List<String>? = null
+        sellerVerifiedSkillBadges: List<String>? = null,
+        policyAcceptedAt: Timestamp? = null
     ): Result<Unit> {
         return try {
             val updates = mutableMapOf<String, Any?>(
@@ -149,7 +155,9 @@ class ListingRepository @Inject constructor(
                 "deliveryTimeHours" to deliveryTimeHours,
                 "tags" to tags
             )
-            if (thumbnailUrl != null) {
+            if (clearThumbnail) {
+                updates["thumbnailUrl"] = null
+            } else if (thumbnailUrl != null) {
                 updates["thumbnailUrl"] = thumbnailUrl
             }
             sellerIdentityVerified?.let {
@@ -157,6 +165,9 @@ class ListingRepository @Inject constructor(
             }
             sellerVerifiedSkillBadges?.let {
                 updates["sellerVerifiedSkillBadges"] = it
+            }
+            policyAcceptedAt?.let {
+                updates["policyAcceptedAt"] = it
             }
             listingsCollection.document(listingId).update(updates).await()
             Result.success(Unit)

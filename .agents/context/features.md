@@ -76,7 +76,7 @@ Bottom navigation items: **Home** (browse) | **Orders** | **Profile**
 ---
 
 ### ListingDetailScreen
-- Full-width thumbnail
+- Full-width thumbnail, using the uploaded listing image when available or the generated category fallback image when `thumbnailUrl` is null
 - Title, price (Rupiah format), delivery time estimate
 - Full description
 - Seller card: photo, name, average rating, total completed orders, identity badge when approved, and relevant skill badge when approved for the listing category
@@ -88,11 +88,12 @@ Bottom navigation items: **Home** (browse) | **Orders** | **Profile**
 ### CreateListingScreen / EditListingScreen
 - Required fields: title (max 60 chars), category (dropdown), description (max 500 chars),
   price (Rp), delivery time in hours (max 48)
-- Optional: thumbnail (from gallery), tags
+- Optional: one thumbnail image from gallery, tags
+- Thumbnail images upload to Firebase Storage and are stored publicly as `thumbnailUrl` on the listing; old listings without a thumbnail use generated category fallback images in the UI
 - Required service policy acknowledgement before submit/save
 - Validate all required fields before submit
 - On save: write to Firestore, navigate back to Profile
-- Owner can deactivate a listing through listing management UI
+- Owner can deactivate an active listing from Profile, ListingDetail, or EditListing
 - Do not expose hard delete in MVP client UI
 
 ---
@@ -160,6 +161,7 @@ Order revision is not part of the current PRD scope. Do not add revision statuse
 - "Pusat Verifikasi" entry with current identity/skill status summary
 - Portfolio preview section with "Kelola" entry to Portfolio management
 - "Listing Saya" section with own listings
+- Inactive own listings remain visible here with a `NONAKTIF` label
 - "Tambah Listing Baru" button
 - Edit Profile button
 - Logout button

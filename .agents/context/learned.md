@@ -3,6 +3,38 @@
 Document discoveries here as the project progresses.
 Each entry must include: what was learned, which file it affects (if any), and date.
 
+- [2026-06-28] Phase 11 PRD P4 listing/order polish shipped. Shared
+  `ListingFormContent` now includes a required service-policy acknowledgement
+  before Create/Edit save; both ViewModels validate it and write
+  `policyAcceptedAt`. Owner-only listing deactivation is exposed from Profile,
+  ListingDetail, and EditListing through existing `ListingRepository.setListingActive(false)`;
+  inactive listings remain visible to the owner with a `NONAKTIF` label while
+  public active-listing queries continue filtering them out. Order detail keeps
+  the existing status lifecycle and `Simulasi Bayar` action, but the status/action
+  copy now states that no real money is processed and Midtrans/payment gateway is
+  a future placeholder. Build verified with `./gradlew.bat :app:compileDebugKotlin`.
+  → Affects `ListingFormContent.kt`, `CreateListingViewModel.kt`,
+  `EditListingViewModel.kt`, `CreateListingScreen.kt`, `EditListingScreen.kt`,
+  `ListingDetailScreen.kt`, `ListingDetailViewModel.kt`, `ProfileScreen.kt`,
+  `ProfileViewModel.kt`, `ListingRepository.kt`, `OrderActions.kt`,
+  `AppStrings.kt`, `features.md`, and `AGENTS.md`.
+
+- [2026-06-28] Listing thumbnails are now supported end-to-end. Create/Edit Listing
+  use `ActivityResultContracts.GetContent("image/*")`, preview the selected image in
+  the shared `ListingFormContent`, upload via `StorageRepository.uploadListingThumbnail`
+  to `users/{uid}/listings/{listingId}/{filename}`, and store the public download URL
+  in `listings.thumbnailUrl`. Edit can replace or clear an existing thumbnail; no
+  storage path is stored on listings, so old thumbnail object cleanup is not automated.
+  Listings without an uploaded image now render generated category fallback PNGs from
+  `app/src/main/res/drawable-nodpi/listing_thumb_{academic,visual,data}.png` instead
+  of glyph-only placeholders. Build verified with `./gradlew.bat :app:assembleDebug`;
+  Storage rules verified with `firebase deploy --only storage --dry-run --project berima-74938`.
+  → Affects `StorageRepository.kt`, `ListingRepository.kt`, `CreateListingViewModel.kt`,
+  `EditListingViewModel.kt`, `CreateListingScreen.kt`, `EditListingScreen.kt`,
+  `ListingFormContent.kt`, `CategoryVisuals.kt`, `ListingCard.kt`,
+  `ListingDetailScreen.kt`, `CreateOrderScreen.kt`, `ProfileScreen.kt`,
+  `storage.rules`, `features.md`, `database.md`, `architecture.md`, and `AGENTS.md`.
+
 - [2026-06-28] Phase 10 PRD P3 portfolio and badge work shipped. Portfolio CRUD
   now uses a dedicated `PortfolioRepository` and one Profile-owned
   `PortfolioManagerScreen` for create/edit/delete, with optional image upload to

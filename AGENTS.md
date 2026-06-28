@@ -92,11 +92,11 @@ One agent session should update at minimum one item before ending.
 | HomeScreen + HomeViewModel | ✅ Done | Redesigned: surfaceRaised header band + personalized greeting, scrollable glyph category rail, featured rail, 2-col grid, skeleton loading, real empty state. Fixed shared-loading bug that blanked "Terbaru". Category-tinted ListingCard placeholders (shared). |
 | SearchScreen | ✅ Done | Client-side title filter, auto-focus, empty/no-results states |
 | ListingDetailScreen + ListingDetailViewModel | ✅ Done | Full detail view, seller card, reviews section, owner/buyer CTA |
-| CreateListingScreen + CreateListingViewModel | ✅ Done | Redesigned: renders shared `ListingFormContent` (3 labelled sections, char counters, multiline desc, Rp-prefixed price + live preview, bottom-sheet category picker). |
-| EditListingScreen | ✅ Done | Pre-filled form, renders the same shared `ListingFormContent` as Create. |
-| ListingCard composable (reusable) | ✅ Done | `ui/common/ListingCard.kt` |
+| CreateListingScreen + CreateListingViewModel | ✅ Done | Redesigned: renders shared `ListingFormContent` (3 labelled sections, char counters, multiline desc, Rp-prefixed price + live preview, bottom-sheet category picker). Now supports one gallery thumbnail upload to Storage. |
+| EditListingScreen | ✅ Done | Pre-filled form, renders the same shared `ListingFormContent` as Create. Existing thumbnail can be replaced or cleared. |
+| ListingCard composable (reusable) | ✅ Done | `ui/common/ListingCard.kt`; uses uploaded thumbnails when present and generated category fallback images when absent |
 | CategoryPicker composable (reusable) | ✅ Done | `ui/common/CategoryPicker.kt` — `CategoryPickerField` + bottom sheet, replaced old `CategoryDropdown`. Reuse for any category selection. |
-| ListingFormContent composable (reusable) | ✅ Done | `ui/listing/ListingFormContent.kt` — stateless full listing form shared by Create + Edit. |
+| ListingFormContent composable (reusable) | ✅ Done | `ui/listing/ListingFormContent.kt` — stateless full listing form shared by Create + Edit, including thumbnail picker/preview. |
 
 ### Phase 3 — Order Flow
 | Task | Status | Notes |
@@ -138,7 +138,7 @@ One agent session should update at minimum one item before ending.
 |---|---|---|
 | Verification and portfolio models/constants | ✅ Done | Added `VerificationSubmission`, `PortfolioItem`, verification constants, user badge fields, listing badge/policy fields |
 | Firestore rules for verification, portfolio, and protected badge fields | 🔄 In progress | Source updated: users cannot self-approve/edit badge fields; submissions are owner-only; portfolio is auth-readable owner-writable. Physical-device QA still gets PERMISSION_DENIED, so deploy/verify against Firebase project remains pending |
-| Storage rules configured and deployed | 🔄 In progress | `storage.rules` + `firebase.json` storage config added locally; Firebase CLI dry-run passed; deploy still pending |
+| Storage rules configured and deployed | 🔄 In progress | `storage.rules` + `firebase.json` storage config added locally; Firebase CLI dry-run passed, including listing thumbnail path; deploy still pending |
 | Firestore composite indexes for verification and portfolio | ✅ Done | Added indexes from PRD Section 5 to `firestore.indexes.json`; Firebase CLI dry-run passed |
 
 ### Phase 8 — PRD P1: Auth & Profile Entry Points
@@ -167,9 +167,9 @@ One agent session should update at minimum one item before ending.
 ### Phase 11 — PRD P4: Listing & Order Polish
 | Task | Status | Notes |
 |---|---|---|
-| Service policy acknowledgement | ⬜ Not started | Required in Create/Edit Listing; prohibits joki/plagiarism/document falsification |
-| Listing deactivation UI | ⬜ Not started | Use existing `setListingActive`; do not expose hard delete in MVP client |
-| Escrow simulation copy update | ⬜ Not started | Keep existing lifecycle; clarify no real payment is processed |
+| Service policy acknowledgement | ✅ Done | `ListingFormContent` now requires a policy checkbox before Create/Edit save and writes `policyAcceptedAt` |
+| Listing deactivation UI | ✅ Done | Profile, ListingDetail, and EditListing expose owner-only deactivation through existing `setListingActive`; inactive listings are labelled in own Profile |
+| Escrow simulation copy update | ✅ Done | Order detail/action copy keeps `Simulasi Bayar` but clarifies no real money is processed and Midtrans/payment gateway is future placeholder |
 
 **Status legend:** ⬜ Not started · 🔄 In progress · ✅ Done · ⚠️ Blocked
 
@@ -177,6 +177,20 @@ One agent session should update at minimum one item before ending.
 
 ## Learned
 
+- [2026-06-28] Phase 11 P4 listing/order polish shipped. Create/Edit Listing now
+  require a service-policy checkbox before save, write `policyAcceptedAt`, and use
+  concise Bahasa Indonesia copy prohibiting joki, plagiarism, document
+  falsification, and illegal work. Owners can deactivate active listings from
+  Profile, ListingDetail, or EditListing via `ListingRepository.setListingActive`;
+  inactive listings remain visible in the owner's Profile with a `NONAKTIF` label
+  but are hidden from public active-listing queries. Order detail keeps the current
+  lifecycle and `Simulasi Bayar` action while clarifying that MVP payment is a demo
+  with no real money processed.
+- [2026-06-28] Listing thumbnails now support user gallery upload. Create/Edit
+  preview one selected image, upload it to `users/{uid}/listings/{listingId}/{filename}`,
+  and store the public URL in `listings.thumbnailUrl`; edit can replace or clear the
+  thumbnail. Generated fallback images live in `app/src/main/res/drawable-nodpi/`
+  for academic/visual/data listings when `thumbnailUrl` is null.
 - [2026-06-27] Phase 8 uses Android Credential Manager + Google ID token for
   Google auth. Runtime login requires Firebase Google provider and a Web Client
   ID in `app/src/main/res/values/strings.xml` as `berima_web_client_id`; current

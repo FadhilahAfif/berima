@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,12 +28,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,7 +60,7 @@ import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.common.PortfolioSection
 import upnvj.berima.v1.ui.common.VerificationBadgeRow
 import upnvj.berima.v1.ui.common.categoryColors
-import upnvj.berima.v1.ui.common.categoryIconRes
+import upnvj.berima.v1.ui.common.categoryThumbnailRes
 import upnvj.berima.v1.ui.common.formatRupiah
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 import java.util.Locale
@@ -78,14 +82,46 @@ fun ProfileScreen(
     val portfolioItems by viewModel.portfolioItems.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
+    val success by viewModel.success.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val berimaColors = LocalBerimaColors.current
+    var deactivateCandidate by remember { mutableStateOf<Listing?>(null) }
 
     LaunchedEffect(error) {
         error?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearError()
         }
+    }
+
+    LaunchedEffect(success) {
+        success?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearSuccess()
+        }
+    }
+
+    deactivateCandidate?.let { listing ->
+        AlertDialog(
+            onDismissRequest = { deactivateCandidate = null },
+            title = { Text(AppStrings.LISTING_DEACTIVATE_TITLE) },
+            text = { Text(AppStrings.LISTING_DEACTIVATE_BODY) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deactivateListing(listing.listingId)
+                        deactivateCandidate = null
+                    }
+                ) {
+                    Text(AppStrings.LISTING_DEACTIVATE_CONFIRM)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deactivateCandidate = null }) {
+                    Text(AppStrings.LISTING_DEACTIVATE_CANCEL)
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -158,6 +194,7 @@ fun ProfileScreen(
                     onNavigateToVerificationCenter = onNavigateToVerificationCenter,
                     onNavigateToPortfolio = onNavigateToPortfolio,
                     onListingClick = onListingClick,
+                    onDeactivateListing = { deactivateCandidate = it },
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
@@ -199,6 +236,7 @@ private fun ProfileContent(
     onNavigateToVerificationCenter: () -> Unit,
     onNavigateToPortfolio: () -> Unit,
     onListingClick: (String) -> Unit,
+    onDeactivateListing: (Listing) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -279,7 +317,8 @@ private fun ProfileContent(
                 listings.forEach { listing ->
                     ProfileListingRow(
                         listing = listing,
-                        onClick = { onListingClick(listing.listingId) }
+                        onClick = { onListingClick(listing.listingId) },
+                        onDeactivate = { onDeactivateListing(listing) }
                     )
                 }
             }
@@ -596,6 +635,7 @@ private fun StatColumn(
 private fun ProfileListingRow(
     listing: Listing,
     onClick: () -> Unit,
+    onDeactivate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val berimaColors = LocalBerimaColors.current
@@ -628,11 +668,11 @@ private fun ProfileListingRow(
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                Icon(
-                    painter = painterResource(categoryIconRes(listing.category)),
+                androidx.compose.foundation.Image(
+                    painter = painterResource(categoryThumbnailRes(listing.category)),
                     contentDescription = null,
-                    tint = category.glyph,
-                    modifier = Modifier.size(28.dp)
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
@@ -671,14 +711,40 @@ private fun ProfileListingRow(
                     )
                 }
             }
+            if (!listing.isActive) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = AppStrings.LISTING_INACTIVE_LABEL,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(9999.dp))
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                )
+            }
         }
 
-        Icon(
-            painter = painterResource(R.drawable.ic_chevron_right),
-            contentDescription = null,
-            tint = berimaColors.textSecondary,
-            modifier = Modifier.size(22.dp)
-        )
+        Column(horizontalAlignment = Alignment.End) {
+            Icon(
+                painter = painterResource(R.drawable.ic_chevron_right),
+                contentDescription = null,
+                tint = berimaColors.textSecondary,
+                modifier = Modifier.size(22.dp)
+            )
+            if (listing.isActive) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = AppStrings.LISTING_DEACTIVATE_SHORT,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(9999.dp))
+                        .clickable(onClick = onDeactivate)
+                        .padding(horizontal = 6.dp, vertical = 4.dp)
+                )
+            }
+        }
     }
 }
 
@@ -792,6 +858,7 @@ private fun ProfileScreenPreview() {
                 onNavigateToVerificationCenter = {},
                 onNavigateToPortfolio = {},
                 onListingClick = {},
+                onDeactivateListing = {},
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)

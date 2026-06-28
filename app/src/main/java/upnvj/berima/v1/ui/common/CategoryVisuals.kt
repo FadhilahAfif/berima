@@ -18,16 +18,35 @@ import upnvj.berima.v1.ui.theme.LocalBerimaColors
 data class CategoryVisual(
     val id: String?,
     val label: String,
-    @DrawableRes val iconRes: Int?,
+    @param:DrawableRes val iconRes: Int?,
+    @param:DrawableRes val thumbnailRes: Int?,
     val fullLabel: String = label
 )
 
 /** Ordered list for the Home category rail. `null` id = "Semua" (all), shown text-only. */
 val categoryVisuals: List<CategoryVisual> = listOf(
-    CategoryVisual(null, "Semua", null),
-    CategoryVisual(Category.ACADEMIC, "Akademik", R.drawable.ic_category_academic, AppStrings.CATEGORY_ACADEMIC),
-    CategoryVisual(Category.VISUAL, "Desain", R.drawable.ic_category_visual, AppStrings.CATEGORY_VISUAL),
-    CategoryVisual(Category.DATA, "Data", R.drawable.ic_category_data, AppStrings.CATEGORY_DATA),
+    CategoryVisual(null, "Semua", null, null),
+    CategoryVisual(
+        Category.ACADEMIC,
+        "Akademik",
+        R.drawable.ic_category_academic,
+        R.drawable.listing_thumb_academic,
+        AppStrings.CATEGORY_ACADEMIC
+    ),
+    CategoryVisual(
+        Category.VISUAL,
+        "Desain",
+        R.drawable.ic_category_visual,
+        R.drawable.listing_thumb_visual,
+        AppStrings.CATEGORY_VISUAL
+    ),
+    CategoryVisual(
+        Category.DATA,
+        "Data",
+        R.drawable.ic_category_data,
+        R.drawable.listing_thumb_data,
+        AppStrings.CATEGORY_DATA
+    ),
 )
 
 /** Concrete (selectable) categories only, excluding the "Semua" sentinel. Used by the category picker. */
@@ -44,6 +63,11 @@ private val fallbackVisual: CategoryVisual
 fun categoryIconRes(category: String): Int =
     (categoryVisuals.firstOrNull { it.id == category } ?: fallbackVisual).iconRes
         ?: fallbackVisual.iconRes!!
+
+@DrawableRes
+fun categoryThumbnailRes(category: String): Int =
+    (categoryVisuals.firstOrNull { it.id == category } ?: fallbackVisual).thumbnailRes
+        ?: fallbackVisual.thumbnailRes!!
 
 fun categoryLabel(category: String): String =
     (categoryVisuals.firstOrNull { it.id == category } ?: fallbackVisual).label

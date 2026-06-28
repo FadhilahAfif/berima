@@ -57,6 +57,11 @@ service firebase.storage {
       allow write: if isOwner(userId) && isImageUpload();
     }
 
+    match /users/{userId}/listings/{listingId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId) && isImageUpload();
+    }
+
     match /users/{userId}/profile/{fileName} {
       allow read: if isSignedIn();
       allow write: if isOwner(userId) && isImageUpload();

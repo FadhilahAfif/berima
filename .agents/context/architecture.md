@@ -34,8 +34,8 @@ app/src/main/java/upnvj/berima/v1/
 │   ├── model/             # User, Listing, Order, Review, Message, VerificationSubmission,
 │   │                      # PortfolioItem, Constants
 │   ├── repository/        # AuthRepository, ListingRepository, OrderRepository,
-│   │                      # ReviewRepository, MessageRepository, VerificationRepository,
-│   │                      # PortfolioRepository
+│   │                      # ReviewRepository, MessageRepository, StorageRepository,
+│   │                      # VerificationRepository, PortfolioRepository
 │   └── remote/            # Optional Firebase datasource wrappers (not created yet)
 ├── ui/
 │   ├── BerimaApp.kt       # Root composable, owns NavController + Scaffold

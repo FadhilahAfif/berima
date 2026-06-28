@@ -1,5 +1,7 @@
 package upnvj.berima.v1.ui.listing
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,11 +44,18 @@ fun CreateListingScreen(
     val price by viewModel.price.collectAsStateWithLifecycle()
     val deliveryTimeHours by viewModel.deliveryTimeHours.collectAsStateWithLifecycle()
     val tags by viewModel.tags.collectAsStateWithLifecycle()
+    val selectedThumbnailUri by viewModel.selectedThumbnailUri.collectAsStateWithLifecycle()
+    val isPolicyAccepted by viewModel.isPolicyAccepted.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val success by viewModel.success.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val berimaColors = LocalBerimaColors.current
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        viewModel.onThumbnailSelected(uri)
+    }
 
     LaunchedEffect(success) {
         if (success) onNavigateBack()
@@ -107,6 +116,13 @@ fun CreateListingScreen(
                 onDeliveryTimeChange = viewModel::onDeliveryTimeChange,
                 tags = tags,
                 onTagsChange = viewModel::onTagsChange,
+                selectedThumbnailUri = selectedThumbnailUri,
+                existingThumbnailUrl = null,
+                isRemovingExistingThumbnail = false,
+                onPickThumbnail = { imagePicker.launch("image/*") },
+                onRemoveThumbnail = viewModel::removeThumbnail,
+                isPolicyAccepted = isPolicyAccepted,
+                onPolicyAcceptedChange = viewModel::onPolicyAcceptedChange,
                 isLoading = isLoading,
                 submitLabel = AppStrings.LISTING_SAVE_CREATE,
                 onSubmit = viewModel::submit
@@ -164,6 +180,13 @@ private fun CreateListingScreenPreview() {
                     onDeliveryTimeChange = {},
                     tags = "desain, logo, branding",
                     onTagsChange = {},
+                    selectedThumbnailUri = null,
+                    existingThumbnailUrl = null,
+                    isRemovingExistingThumbnail = false,
+                    onPickThumbnail = {},
+                    onRemoveThumbnail = {},
+                    isPolicyAccepted = true,
+                    onPolicyAcceptedChange = {},
                     isLoading = false,
                     submitLabel = AppStrings.LISTING_SAVE_CREATE,
                     onSubmit = {}
