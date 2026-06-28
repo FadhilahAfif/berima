@@ -13,6 +13,7 @@ import upnvj.berima.v1.data.model.User
 import upnvj.berima.v1.data.repository.AuthRepository
 import upnvj.berima.v1.data.repository.ListingRepository
 import upnvj.berima.v1.data.repository.PortfolioRepository
+import upnvj.berima.v1.ui.common.AppStrings
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,6 +39,9 @@ class ProfileViewModel @Inject constructor(
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    private val _success = MutableStateFlow<String?>(null)
+    val success: StateFlow<String?> = _success.asStateFlow()
 
     init {
         val uid = currentUserId
@@ -73,7 +77,21 @@ class ProfileViewModel @Inject constructor(
         authRepository.signOut()
     }
 
+    fun deactivateListing(listingId: String) {
+        viewModelScope.launch {
+            val result = listingRepository.setListingActive(listingId, false)
+            result.fold(
+                onSuccess = { _success.value = AppStrings.LISTING_DEACTIVATE_SUCCESS },
+                onFailure = { _error.value = it.message }
+            )
+        }
+    }
+
     fun clearError() {
         _error.value = null
+    }
+
+    fun clearSuccess() {
+        _success.value = null
     }
 }

@@ -111,6 +111,51 @@ class StorageRepository @Inject constructor(
         portfolioItemId: String,
         uri: Uri
     ): Result<PublicImageUploadMetadata> {
+        return uploadPublicUserImage(
+            userId = userId,
+            ownerPath = "portfolio/$portfolioItemId",
+            uri = uri,
+            fallbackPrefix = "portofolio",
+            typeErrorMessage = "File portofolio harus berupa gambar"
+        )
+    }
+
+    suspend fun uploadListingThumbnail(
+        userId: String,
+        listingId: String,
+        uri: Uri
+    ): Result<PublicImageUploadMetadata> {
+        return uploadPublicUserImage(
+            userId = userId,
+            ownerPath = "listings/$listingId",
+            uri = uri,
+            fallbackPrefix = "listing",
+            typeErrorMessage = "Gambar listing harus berupa file gambar"
+        )
+    }
+
+    /**
+     * Deletes a previously uploaded file by Storage path.
+     *
+     * The caller must only pass owner-owned paths that are allowed by
+     * `storage.rules`.
+     */
+    suspend fun deleteFile(storagePath: String): Result<Unit> {
+        return try {
+            storage.reference.child(storagePath).delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private suspend fun uploadPublicUserImage(
+        userId: String,
+        ownerPath: String,
+        uri: Uri,
+        fallbackPrefix: String,
+        typeErrorMessage: String
+    ): Result<PublicImageUploadMetadata> {
         return try {
             val size = fileSize(uri)
             if (size in 1..Long.MAX_VALUE && size > Validation.MAX_STORAGE_IMAGE_BYTES) {
@@ -121,12 +166,12 @@ class StorageRepository @Inject constructor(
             val contentType = context.contentResolver.getType(uri)
             if (contentType != null && !contentType.startsWith("image/")) {
                 return Result.failure(
-                    IllegalArgumentException("File portofolio harus berupa gambar")
+                    IllegalArgumentException(typeErrorMessage)
                 )
             }
             val fileName = displayName(uri)
-                ?: "portofolio-${System.currentTimeMillis()}"
-            val storagePath = "users/$userId/portfolio/$portfolioItemId/$fileName"
+                ?: "$fallbackPrefix-${System.currentTimeMillis()}"
+            val storagePath = "users/$userId/$ownerPath/$fileName"
             val ref = storage.reference.child(storagePath)
             ref.putFile(uri).await()
             Result.success(
@@ -137,15 +182,6 @@ class StorageRepository @Inject constructor(
                     contentType = contentType
                 )
             )
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun deleteFile(storagePath: String): Result<Unit> {
-        return try {
-            storage.reference.child(storagePath).delete().await()
-            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

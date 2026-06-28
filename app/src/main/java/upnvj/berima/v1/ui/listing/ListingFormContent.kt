@@ -1,23 +1,44 @@
 package upnvj.berima.v1.ui.listing
 
+import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.Role
+import coil.compose.AsyncImage
 import upnvj.berima.v1.data.model.Validation
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.common.BerimaTextField
 import upnvj.berima.v1.ui.common.CategoryPickerField
 import upnvj.berima.v1.ui.common.CounterText
+import upnvj.berima.v1.ui.common.categoryThumbnailRes
 import upnvj.berima.v1.ui.common.formatRupiahInput
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 
@@ -48,6 +69,13 @@ fun ListingFormContent(
     onDeliveryTimeChange: (String) -> Unit,
     tags: String,
     onTagsChange: (String) -> Unit,
+    selectedThumbnailUri: Uri?,
+    existingThumbnailUrl: String?,
+    isRemovingExistingThumbnail: Boolean,
+    onPickThumbnail: () -> Unit,
+    onRemoveThumbnail: () -> Unit,
+    isPolicyAccepted: Boolean,
+    onPolicyAcceptedChange: (Boolean) -> Unit,
     isLoading: Boolean,
     submitLabel: String,
     onSubmit: () -> Unit,
@@ -137,6 +165,15 @@ fun ListingFormContent(
         Spacer(Modifier.height(24.dp))
 
         FormSection(title = AppStrings.LISTING_SECTION_EXTRA) {
+            ListingImagePicker(
+                category = category,
+                selectedThumbnailUri = selectedThumbnailUri,
+                existingThumbnailUrl = existingThumbnailUrl,
+                isRemovingExistingThumbnail = isRemovingExistingThumbnail,
+                onPickThumbnail = onPickThumbnail,
+                onRemoveThumbnail = onRemoveThumbnail
+            )
+            Spacer(Modifier.height(14.dp))
             BerimaTextField(
                 value = tags,
                 onValueChange = onTagsChange,
@@ -145,16 +182,179 @@ fun ListingFormContent(
             )
         }
 
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(24.dp))
+
+        PolicyAcknowledgement(
+            isChecked = isPolicyAccepted,
+            onCheckedChange = onPolicyAcceptedChange
+        )
+
+        Spacer(Modifier.height(20.dp))
 
         BerimaButton(
             text = submitLabel,
             onClick = onSubmit,
             isLoading = isLoading,
+            enabled = isPolicyAccepted,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun PolicyAcknowledgement(
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    val shape = RoundedCornerShape(12.dp)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(berimaColors.surfaceRaised)
+            .border(1.dp, berimaColors.borderSubtle, shape)
+            .toggleable(
+                value = isChecked,
+                role = Role.Checkbox,
+                onValueChange = onCheckedChange
+            )
+            .padding(horizontal = 10.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Checkbox(
+            checked = isChecked,
+            onCheckedChange = null,
+            colors = CheckboxDefaults.colors(
+                checkedColor = MaterialTheme.colorScheme.primary,
+                uncheckedColor = berimaColors.textSecondary
+            ),
+            modifier = Modifier.padding(top = 2.dp)
+        )
+        Spacer(Modifier.width(8.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = AppStrings.LISTING_POLICY_TITLE,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = AppStrings.LISTING_POLICY_BODY,
+                style = MaterialTheme.typography.bodyMedium,
+                color = berimaColors.textSecondary
+            )
+        }
+    }
+}
+
+@Composable
+private fun ListingImagePicker(
+    category: String,
+    selectedThumbnailUri: Uri?,
+    existingThumbnailUrl: String?,
+    isRemovingExistingThumbnail: Boolean,
+    onPickThumbnail: () -> Unit,
+    onRemoveThumbnail: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    val existingModel = existingThumbnailUrl.takeUnless { isRemovingExistingThumbnail }
+    val imageModel: Any? = selectedThumbnailUri ?: existingModel
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(berimaColors.surfaceRaised)
+            .border(1.dp, berimaColors.borderSubtle, RoundedCornerShape(12.dp))
+            .padding(12.dp)
+    ) {
+        Text(
+            text = AppStrings.LISTING_IMAGE_TITLE,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(82.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                contentAlignment = Alignment.Center
+            ) {
+                if (imageModel == null) {
+                    androidx.compose.foundation.Image(
+                        painter = painterResource(categoryThumbnailRes(category)),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    AsyncImage(
+                        model = imageModel,
+                        contentDescription = AppStrings.LISTING_IMAGE_TITLE,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = if (imageModel == null) {
+                        AppStrings.LISTING_IMAGE_EMPTY
+                    } else {
+                        AppStrings.LISTING_IMAGE_ATTACHED
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = AppStrings.LISTING_IMAGE_HELP,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = berimaColors.textSecondary,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        Spacer(Modifier.height(10.dp))
+        Row {
+            Text(
+                text = if (imageModel == null) {
+                    AppStrings.LISTING_PICK_IMAGE
+                } else {
+                    AppStrings.LISTING_CHANGE_IMAGE
+                },
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(9999.dp))
+                    .clickable(onClick = onPickThumbnail)
+                    .padding(vertical = 6.dp)
+            )
+            if (imageModel != null) {
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = AppStrings.LISTING_REMOVE_IMAGE,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(9999.dp))
+                        .clickable(onClick = onRemoveThumbnail)
+                        .padding(vertical = 6.dp)
+                )
+            }
+        }
     }
 }
 
@@ -174,5 +374,3 @@ private fun FormSection(
         content()
     }
 }
-
-

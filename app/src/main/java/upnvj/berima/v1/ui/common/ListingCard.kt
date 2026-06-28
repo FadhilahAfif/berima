@@ -158,13 +158,11 @@ private fun ListingThumbnail(
                 modifier = Modifier.fillMaxSize()
             )
         } else {
-            Icon(
-                painter = painterResource(categoryIconRes(listing.category)),
+            androidx.compose.foundation.Image(
+                painter = painterResource(categoryThumbnailRes(listing.category)),
                 contentDescription = null,
-                tint = category.glyph.copy(alpha = 0.32f),
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(40.dp)
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
             )
             CategoryTag(
                 label = categoryLabel(listing.category),

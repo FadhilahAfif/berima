@@ -42,6 +42,7 @@ category:             String      // "academic" | "visual" | "data"
 price:                Long        // in Rupiah, use Long not Double
 deliveryTimeHours:    Int         // max 48
 thumbnailUrl:         String?     // Firebase Storage URL
+thumbnailStoragePath: String?     // Firebase Storage path for cleanup
 tags:                 List<String>
 isActive:             Boolean     // default true
 sellerIdentityVerified: Boolean   // denormalized display helper
@@ -201,6 +202,7 @@ Storage paths:
 users/{userId}/verification/identity/{submissionId}/{filename}
 users/{userId}/verification/skill/{submissionId}/{filename}
 users/{userId}/portfolio/{portfolioItemId}/{filename}
+users/{userId}/listings/{listingId}/{filename}
 users/{userId}/profile/{filename}
 orders/{orderId}/result/{filename}
 ```
@@ -210,6 +212,7 @@ Required behavior:
 - Skill evidence files under `verification/skill` are private to the owner from the app.
 - Admin inspection happens through Firebase Console project access.
 - Portfolio images can be readable by authenticated users.
+- Listing thumbnail images can be readable by authenticated users and writable only by the listing owner.
 - Profile photos remain readable where needed for profile/listing display.
 - Order result files must be accessible only to the order buyer and seller.
 

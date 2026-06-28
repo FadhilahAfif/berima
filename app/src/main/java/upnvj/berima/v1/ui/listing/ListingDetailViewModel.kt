@@ -20,6 +20,7 @@ import upnvj.berima.v1.data.repository.AuthRepository
 import upnvj.berima.v1.data.repository.ListingRepository
 import upnvj.berima.v1.data.repository.ReviewRepository
 import upnvj.berima.v1.navigation.Screen
+import upnvj.berima.v1.ui.common.AppStrings
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +46,9 @@ class ListingDetailViewModel @Inject constructor(
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    private val _success = MutableStateFlow<String?>(null)
+    val success: StateFlow<String?> = _success.asStateFlow()
 
     val reviews: StateFlow<List<Review>> = reviewRepository
         .getReviewsForListing(listingId)
@@ -85,5 +89,19 @@ class ListingDetailViewModel @Inject constructor(
 
     fun clearError() {
         _error.value = null
+    }
+
+    fun deactivateListing() {
+        viewModelScope.launch {
+            val result = listingRepository.setListingActive(listingId, false)
+            result.fold(
+                onSuccess = { _success.value = AppStrings.LISTING_DEACTIVATE_SUCCESS },
+                onFailure = { _error.value = it.message }
+            )
+        }
+    }
+
+    fun clearSuccess() {
+        _success.value = null
     }
 }

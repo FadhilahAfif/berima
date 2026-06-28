@@ -1,8 +1,11 @@
 package upnvj.berima.v1.ui.listing
 
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,15 +14,21 @@ import kotlinx.coroutines.launch
 import upnvj.berima.v1.data.model.Validation
 import upnvj.berima.v1.data.repository.AuthRepository
 import upnvj.berima.v1.data.repository.ListingRepository
+import upnvj.berima.v1.data.repository.StorageRepository
 import upnvj.berima.v1.navigation.Screen
+import upnvj.berima.v1.ui.common.AppStrings
 import javax.inject.Inject
 
 @HiltViewModel
 class EditListingViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val listingRepository: ListingRepository,
+    private val storageRepository: StorageRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
+    companion object {
+        private const val TAG = "EditListingViewModel"
+    }
 
     private val listingId: String =
         checkNotNull(savedStateHandle[Screen.EditListing.ARG_LISTING_ID])
@@ -41,6 +50,24 @@ class EditListingViewModel @Inject constructor(
 
     private val _tags = MutableStateFlow("")
     val tags: StateFlow<String> = _tags.asStateFlow()
+
+    private val _existingThumbnailUrl = MutableStateFlow<String?>(null)
+    val existingThumbnailUrl: StateFlow<String?> = _existingThumbnailUrl.asStateFlow()
+
+    private val _existingThumbnailStoragePath = MutableStateFlow<String?>(null)
+    val existingThumbnailStoragePath: StateFlow<String?> = _existingThumbnailStoragePath.asStateFlow()
+
+    private val _selectedThumbnailUri = MutableStateFlow<Uri?>(null)
+    val selectedThumbnailUri: StateFlow<Uri?> = _selectedThumbnailUri.asStateFlow()
+
+    private val _removeExistingThumbnail = MutableStateFlow(false)
+    val removeExistingThumbnail: StateFlow<Boolean> = _removeExistingThumbnail.asStateFlow()
+
+    private val _isPolicyAccepted = MutableStateFlow(false)
+    val isPolicyAccepted: StateFlow<Boolean> = _isPolicyAccepted.asStateFlow()
+
+    private val _isActive = MutableStateFlow(true)
+    val isActive: StateFlow<Boolean> = _isActive.asStateFlow()
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -68,6 +95,9 @@ class EditListingViewModel @Inject constructor(
                         _price.value = it.price.toString()
                         _deliveryTimeHours.value = it.deliveryTimeHours.toString()
                         _tags.value = it.tags.joinToString(", ")
+                        _existingThumbnailUrl.value = it.thumbnailUrl
+                        _existingThumbnailStoragePath.value = it.thumbnailStoragePath
+                        _isActive.value = it.isActive
                     }
                 },
                 onFailure = { _error.value = it.message }
@@ -96,6 +126,20 @@ class EditListingViewModel @Inject constructor(
 
     fun onTagsChange(value: String) { _tags.value = value }
 
+    fun onThumbnailSelected(uri: Uri?) {
+        _selectedThumbnailUri.value = uri
+        if (uri != null) _removeExistingThumbnail.value = false
+    }
+
+    fun removeThumbnail() {
+        _selectedThumbnailUri.value = null
+        _removeExistingThumbnail.value = _existingThumbnailUrl.value != null
+    }
+
+    fun onPolicyAcceptedChange(value: Boolean) {
+        _isPolicyAccepted.value = value
+    }
+
     fun submit() {
         val titleVal = _title.value.trim()
         val descVal = _description.value.trim()
@@ -110,6 +154,11 @@ class EditListingViewModel @Inject constructor(
             return
         }
 
+        if (!_isPolicyAccepted.value) {
+            _error.value = AppStrings.LISTING_POLICY_ERROR
+            return
+        }
+
         val tagList = _tags.value
             .split(",")
             .map { it.trim() }
@@ -117,8 +166,28 @@ class EditListingViewModel @Inject constructor(
 
         viewModelScope.launch {
             _isLoading.value = true
-            val user = authRepository.currentUserId
-                ?.let { authRepository.getUser(it).getOrNull() }
+            val uid = authRepository.currentUserId
+            if (uid == null) {
+                _isLoading.value = false
+                _error.value = "Sesi berakhir, silakan login ulang"
+                return@launch
+            }
+            val user = authRepository.getUser(uid).getOrNull()
+            val previousThumbnailStoragePath = _existingThumbnailStoragePath.value
+            var uploadedThumbnailPath: String? = null
+            val thumbnailUpload = _selectedThumbnailUri.value?.let { uri ->
+                val uploadResult = storageRepository.uploadListingThumbnail(uid, listingId, uri)
+                uploadResult.getOrElse {
+                    _isLoading.value = false
+                    Log.e(TAG, "Gagal mengunggah thumbnail listing", it)
+                    _error.value = "Gagal mengunggah gambar listing"
+                    return@launch
+                }
+            }
+            uploadedThumbnailPath = thumbnailUpload?.storagePath
+            val thumbnailUrl = thumbnailUpload?.downloadUrl
+            val thumbnailStoragePath = thumbnailUpload?.storagePath
+            val clearThumbnail = _removeExistingThumbnail.value && thumbnailUpload == null
             val result = listingRepository.updateListing(
                 listingId = listingId,
                 title = titleVal,
@@ -127,13 +196,45 @@ class EditListingViewModel @Inject constructor(
                 price = priceVal,
                 deliveryTimeHours = deliveryVal,
                 tags = tagList,
-                thumbnailUrl = null,
+                thumbnailUrl = thumbnailUrl,
+                thumbnailStoragePath = thumbnailStoragePath,
+                clearThumbnail = clearThumbnail,
                 sellerIdentityVerified = user?.isIdentityVerified,
-                sellerVerifiedSkillBadges = user?.verifiedSkillBadges
+                sellerVerifiedSkillBadges = user?.verifiedSkillBadges,
+                policyAcceptedAt = Timestamp.now()
             )
             _isLoading.value = false
             result.fold(
-                onSuccess = { _success.value = true },
+                onSuccess = {
+                    if (!previousThumbnailStoragePath.isNullOrBlank() &&
+                        previousThumbnailStoragePath != thumbnailStoragePath
+                    ) {
+                        storageRepository.deleteFile(previousThumbnailStoragePath)
+                    }
+                    _existingThumbnailUrl.value = thumbnailUrl ?: if (clearThumbnail) null else _existingThumbnailUrl.value
+                    _existingThumbnailStoragePath.value = thumbnailStoragePath ?: if (clearThumbnail) null else _existingThumbnailStoragePath.value
+                    _success.value = true
+                },
+                onFailure = {
+                    uploadedThumbnailPath?.let { path ->
+                        storageRepository.deleteFile(path)
+                    }
+                    _error.value = it.message
+                }
+            )
+        }
+    }
+
+    fun deactivateListing() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = listingRepository.setListingActive(listingId, false)
+            _isLoading.value = false
+            result.fold(
+                onSuccess = {
+                    _isActive.value = false
+                    _success.value = true
+                },
                 onFailure = { _error.value = it.message }
             )
         }

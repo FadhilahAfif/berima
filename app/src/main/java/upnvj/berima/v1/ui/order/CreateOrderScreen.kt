@@ -50,6 +50,7 @@ import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Listing
 import upnvj.berima.v1.data.model.Validation
 import upnvj.berima.v1.ui.common.BerimaButton
+import upnvj.berima.v1.ui.common.categoryThumbnailRes
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -286,11 +287,11 @@ private fun ListingSummaryCard(
                     modifier = Modifier.size(64.dp)
                 )
             } else {
-                Icon(
-                    painter = painterResource(R.drawable.ic_berima_mark),
+                androidx.compose.foundation.Image(
+                    painter = painterResource(categoryThumbnailRes(listing.category)),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.size(24.dp)
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }

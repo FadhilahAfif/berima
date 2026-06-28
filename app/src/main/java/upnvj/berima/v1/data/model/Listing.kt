@@ -20,6 +20,7 @@ data class Listing(
     val price: Long = 0L,
     val deliveryTimeHours: Int = 24,
     val thumbnailUrl: String? = null,
+    val thumbnailStoragePath: String? = null,
     val tags: List<String> = emptyList(),
     val isActive: Boolean = true,
     val sellerIdentityVerified: Boolean = false,

@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import upnvj.berima.v1.data.model.OrderStatus
+import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.order.OrderAction
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
@@ -47,7 +48,7 @@ fun OrderActions(
             OrderStatus.PENDING -> {
                 if (isBuyer) {
                     DangerOutlinedButton(
-                        text = "Batalkan",
+                        text = AppStrings.ORDER_ACTION_CANCEL,
                         onClick = { onAction(OrderAction.Cancel) },
                         enabled = !isLoading,
                         modifier = Modifier.fillMaxWidth()
@@ -70,12 +71,12 @@ fun OrderActions(
                                 .height(52.dp)
                         ) {
                             Text(
-                                text = "Tolak",
+                                text = AppStrings.ORDER_ACTION_REJECT,
                                 style = MaterialTheme.typography.labelLarge
                             )
                         }
                         BerimaButton(
-                            text = "Terima",
+                            text = AppStrings.ORDER_ACTION_ACCEPT,
                             onClick = { onAction(OrderAction.Accept) },
                             isLoading = isLoading,
                             modifier = Modifier.weight(1f)
@@ -86,10 +87,10 @@ fun OrderActions(
 
             OrderStatus.IN_PROGRESS -> {
                 if (isBuyer) {
-                    Callout(text = "Menunggu hasil dari penjual...")
+                    Callout(text = AppStrings.ORDER_ACTION_WAITING_RESULT)
                 } else {
                     BerimaButton(
-                        text = "Unggah Hasil",
+                        text = AppStrings.ORDER_ACTION_UPLOAD_RESULT,
                         onClick = onPickFile,
                         isLoading = isLoading,
                         modifier = Modifier.fillMaxWidth()
@@ -100,39 +101,39 @@ fun OrderActions(
             OrderStatus.DELIVERED -> {
                 if (isBuyer) {
                     BerimaButton(
-                        text = "Konfirmasi Selesai",
+                        text = AppStrings.ORDER_ACTION_CONFIRM_DONE,
                         onClick = { onAction(OrderAction.ConfirmDelivered) },
                         isLoading = isLoading,
                         modifier = Modifier.fillMaxWidth()
                     )
                 } else {
-                    Callout(text = "Menunggu konfirmasi pembeli...")
+                    Callout(text = AppStrings.ORDER_ACTION_WAITING_BUYER_CONFIRM)
                 }
             }
 
             OrderStatus.COMPLETED -> {
                 if (isBuyer) {
                     BerimaButton(
-                        text = "Simulasi Bayar",
+                        text = AppStrings.ORDER_ACTION_SIMULATE_PAY,
                         onClick = { onAction(OrderAction.SimulatePay) },
                         isLoading = isLoading,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        text = "*Pembayaran simulasi untuk MVP",
+                        text = AppStrings.ORDER_ACTION_SIMULATE_PAY_HELP,
                         style = MaterialTheme.typography.labelSmall,
                         color = berimaColors.textSecondary
                     )
                 } else {
-                    Callout(text = "Menunggu pembayaran dari pembeli...")
+                    Callout(text = AppStrings.ORDER_ACTION_WAITING_PAYMENT)
                 }
             }
 
             OrderStatus.PAID -> {
                 if (isBuyer && !hasReview) {
                     BerimaButton(
-                        text = "Tulis Ulasan",
+                        text = AppStrings.ORDER_ACTION_WRITE_REVIEW,
                         onClick = { onAction(OrderAction.OpenReview) },
                         isLoading = isLoading,
                         modifier = Modifier.fillMaxWidth()
