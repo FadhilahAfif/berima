@@ -3,6 +3,27 @@
 Document discoveries here as the project progresses.
 Each entry must include: what was learned, which file it affects (if any), and date.
 
+- [2026-06-28] Phase 10 PRD P3 portfolio and badge work shipped. Portfolio CRUD
+  now uses a dedicated `PortfolioRepository` and one Profile-owned
+  `PortfolioManagerScreen` for create/edit/delete, with optional image upload to
+  `users/{uid}/portfolio/{portfolioItemId}/{filename}` and public download URLs
+  stored only on portfolio items. `ProfileScreen` shows a portfolio preview and
+  "Kelola" entry, while `UserProfileScreen` displays public portfolio items and
+  opens external links through Compose `LocalUriHandler`. Badge UI is centralized
+  in `VerificationBadgeRow`; Profile/UserProfile read public user badge fields,
+  ListingCard uses denormalized listing skill badges for cheap list rendering,
+  and ListingDetail observes the seller user document so manual admin badge sync
+  is reflected without exposing verification document metadata.
+  Build verified with `./gradlew.bat :app:compileDebugKotlin`.
+  → Affects `PortfolioRepository.kt`, `StorageRepository.kt`,
+  `PortfolioManagerScreen.kt`, `PortfolioManagerViewModel.kt`,
+  `VerificationBadges.kt`, `PortfolioComponents.kt`, `ProfileScreen.kt`,
+  `ProfileViewModel.kt`, `UserProfileScreen.kt`, `UserProfileViewModel.kt`,
+  `ListingCard.kt`, `ListingDetailScreen.kt`, `ListingDetailViewModel.kt`,
+  `CreateListingViewModel.kt`, `EditListingViewModel.kt`, `Screen.kt`,
+  `NavGraph.kt`, `AppStrings.kt`, `AGENTS.md`, `features.md`, and
+  `architecture.md`.
+
 - [2026-06-28] Phase 9 PRD P2 verification flows shipped. `VerificationRepository`
   now streams `verificationSubmissions` by user/type, creates pending identity and
   skill submissions, prevents client duplicate pending/approved submissions, and

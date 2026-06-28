@@ -159,10 +159,10 @@ One agent session should update at minimum one item before ending.
 ### Phase 10 — PRD P3: Portfolio & Badges
 | Task | Status | Notes |
 |---|---|---|
-| Portfolio CRUD | ⬜ Not started | Title, description, category, optional link, one optional image |
-| Public portfolio display | ⬜ Not started | Own Profile management + read-only UserProfile display |
-| Identity and skill badge components | ⬜ Not started | Reusable badge UI, Bahasa Indonesia labels, no document data exposed |
-| Badge placement across marketplace | ⬜ Not started | Profile, UserProfile, ListingCard, ListingDetail seller info |
+| Portfolio CRUD | ✅ Done | `PortfolioRepository` + `PortfolioManagerScreen`; title, description, category, optional link, one optional image; edit/delete supported |
+| Public portfolio display | ✅ Done | Profile shows own portfolio preview + manage entry; UserProfile shows public portfolio with images and safe external links |
+| Identity and skill badge components | ✅ Done | `VerificationBadgeRow` + listing skill badge, Bahasa Indonesia labels, no document data exposed |
+| Badge placement across marketplace | ✅ Done | Profile, UserProfile, ListingCard, and ListingDetail seller info wired; ListingDetail reads seller user badge fields as display source |
 
 ### Phase 11 — PRD P4: Listing & Order Polish
 | Task | Status | Notes |
@@ -182,3 +182,7 @@ One agent session should update at minimum one item before ending.
   ID in `app/src/main/res/values/strings.xml` as `berima_web_client_id`; current
   fallback is `MISSING_WEB_CLIENT_ID` because local `google-services.json` has no
   OAuth client entries.
+- [2026-06-28] Phase 10 P3 portfolio and badges shipped. Portfolio CRUD lives in
+  `ui/portfolio/PortfolioManagerScreen.kt` with `PortfolioRepository`; Profile
+  shows a preview and management entry, UserProfile shows public portfolio items,
+  and badge display is centralized in `ui/common/VerificationBadges.kt`.

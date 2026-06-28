@@ -15,6 +15,7 @@ import upnvj.berima.v1.data.model.VerificationStatus
 import upnvj.berima.v1.data.model.VerificationSubmission
 import upnvj.berima.v1.data.model.VerificationType
 import upnvj.berima.v1.data.repository.AuthRepository
+import upnvj.berima.v1.data.repository.PortfolioRepository
 import upnvj.berima.v1.data.repository.StorageRepository
 import upnvj.berima.v1.data.repository.VerificationRepository
 import upnvj.berima.v1.ui.common.AppStrings
@@ -24,6 +25,7 @@ import javax.inject.Inject
 class SkillVerificationViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val storageRepository: StorageRepository,
+    private val portfolioRepository: PortfolioRepository,
     private val verificationRepository: VerificationRepository
 ) : ViewModel() {
 
@@ -211,7 +213,7 @@ class SkillVerificationViewModel @Inject constructor(
     private fun observePortfolio(uid: String) {
         viewModelScope.launch {
             try {
-                verificationRepository.observePortfolioItems(uid).collect { items ->
+                portfolioRepository.observePortfolioItems(uid).collect { items ->
                     _portfolioItems.value = items
                     val current = _selectedPortfolioItemId.value
                     if (current != null && items.none { it.portfolioItemId == current }) {

@@ -158,7 +158,7 @@ Order revision is not part of the current PRD scope. Do not add revision statuse
 - Identity and skill verification badges when approved
 - Stats: average rating (if seller), total orders as buyer, total orders as seller
 - "Pusat Verifikasi" entry with current identity/skill status summary
-- Portfolio management entry/section
+- Portfolio preview section with "Kelola" entry to Portfolio management
 - "Listing Saya" section with own listings
 - "Tambah Listing Baru" button
 - Edit Profile button
@@ -203,8 +203,16 @@ Order revision is not part of the current PRD scope. Do not add revision statuse
 ### Portfolio
 - Users can create/edit/delete own portfolio items
 - Fields: title, description, category, optional external link, optional single image
-- Portfolio items are public to authenticated users and displayed on UserProfileScreen
+- Portfolio management is a single Profile-owned screen for create/edit/delete
+- ProfileScreen shows the owner's latest portfolio preview and UserProfileScreen shows public portfolio items
+- External portfolio links open through Android's URI handler when tapped
 - Portfolio images may use readable download URLs; identity/skill evidence must not expose public URLs
+
+### Badges
+- Identity and skill badges use reusable UI from `ui/common/VerificationBadges.kt`
+- Profile and UserProfile show approved identity and all approved skill badges from public `users/{uid}` fields
+- ListingCard shows a compact verified skill badge only when the seller has a badge for that listing category
+- ListingDetail seller card shows identity plus the relevant skill badge and observes the seller's public user badge fields as the display source
 
 ---
 

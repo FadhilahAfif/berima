@@ -104,6 +104,8 @@ class CreateListingViewModel @Inject constructor(
                 sellerName = user?.name ?: "",
                 sellerPhotoUrl = user?.photoUrl,
                 sellerRating = user?.averageRating ?: 0.0,
+                sellerIdentityVerified = user?.isIdentityVerified ?: false,
+                sellerVerifiedSkillBadges = user?.verifiedSkillBadges.orEmpty(),
                 title = titleVal,
                 description = descVal,
                 category = _category.value,

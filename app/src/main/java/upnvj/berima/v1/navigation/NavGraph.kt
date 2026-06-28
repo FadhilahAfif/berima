@@ -21,6 +21,7 @@ import upnvj.berima.v1.ui.listing.ListingDetailScreen
 import upnvj.berima.v1.ui.order.CreateOrderScreen
 import upnvj.berima.v1.ui.order.OrderDetailScreen
 import upnvj.berima.v1.ui.order.OrdersScreen
+import upnvj.berima.v1.ui.portfolio.PortfolioManagerScreen
 import upnvj.berima.v1.ui.profile.EditProfileScreen
 import upnvj.berima.v1.ui.profile.ProfileScreen
 import upnvj.berima.v1.ui.profile.UserProfileScreen
@@ -117,6 +118,9 @@ fun BerimaNavGraph(
                 },
                 onNavigateToVerificationCenter = {
                     navController.navigate(Screen.VerificationCenter.route)
+                },
+                onNavigateToPortfolio = {
+                    navController.navigate(Screen.PortfolioManager.route)
                 },
                 onListingClick = { listingId ->
                     navController.navigate(Screen.ListingDetail.createRoute(listingId))
@@ -236,6 +240,12 @@ fun BerimaNavGraph(
 
         composable(Screen.SkillVerification.route) {
             SkillVerificationScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.PortfolioManager.route) {
+            PortfolioManagerScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

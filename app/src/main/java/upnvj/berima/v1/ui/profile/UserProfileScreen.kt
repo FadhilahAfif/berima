@@ -44,8 +44,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Listing
+import upnvj.berima.v1.data.model.PortfolioItem
 import upnvj.berima.v1.data.model.User
+import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.ListingCard
+import upnvj.berima.v1.ui.common.PortfolioSection
+import upnvj.berima.v1.ui.common.VerificationBadgeRow
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 import java.util.Locale
 
@@ -59,6 +63,7 @@ fun UserProfileScreen(
 ) {
     val user by viewModel.user.collectAsStateWithLifecycle()
     val listings by viewModel.listings.collectAsStateWithLifecycle()
+    val portfolioItems by viewModel.portfolioItems.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -134,6 +139,7 @@ fun UserProfileScreen(
                 UserProfileContent(
                     user = user!!,
                     listings = listings,
+                    portfolioItems = portfolioItems,
                     onListingClick = onListingClick,
                     modifier = Modifier
                         .fillMaxSize()
@@ -148,6 +154,7 @@ fun UserProfileScreen(
 private fun UserProfileContent(
     user: User,
     listings: List<Listing>,
+    portfolioItems: List<PortfolioItem>,
     onListingClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -194,6 +201,12 @@ private fun UserProfileContent(
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
+            )
+
+            VerificationBadgeRow(
+                isIdentityVerified = user.isIdentityVerified,
+                skillBadges = user.verifiedSkillBadges,
+                modifier = Modifier.padding(top = 10.dp)
             )
 
             if (!user.bio.isNullOrBlank()) {
@@ -256,6 +269,16 @@ private fun UserProfileContent(
         HorizontalDivider(color = berimaColors.borderSubtle)
 
         Column(modifier = Modifier.padding(16.dp)) {
+            PortfolioSection(
+                title = AppStrings.PROFILE_PORTFOLIO_TITLE,
+                items = portfolioItems,
+                emptyText = AppStrings.PORTFOLIO_EMPTY_PUBLIC
+            )
+        }
+
+        HorizontalDivider(color = berimaColors.borderSubtle)
+
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "Listing Aktif",
                 style = MaterialTheme.typography.titleMedium,
@@ -309,7 +332,9 @@ private fun UserProfileScreenPreview() {
             faculty = "Fakultas Ilmu Komputer",
             averageRating = 4.8,
             totalReviews = 12,
-            totalOrdersAsSeller = 20
+            totalOrdersAsSeller = 20,
+            isIdentityVerified = true,
+            verifiedSkillBadges = listOf(upnvj.berima.v1.data.model.Category.VISUAL)
         )
         val listings = listOf(
             upnvj.berima.v1.data.model.Listing(
@@ -358,6 +383,14 @@ private fun UserProfileScreenPreview() {
             UserProfileContent(
                 user = user,
                 listings = listings,
+                portfolioItems = listOf(
+                    PortfolioItem(
+                        portfolioItemId = "p1",
+                        title = "Identitas Visual UKM",
+                        description = "Logo dan poster publikasi untuk kegiatan kampus.",
+                        category = upnvj.berima.v1.data.model.Category.VISUAL
+                    )
+                ),
                 onListingClick = {},
                 modifier = Modifier
                     .fillMaxSize()

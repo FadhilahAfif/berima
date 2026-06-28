@@ -16,6 +16,13 @@ data class StorageUploadMetadata(
     val contentType: String?
 )
 
+data class PublicImageUploadMetadata(
+    val downloadUrl: String,
+    val storagePath: String,
+    val fileName: String?,
+    val contentType: String?
+)
+
 /**
  * Wraps Firebase Storage uploads for order result files and user profile photos.
  */
@@ -97,6 +104,42 @@ class StorageRepository @Inject constructor(
             kind = "skill",
             fallbackPrefix = "bukti-keahlian"
         )
+    }
+
+    suspend fun uploadPortfolioImage(
+        userId: String,
+        portfolioItemId: String,
+        uri: Uri
+    ): Result<PublicImageUploadMetadata> {
+        return try {
+            val size = fileSize(uri)
+            if (size in 1..Long.MAX_VALUE && size > Validation.MAX_STORAGE_IMAGE_BYTES) {
+                return Result.failure(
+                    IllegalArgumentException("Ukuran gambar maksimal 5 MB")
+                )
+            }
+            val contentType = context.contentResolver.getType(uri)
+            if (contentType != null && !contentType.startsWith("image/")) {
+                return Result.failure(
+                    IllegalArgumentException("File portofolio harus berupa gambar")
+                )
+            }
+            val fileName = displayName(uri)
+                ?: "portofolio-${System.currentTimeMillis()}"
+            val storagePath = "users/$userId/portfolio/$portfolioItemId/$fileName"
+            val ref = storage.reference.child(storagePath)
+            ref.putFile(uri).await()
+            Result.success(
+                PublicImageUploadMetadata(
+                    downloadUrl = ref.downloadUrl.await().toString(),
+                    storagePath = storagePath,
+                    fileName = fileName,
+                    contentType = contentType
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     suspend fun deleteFile(storagePath: String): Result<Unit> {

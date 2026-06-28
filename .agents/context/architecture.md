@@ -46,7 +46,7 @@ app/src/main/java/upnvj/berima/v1/
 │   ├── review/            # CreateReview (Phase 4)
 │   ├── profile/           # Profile, EditProfile, UserProfile (Phase 4)
 │   ├── verification/      # VerificationCenter, IdentityVerification, SkillVerification (PRD)
-│   ├── portfolio/         # Portfolio create/edit/manage screens (PRD)
+│   ├── portfolio/         # PortfolioManagerScreen + ViewModel (PRD P3)
 │   ├── splash/            # SplashScreen (Phase 1 UI)
 │   ├── common/            # Reusable composables (ListingCard, StatusChip, ...)
 │   └── theme/             # BerimaTheme, Color, Type
@@ -167,11 +167,7 @@ sealed class Screen(val route: String) {
     data object VerificationCenter : Screen("verification")
     data object IdentityVerification : Screen("verification/identity")
     data object SkillVerification : Screen("verification/skill")
-    data object PortfolioCreate : Screen("portfolio/create")
-    data object PortfolioEdit : Screen("portfolio/edit/{portfolioItemId}") {
-        const val ARG_PORTFOLIO_ITEM_ID = "portfolioItemId"
-        fun createRoute(portfolioItemId: String) = "portfolio/edit/$portfolioItemId"
-    }
+    data object PortfolioManager : Screen("portfolio")
 }
 ```
 
