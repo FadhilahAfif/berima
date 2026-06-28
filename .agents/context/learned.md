@@ -3,6 +3,16 @@
 Document discoveries here as the project progresses.
 Each entry must include: what was learned, which file it affects (if any), and date.
 
+- [2026-06-28] User-facing terminology was refreshed from marketplace-retail language
+  to service-first language. Core UI copy now prefers layanan, penyedia jasa,
+  and pemesan on Home, Orders, Profile, listing forms, create-order, and seller
+  detail screens. Internal Firestore/model names remain unchanged so the schema
+  and repository contracts stay stable. Build + device QA were verified with
+  `./gradlew.bat :app:compileDebugKotlin` and `./gradlew.bat :app:installDebug`.
+  → Affects `AppStrings.kt`, `SearchScreen.kt`, `CreateOrderScreen.kt`,
+  `CreateOrderViewModel.kt`, `UserProfileScreen.kt`, `OrderActions.kt`,
+  and `AGENTS.md`.
+
 - [2026-06-28] Phase 11 PRD P4 listing/order polish shipped. Shared
   `ListingFormContent` now includes a required service-policy acknowledgement
   before Create/Edit save; both ViewModels validate it and write
@@ -55,6 +65,16 @@ Each entry must include: what was learned, which file it affects (if any), and d
   `CreateListingViewModel.kt`, `EditListingViewModel.kt`, `Screen.kt`,
   `NavGraph.kt`, `AppStrings.kt`, `AGENTS.md`, `features.md`, and
   `architecture.md`.
+
+- [2026-06-28] PR #31 review fixes landed for listing thumbnail cleanup and
+  order copy. Listings now persist `thumbnailStoragePath` alongside
+  `thumbnailUrl`, and user-owned Storage paths allow deletes so replaced or
+  removed thumbnails can be cleaned up from Create/Edit flows. The policy
+  acknowledgement row in `ListingFormContent` now uses a single toggle target,
+  and the simulated payment copy in `AppStrings` is fully Bahasa Indonesia.
+  → Affects `Listing.kt`, `ListingRepository.kt`, `CreateListingViewModel.kt`,
+  `EditListingViewModel.kt`, `ListingFormContent.kt`, `CreateListingScreen.kt`,
+  `AppStrings.kt`, `storage.rules`, and `database.md`.
 
 - [2026-06-28] Phase 9 PRD P2 verification flows shipped. `VerificationRepository`
   now streams `verificationSubmissions` by user/type, creates pending identity and

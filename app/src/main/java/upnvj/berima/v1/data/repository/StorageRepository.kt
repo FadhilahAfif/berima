@@ -134,6 +134,12 @@ class StorageRepository @Inject constructor(
         )
     }
 
+    /**
+     * Deletes a previously uploaded file by Storage path.
+     *
+     * The caller must only pass owner-owned paths that are allowed by
+     * `storage.rules`.
+     */
     suspend fun deleteFile(storagePath: String): Result<Unit> {
         return try {
             storage.reference.child(storagePath).delete().await()

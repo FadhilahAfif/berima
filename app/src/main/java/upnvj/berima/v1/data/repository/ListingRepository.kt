@@ -141,6 +141,7 @@ class ListingRepository @Inject constructor(
         deliveryTimeHours: Int,
         tags: List<String>,
         thumbnailUrl: String?,
+        thumbnailStoragePath: String?,
         clearThumbnail: Boolean = false,
         sellerIdentityVerified: Boolean? = null,
         sellerVerifiedSkillBadges: List<String>? = null,
@@ -157,8 +158,10 @@ class ListingRepository @Inject constructor(
             )
             if (clearThumbnail) {
                 updates["thumbnailUrl"] = null
+                updates["thumbnailStoragePath"] = null
             } else if (thumbnailUrl != null) {
                 updates["thumbnailUrl"] = thumbnailUrl
+                updates["thumbnailStoragePath"] = thumbnailStoragePath
             }
             sellerIdentityVerified?.let {
                 updates["sellerIdentityVerified"] = it

@@ -45,26 +45,31 @@ service firebase.storage {
     match /users/{userId}/verification/identity/{submissionId}/{fileName} {
       allow read: if isOwner(userId);
       allow write: if isOwner(userId) && isVerificationUpload();
+      allow delete: if isOwner(userId);
     }
 
     match /users/{userId}/verification/skill/{submissionId}/{fileName} {
       allow read: if isOwner(userId);
       allow write: if isOwner(userId) && isVerificationUpload();
+      allow delete: if isOwner(userId);
     }
 
     match /users/{userId}/portfolio/{portfolioItemId}/{fileName} {
       allow read: if isSignedIn();
       allow write: if isOwner(userId) && isImageUpload();
+      allow delete: if isOwner(userId);
     }
 
     match /users/{userId}/listings/{listingId}/{fileName} {
       allow read: if isSignedIn();
       allow write: if isOwner(userId) && isImageUpload();
+      allow delete: if isOwner(userId);
     }
 
     match /users/{userId}/profile/{fileName} {
       allow read: if isSignedIn();
       allow write: if isOwner(userId) && isImageUpload();
+      allow delete: if isOwner(userId);
     }
 
     match /orders/{orderId}/result/{fileName} {

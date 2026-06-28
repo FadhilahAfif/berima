@@ -54,7 +54,7 @@ fun CreateListingScreen(
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        viewModel.onThumbnailSelected(uri)
+        uri?.let(viewModel::onThumbnailSelected)
     }
 
     LaunchedEffect(success) {

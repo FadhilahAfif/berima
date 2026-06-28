@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
@@ -29,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.Role
 import coil.compose.AsyncImage
 import upnvj.berima.v1.data.model.Validation
 import upnvj.berima.v1.ui.common.AppStrings
@@ -216,13 +218,17 @@ private fun PolicyAcknowledgement(
             .clip(shape)
             .background(berimaColors.surfaceRaised)
             .border(1.dp, berimaColors.borderSubtle, shape)
-            .clickable { onCheckedChange(!isChecked) }
+            .toggleable(
+                value = isChecked,
+                role = Role.Checkbox,
+                onValueChange = onCheckedChange
+            )
             .padding(horizontal = 10.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top
     ) {
         Checkbox(
             checked = isChecked,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = null,
             colors = CheckboxDefaults.colors(
                 checkedColor = MaterialTheme.colorScheme.primary,
                 uncheckedColor = berimaColors.textSecondary

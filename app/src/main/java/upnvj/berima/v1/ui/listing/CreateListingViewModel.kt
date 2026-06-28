@@ -1,6 +1,7 @@
 package upnvj.berima.v1.ui.listing
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
@@ -26,6 +27,9 @@ class CreateListingViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val auth: FirebaseAuth
 ) : ViewModel() {
+    companion object {
+        private const val TAG = "CreateListingViewModel"
+    }
 
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
@@ -121,14 +125,18 @@ class CreateListingViewModel @Inject constructor(
             val userResult = authRepository.getUser(uid)
             val user = userResult.getOrNull()
             val listingId = listingRepository.newListingId()
-            val thumbnailUrl = _selectedThumbnailUri.value?.let { uri ->
+            var uploadedThumbnailPath: String? = null
+            val thumbnailUpload = _selectedThumbnailUri.value?.let { uri ->
                 val uploadResult = storageRepository.uploadListingThumbnail(uid, listingId, uri)
                 uploadResult.getOrElse {
                     _isLoading.value = false
-                    _error.value = it.message ?: "Gagal mengunggah gambar listing"
+                    Log.e(TAG, "Gagal mengunggah thumbnail listing", it)
+                    _error.value = "Gagal mengunggah gambar listing"
                     return@launch
-                }.downloadUrl
+                }
             }
+            uploadedThumbnailPath = thumbnailUpload?.storagePath
+            val thumbnailUrl = thumbnailUpload?.downloadUrl
 
             val tagList = _tags.value
                 .split(",")
@@ -148,6 +156,7 @@ class CreateListingViewModel @Inject constructor(
                 price = priceVal,
                 deliveryTimeHours = deliveryVal,
                 thumbnailUrl = thumbnailUrl,
+                thumbnailStoragePath = uploadedThumbnailPath,
                 tags = tagList,
                 isActive = true,
                 policyAcceptedAt = Timestamp.now(),
@@ -158,7 +167,12 @@ class CreateListingViewModel @Inject constructor(
             _isLoading.value = false
             result.fold(
                 onSuccess = { _success.value = true },
-                onFailure = { _error.value = it.message }
+                onFailure = {
+                    uploadedThumbnailPath?.let { path ->
+                        storageRepository.deleteFile(path)
+                    }
+                    _error.value = it.message
+                }
             )
         }
     }

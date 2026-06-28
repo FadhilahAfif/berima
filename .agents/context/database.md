@@ -42,6 +42,7 @@ category:             String      // "academic" | "visual" | "data"
 price:                Long        // in Rupiah, use Long not Double
 deliveryTimeHours:    Int         // max 48
 thumbnailUrl:         String?     // Firebase Storage URL
+thumbnailStoragePath: String?     // Firebase Storage path for cleanup
 tags:                 List<String>
 isActive:             Boolean     // default true
 sellerIdentityVerified: Boolean   // denormalized display helper

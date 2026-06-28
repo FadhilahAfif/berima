@@ -1,6 +1,7 @@
 package upnvj.berima.v1.ui.listing
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,6 +26,9 @@ class EditListingViewModel @Inject constructor(
     private val storageRepository: StorageRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
+    companion object {
+        private const val TAG = "EditListingViewModel"
+    }
 
     private val listingId: String =
         checkNotNull(savedStateHandle[Screen.EditListing.ARG_LISTING_ID])
@@ -49,6 +53,9 @@ class EditListingViewModel @Inject constructor(
 
     private val _existingThumbnailUrl = MutableStateFlow<String?>(null)
     val existingThumbnailUrl: StateFlow<String?> = _existingThumbnailUrl.asStateFlow()
+
+    private val _existingThumbnailStoragePath = MutableStateFlow<String?>(null)
+    val existingThumbnailStoragePath: StateFlow<String?> = _existingThumbnailStoragePath.asStateFlow()
 
     private val _selectedThumbnailUri = MutableStateFlow<Uri?>(null)
     val selectedThumbnailUri: StateFlow<Uri?> = _selectedThumbnailUri.asStateFlow()
@@ -89,6 +96,7 @@ class EditListingViewModel @Inject constructor(
                         _deliveryTimeHours.value = it.deliveryTimeHours.toString()
                         _tags.value = it.tags.joinToString(", ")
                         _existingThumbnailUrl.value = it.thumbnailUrl
+                        _existingThumbnailStoragePath.value = it.thumbnailStoragePath
                         _isActive.value = it.isActive
                     }
                 },
@@ -165,14 +173,21 @@ class EditListingViewModel @Inject constructor(
                 return@launch
             }
             val user = authRepository.getUser(uid).getOrNull()
-            val thumbnailUrl = _selectedThumbnailUri.value?.let { uri ->
+            val previousThumbnailStoragePath = _existingThumbnailStoragePath.value
+            var uploadedThumbnailPath: String? = null
+            val thumbnailUpload = _selectedThumbnailUri.value?.let { uri ->
                 val uploadResult = storageRepository.uploadListingThumbnail(uid, listingId, uri)
                 uploadResult.getOrElse {
                     _isLoading.value = false
-                    _error.value = it.message ?: "Gagal mengunggah gambar listing"
+                    Log.e(TAG, "Gagal mengunggah thumbnail listing", it)
+                    _error.value = "Gagal mengunggah gambar listing"
                     return@launch
-                }.downloadUrl
+                }
             }
+            uploadedThumbnailPath = thumbnailUpload?.storagePath
+            val thumbnailUrl = thumbnailUpload?.downloadUrl
+            val thumbnailStoragePath = thumbnailUpload?.storagePath
+            val clearThumbnail = _removeExistingThumbnail.value && thumbnailUpload == null
             val result = listingRepository.updateListing(
                 listingId = listingId,
                 title = titleVal,
@@ -182,15 +197,30 @@ class EditListingViewModel @Inject constructor(
                 deliveryTimeHours = deliveryVal,
                 tags = tagList,
                 thumbnailUrl = thumbnailUrl,
-                clearThumbnail = thumbnailUrl == null && _removeExistingThumbnail.value,
+                thumbnailStoragePath = thumbnailStoragePath,
+                clearThumbnail = clearThumbnail,
                 sellerIdentityVerified = user?.isIdentityVerified,
                 sellerVerifiedSkillBadges = user?.verifiedSkillBadges,
                 policyAcceptedAt = Timestamp.now()
             )
             _isLoading.value = false
             result.fold(
-                onSuccess = { _success.value = true },
-                onFailure = { _error.value = it.message }
+                onSuccess = {
+                    if (!previousThumbnailStoragePath.isNullOrBlank() &&
+                        previousThumbnailStoragePath != thumbnailStoragePath
+                    ) {
+                        storageRepository.deleteFile(previousThumbnailStoragePath)
+                    }
+                    _existingThumbnailUrl.value = thumbnailUrl ?: if (clearThumbnail) null else _existingThumbnailUrl.value
+                    _existingThumbnailStoragePath.value = thumbnailStoragePath ?: if (clearThumbnail) null else _existingThumbnailStoragePath.value
+                    _success.value = true
+                },
+                onFailure = {
+                    uploadedThumbnailPath?.let { path ->
+                        storageRepository.deleteFile(path)
+                    }
+                    _error.value = it.message
+                }
             )
         }
     }

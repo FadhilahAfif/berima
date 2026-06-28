@@ -41,6 +41,7 @@ Before doing anything, read all context files in order.
 - All code, comments, and variable names must be in **English**
 - Verification identity documents are private. Never store KTM download URLs in public profile, listing, or badge fields.
 - Admin review for verification is manual through Firebase Console only for MVP. Do not build an in-app admin panel unless explicitly requested.
+- Terminology policy: user-facing copy should prefer `layanan`, `pemesan`, and `penyedia jasa`. Keep `buyer`, `seller`, and `listing` only for internal code, schema fields, or docs that explicitly describe technical identifiers. When in doubt, choose the service-first term in visible UI text.
 
 ---
 
@@ -170,6 +171,8 @@ One agent session should update at minimum one item before ending.
 | Service policy acknowledgement | ✅ Done | `ListingFormContent` now requires a policy checkbox before Create/Edit save and writes `policyAcceptedAt` |
 | Listing deactivation UI | ✅ Done | Profile, ListingDetail, and EditListing expose owner-only deactivation through existing `setListingActive`; inactive listings are labelled in own Profile |
 | Escrow simulation copy update | ✅ Done | Order detail/action copy keeps `Simulasi Bayar` but clarifies no real money is processed and Midtrans/payment gateway is future placeholder |
+| PR #31 review cleanup | ✅ Done | Listing thumbnails persist `thumbnailStoragePath` for cleanup, user-owned Storage paths allow delete, the policy row is a single toggle target, and payment copy stays fully Bahasa Indonesia |
+| Terminology refresh | ✅ Done | User-facing copy now prefers layanan/penyedia jasa/pemesan over listing/penjual/pembeli where it reads as marketplace language |
 
 **Status legend:** ⬜ Not started · 🔄 In progress · ✅ Done · ⚠️ Blocked
 
