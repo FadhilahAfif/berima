@@ -26,6 +26,8 @@ import upnvj.berima.v1.ui.profile.ProfileScreen
 import upnvj.berima.v1.ui.profile.UserProfileScreen
 import upnvj.berima.v1.ui.review.CreateReviewScreen
 import upnvj.berima.v1.ui.splash.SplashScreen
+import upnvj.berima.v1.ui.verification.IdentityVerificationScreen
+import upnvj.berima.v1.ui.verification.SkillVerificationScreen
 import upnvj.berima.v1.ui.verification.VerificationCenterScreen
 
 @Composable
@@ -216,6 +218,24 @@ fun BerimaNavGraph(
 
         composable(Screen.VerificationCenter.route) {
             VerificationCenterScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToIdentity = {
+                    navController.navigate(Screen.IdentityVerification.route)
+                },
+                onNavigateToSkill = {
+                    navController.navigate(Screen.SkillVerification.route)
+                }
+            )
+        }
+
+        composable(Screen.IdentityVerification.route) {
+            IdentityVerificationScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.SkillVerification.route) {
+            SkillVerificationScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

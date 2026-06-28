@@ -3,6 +3,34 @@
 Document discoveries here as the project progresses.
 Each entry must include: what was learned, which file it affects (if any), and date.
 
+- [2026-06-28] Phase 9 PRD P2 verification flows shipped. `VerificationRepository`
+  now streams `verificationSubmissions` by user/type, creates pending identity and
+  skill submissions, prevents client duplicate pending/approved submissions, and
+  exposes a read-only own-portfolio stream for skill evidence selection until full
+  Portfolio CRUD lands in Phase 10. Verification Center status is sourced from the
+  latest submission document, while public approved badges still come from
+  `users/{uid}` fields because admin sync remains manual. Identity and skill file
+  uploads use private Storage paths returned by `StorageRepository` as
+  `storagePath` metadata only; no KTM or skill-evidence download URL is written to
+  public profile/listing fields. Build verified with `./gradlew.bat assembleDebug`.
+  → Affects `VerificationRepository.kt`, `StorageRepository.kt`,
+  `VerificationCenterScreen.kt`, `VerificationCenterViewModel.kt`,
+  `IdentityVerificationScreen.kt`, `IdentityVerificationViewModel.kt`,
+  `SkillVerificationScreen.kt`, `SkillVerificationViewModel.kt`, `NavGraph.kt`,
+  `AppStrings.kt`, and `AGENTS.md`.
+
+- [2026-06-28] Physical-device QA on Samsung SM-A235F / Android 14 verified the
+  Profile → Pusat Verifikasi → Identity/Skill navigation and client validation
+  paths. No crash was recorded, but Firestore runtime rules for the deployed
+  project still reject the new queries: `verificationSubmissions where userId ==
+  uid and type == identity|skill orderBy createdAt`, plus `portfolioItems where
+  userId == uid orderBy createdAt`, all with `PERMISSION_DENIED`. Source rules
+  already contain the intended matches, so deploy/verify Firebase rules before
+  testing real submission writes. Logcat also shows existing profile documents may
+  still contain legacy `identityVerified`; the current model field is
+  `isIdentityVerified`, and the warning is non-fatal.
+  → Affects `AGENTS.md`, Firebase deployment state, seeded/user profile cleanup.
+
 - [2026-06-27] Phase 8 P1 auth/profile entry points shipped. Login now has
   Credential Manager Google sign-in wired through Firebase Auth, forgot password
   via `sendPasswordResetEmail`, and Profile links to a lightweight Verification
