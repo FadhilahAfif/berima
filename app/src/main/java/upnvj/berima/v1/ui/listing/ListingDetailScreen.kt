@@ -54,7 +54,9 @@ import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Review
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
+import upnvj.berima.v1.ui.common.DangerActionButton
 import upnvj.berima.v1.ui.common.VerificationBadgeRow
+import upnvj.berima.v1.ui.common.categoryLabel
 import upnvj.berima.v1.ui.common.categoryThumbnailRes
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 import java.util.Locale
@@ -136,6 +138,20 @@ fun ListingDetailScreen(
                 )
             )
         },
+        bottomBar = {
+            listing?.let { l ->
+                val isOwner = viewModel.currentUserId == l.sellerId
+                if (isOwner || l.isActive) {
+                    ListingDetailActionBar(
+                        listing = l,
+                        isOwner = isOwner,
+                        onOrderClick = { onOrderClick(l.listingId) },
+                        onEditClick = { onEditClick(l.listingId) },
+                        onDeactivateClick = { showDeactivateDialog = true }
+                    )
+                }
+            }
+        },
         modifier = modifier
     ) { padding ->
         when {
@@ -203,27 +219,14 @@ fun ListingDetailScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = l.title,
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-
-                        Spacer(Modifier.height(8.dp))
-
-                        Text(
-                            text = formatRupiah(l.price),
                             style = MaterialTheme.typography.headlineLarge,
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
-                        Spacer(Modifier.height(4.dp))
+                        Spacer(Modifier.height(14.dp))
+                        ListingMetaPanel(listing = l)
 
-                        Text(
-                            text = "${AppStrings.LISTING_ESTIMATE_PREFIX} ${l.deliveryTimeHours} jam",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = berimaColors.textSecondary
-                        )
-
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(20.dp))
 
                         Text(
                             text = l.description,
@@ -297,7 +300,7 @@ fun ListingDetailScreen(
                                     Text(
                                         text = if (l.sellerRating > 0.0)
                                             String.format(Locale.US, "%.1f", l.sellerRating)
-                                        else "Belum ada rating",
+                                        else AppStrings.LISTING_SELLER_NO_RATING,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = berimaColors.textSecondary
                                     )
@@ -319,8 +322,8 @@ fun ListingDetailScreen(
                             }
                             IconButton(onClick = { onSellerClick(l.sellerId) }) {
                                 Icon(
-                                    painter = painterResource(R.drawable.ic_arrow_back),
-                                    contentDescription = "Lihat profil",
+                                    painter = painterResource(R.drawable.ic_chevron_right),
+                                    contentDescription = AppStrings.LISTING_SELLER_PROFILE_ACTION,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -330,7 +333,7 @@ fun ListingDetailScreen(
                         if (reviews.isNotEmpty()) {
                             Spacer(Modifier.height(24.dp))
                             Text(
-                                text = "Ulasan",
+                                text = AppStrings.LISTING_REVIEWS_TITLE,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -341,41 +344,113 @@ fun ListingDetailScreen(
                             }
                         }
 
-                        Spacer(Modifier.height(24.dp))
-
-                        if (isOwner) {
-                            BerimaButton(
-                                text = AppStrings.LISTING_EDIT_ACTION,
-                                onClick = { onEditClick(l.listingId) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            if (l.isActive) {
-                                Spacer(Modifier.height(10.dp))
-                                Text(
-                                    text = AppStrings.LISTING_DEACTIVATE,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(9999.dp))
-                                        .clickable { showDeactivateDialog = true }
-                                        .align(Alignment.CenterHorizontally)
-                                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                                )
-                            } else {
-                                Spacer(Modifier.height(10.dp))
-                                InactiveListingNotice(modifier = Modifier.fillMaxWidth())
-                            }
-                        } else if (l.isActive) {
-                            BerimaButton(
-                                text = AppStrings.LISTING_ORDER_ACTION,
-                                onClick = { onOrderClick(l.listingId) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        } else {
+                        if (!l.isActive) {
+                            Spacer(Modifier.height(24.dp))
                             InactiveListingNotice(modifier = Modifier.fillMaxWidth())
                         }
+
+                        Spacer(Modifier.height(96.dp))
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ListingMetaPanel(
+    listing: upnvj.berima.v1.data.model.Listing,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle, RoundedCornerShape(16.dp))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = formatRupiah(listing.price),
+                style = MaterialTheme.typography.displayLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = categoryLabel(listing.category).uppercase(Locale.forLanguageTag("id-ID")),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(9999.dp))
+                .background(berimaColors.containerGreen)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = "${listing.deliveryTimeHours} jam",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun ListingDetailActionBar(
+    listing: upnvj.berima.v1.data.model.Listing,
+    isOwner: Boolean,
+    onOrderClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeactivateClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle)
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 18.dp)
+    ) {
+        if (isOwner) {
+            BerimaButton(
+                text = AppStrings.LISTING_EDIT_ACTION,
+                onClick = onEditClick,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (listing.isActive) {
+                Spacer(Modifier.height(10.dp))
+                DangerActionButton(
+                    text = AppStrings.LISTING_DEACTIVATE,
+                    onClick = onDeactivateClick,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        } else if (listing.isActive) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = formatRupiah(listing.price),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "${listing.deliveryTimeHours} jam",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = berimaColors.textSecondary
+                    )
+                }
+                Spacer(Modifier.width(14.dp))
+                BerimaButton(
+                    text = AppStrings.LISTING_ORDER_ACTION,
+                    onClick = onOrderClick,
+                    modifier = Modifier.weight(1.25f)
+                )
             }
         }
     }

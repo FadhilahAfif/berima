@@ -157,6 +157,12 @@ private fun EditProfileContent(
                 )
             )
         },
+        bottomBar = {
+            EditProfileSaveBar(
+                isLoading = isLoading,
+                onSave = onSave
+            )
+        },
         modifier = modifier
     ) { paddingValues ->
         Column(
@@ -170,92 +176,131 @@ private fun EditProfileContent(
                 photoUrl = photoUrl,
                 isLoading = isLoading,
                 onPickPhoto = onPickPhoto,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            BerimaTextField(
-                value = name,
-                onValueChange = onNameChange,
-                label = AppStrings.EDIT_PROFILE_FIELD_NAME,
-                supportingText = { CounterText(name.length, Validation.MAX_NAME_LENGTH) },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            BerimaTextField(
-                value = bio,
-                onValueChange = onBioChange,
-                label = AppStrings.EDIT_PROFILE_FIELD_BIO,
-                placeholder = AppStrings.EDIT_PROFILE_BIO_PLACEHOLDER,
-                singleLine = false,
-                maxLines = 4,
-                supportingText = { CounterText(bio.length, Validation.MAX_BIO_LENGTH) },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            BerimaTextField(
-                value = faculty,
-                onValueChange = onFacultyChange,
-                label = AppStrings.EDIT_PROFILE_FIELD_FACULTY,
-                placeholder = AppStrings.EDIT_PROFILE_FACULTY_PLACEHOLDER,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = AppStrings.EDIT_PROFILE_ROLE_LABEL,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = AppStrings.EDIT_PROFILE_ROLE_HELP,
-                style = MaterialTheme.typography.bodyMedium,
-                color = berimaColors.textSecondary
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                RoleOption(
-                    text = AppStrings.ROLE_BUYER,
-                    selected = role == UserRole.BUYER,
-                    onClick = { onRoleChange(UserRole.BUYER) },
-                    modifier = Modifier.weight(1f)
+            ProfileFormSection(title = AppStrings.EDIT_PROFILE_SECTION_PUBLIC) {
+                BerimaTextField(
+                    value = name,
+                    onValueChange = onNameChange,
+                    label = AppStrings.EDIT_PROFILE_FIELD_NAME,
+                    supportingText = { CounterText(name.length, Validation.MAX_NAME_LENGTH) },
+                    modifier = Modifier.fillMaxWidth()
                 )
-                RoleOption(
-                    text = AppStrings.ROLE_SELLER,
-                    selected = role == UserRole.SELLER,
-                    onClick = { onRoleChange(UserRole.SELLER) },
-                    modifier = Modifier.weight(1f)
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                BerimaTextField(
+                    value = bio,
+                    onValueChange = onBioChange,
+                    label = AppStrings.EDIT_PROFILE_FIELD_BIO,
+                    placeholder = AppStrings.EDIT_PROFILE_BIO_PLACEHOLDER,
+                    singleLine = false,
+                    maxLines = 4,
+                    supportingText = { CounterText(bio.length, Validation.MAX_BIO_LENGTH) },
+                    modifier = Modifier.fillMaxWidth()
                 )
-                RoleOption(
-                    text = AppStrings.ROLE_BOTH,
-                    selected = role == UserRole.BOTH,
-                    onClick = { onRoleChange(UserRole.BOTH) },
-                    modifier = Modifier.weight(1f)
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                BerimaTextField(
+                    value = faculty,
+                    onValueChange = onFacultyChange,
+                    label = AppStrings.EDIT_PROFILE_FIELD_FACULTY,
+                    placeholder = AppStrings.EDIT_PROFILE_FACULTY_PLACEHOLDER,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            BerimaButton(
-                text = AppStrings.EDIT_PROFILE_SAVE,
-                onClick = onSave,
-                isLoading = isLoading,
-                enabled = !isLoading,
-                modifier = Modifier.fillMaxWidth()
-            )
+            ProfileFormSection(title = AppStrings.EDIT_PROFILE_SECTION_ROLE) {
+                Text(
+                    text = AppStrings.EDIT_PROFILE_ROLE_HELP,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = berimaColors.textSecondary
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    RoleOption(
+                        text = AppStrings.ROLE_BUYER,
+                        selected = role == UserRole.BUYER,
+                        onClick = { onRoleChange(UserRole.BUYER) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    RoleOption(
+                        text = AppStrings.ROLE_SELLER,
+                        selected = role == UserRole.SELLER,
+                        onClick = { onRoleChange(UserRole.SELLER) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    RoleOption(
+                        text = AppStrings.ROLE_BOTH,
+                        selected = role == UserRole.BOTH,
+                        onClick = { onRoleChange(UserRole.BOTH) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(104.dp))
         }
+    }
+}
+
+@Composable
+private fun EditProfileSaveBar(
+    isLoading: Boolean,
+    onSave: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle)
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 18.dp)
+    ) {
+        BerimaButton(
+            text = AppStrings.EDIT_PROFILE_SAVE,
+            onClick = onSave,
+            isLoading = isLoading,
+            enabled = !isLoading,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun ProfileFormSection(
+    title: String,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    val berimaColors = LocalBerimaColors.current
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle, RoundedCornerShape(16.dp))
+            .padding(16.dp)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(14.dp))
+        content()
     }
 }
 
@@ -268,7 +313,11 @@ private fun AvatarPicker(
 ) {
     val berimaColors = LocalBerimaColors.current
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(berimaColors.surfaceRaised)
+            .border(1.dp, berimaColors.borderSubtle, RoundedCornerShape(16.dp))
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -378,7 +427,7 @@ private fun RoleOption(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.labelLarge,
             color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
         )
     }

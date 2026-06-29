@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -57,6 +58,7 @@ import upnvj.berima.v1.data.model.UserRole
 import upnvj.berima.v1.data.model.VerificationStatus
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
+import upnvj.berima.v1.ui.common.InlineTextAction
 import upnvj.berima.v1.ui.common.PortfolioSection
 import upnvj.berima.v1.ui.common.VerificationBadgeRow
 import upnvj.berima.v1.ui.common.categoryColors
@@ -133,7 +135,7 @@ fun ProfileScreen(
                 title = {
                     Text(
                         text = AppStrings.PROFILE_TITLE,
-                        style = MaterialTheme.typography.headlineLarge,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },
@@ -216,6 +218,7 @@ private fun LogoutButton(
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, berimaColors.borderInput, RoundedCornerShape(9999.dp))
             .clickable(onClick = onClick)
+            .defaultMinSize(minHeight = 44.dp)
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(
@@ -244,12 +247,11 @@ private fun ProfileContent(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        IdentityCard(user = user, onEditClick = onNavigateToEditProfile)
-
-        if (shouldShowStats(user)) {
-            Spacer(Modifier.height(12.dp))
-            StatsStrip(user = user)
-        }
+        IdentityCard(
+            user = user,
+            listingCount = listings.size,
+            onEditClick = onNavigateToEditProfile
+        )
 
         Spacer(Modifier.height(16.dp))
 
@@ -260,29 +262,24 @@ private fun ProfileContent(
 
         Spacer(Modifier.height(16.dp))
 
+        BerimaButton(
+            text = AppStrings.PROFILE_ADD_LISTING,
+            onClick = onNavigateToCreateListing,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(16.dp))
+
         PortfolioSection(
             title = AppStrings.PROFILE_PORTFOLIO_TITLE,
             items = portfolioItems.take(3),
             emptyText = AppStrings.PROFILE_PORTFOLIO_EMPTY,
             action = {
-                Text(
+                InlineTextAction(
                     text = AppStrings.PROFILE_PORTFOLIO_ACTION,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(9999.dp))
-                        .clickable(onClick = onNavigateToPortfolio)
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                    onClick = onNavigateToPortfolio
                 )
             }
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        BerimaButton(
-            text = AppStrings.PROFILE_ADD_LISTING,
-            onClick = onNavigateToCreateListing,
-            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(28.dp))
@@ -324,13 +321,14 @@ private fun ProfileContent(
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(96.dp))
     }
 }
 
 @Composable
 private fun IdentityCard(
     user: User,
+    listingCount: Int,
     onEditClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -339,17 +337,17 @@ private fun IdentityCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface)
+            .background(berimaColors.surfaceRaised)
             .border(1.dp, berimaColors.borderSubtle, RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            ProfileAvatar(photoUrl = user.photoUrl, size = 64.dp)
-            Spacer(Modifier.width(14.dp))
+            ProfileAvatar(photoUrl = user.photoUrl, size = 76.dp)
+            Spacer(Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = user.name,
-                    style = MaterialTheme.typography.headlineLarge,
+                    style = MaterialTheme.typography.displayMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -378,7 +376,7 @@ private fun IdentityCard(
             Spacer(Modifier.height(14.dp))
             Text(
                 text = user.bio,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
@@ -400,6 +398,50 @@ private fun IdentityCard(
                 )
             }
         }
+
+        Spacer(Modifier.height(16.dp))
+        ProfileStatsInline(user = user, listingCount = listingCount)
+    }
+}
+
+@Composable
+private fun ProfileStatsInline(
+    user: User,
+    listingCount: Int,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    val isSeller = user.role == UserRole.SELLER || user.role == UserRole.BOTH
+    val stats = buildList {
+        add(StatItem("$listingCount", AppStrings.PROFILE_LISTING_COUNT_LABEL))
+        if (isSeller && user.averageRating > 0.0) {
+            add(StatItem(String.format(Locale.forLanguageTag("id-ID"), "%.1f", user.averageRating), AppStrings.PROFILE_STAT_RATING, isRating = true))
+        }
+        if (user.totalOrdersAsSeller > 0) {
+            add(StatItem("${user.totalOrdersAsSeller}", AppStrings.PROFILE_STAT_COMPLETED_ORDERS))
+        }
+    }.take(4)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.72f))
+            .border(1.dp, berimaColors.borderSubtle, RoundedCornerShape(12.dp))
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        stats.forEachIndexed { index, stat ->
+            StatColumn(stat = stat, modifier = Modifier.weight(1f))
+            if (index < stats.lastIndex) {
+                Box(
+                    modifier = Modifier
+                        .height(34.dp)
+                        .width(1.dp)
+                        .background(berimaColors.borderSubtle)
+                )
+            }
+        }
     }
 }
 
@@ -411,7 +453,7 @@ private fun EditIconButton(
     val berimaColors = LocalBerimaColors.current
     Box(
         modifier = modifier
-            .size(40.dp)
+            .size(44.dp)
             .clip(CircleShape)
             .background(berimaColors.surfaceRaised)
             .border(1.dp, berimaColors.borderSubtle, CircleShape)
@@ -492,6 +534,7 @@ private fun VerificationEntryCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .height(132.dp)
             .clip(shape)
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, berimaColors.borderSubtle, shape)
@@ -522,13 +565,21 @@ private fun VerificationEntryCard(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = AppStrings.PROFILE_VERIFICATION_BODY.format(
-                    verificationStatusLabel(user.identityVerificationStatus),
+                text = AppStrings.PROFILE_VERIFICATION_IDENTITY.format(
+                    verificationStatusLabel(user.identityVerificationStatus)
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = berimaColors.textSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = AppStrings.PROFILE_VERIFICATION_SKILL.format(
                     skillStatusLabel(user.verifiedSkillBadges.size)
                 ),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = berimaColors.textSecondary,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
@@ -545,52 +596,6 @@ private fun VerificationEntryCard(
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(20.dp)
         )
-    }
-}
-
-@Composable
-private fun StatsStrip(
-    user: User,
-    modifier: Modifier = Modifier
-) {
-    val berimaColors = LocalBerimaColors.current
-    val isSeller = user.role == UserRole.SELLER || user.role == UserRole.BOTH
-    val showRating = isSeller && user.averageRating > 0.0
-
-    val stats = buildList {
-        if (showRating) {
-            add(StatItem(String.format(Locale("id", "ID"), "%.1f", user.averageRating), AppStrings.PROFILE_STAT_RATING, isRating = true))
-        }
-        if (user.totalOrdersAsSeller > 0) {
-            add(StatItem("${user.totalOrdersAsSeller}", AppStrings.PROFILE_STAT_AS_SELLER))
-        }
-        if (user.totalOrdersAsBuyer > 0) {
-            add(StatItem("${user.totalOrdersAsBuyer}", AppStrings.PROFILE_STAT_AS_BUYER))
-        }
-    }
-
-    if (stats.isEmpty()) return
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, berimaColors.borderSubtle, RoundedCornerShape(16.dp))
-            .padding(vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        stats.forEachIndexed { index, stat ->
-            StatColumn(stat = stat, modifier = Modifier.weight(1f))
-            if (index < stats.lastIndex) {
-                Box(
-                    modifier = Modifier
-                        .height(36.dp)
-                        .width(1.dp)
-                        .background(berimaColors.borderSubtle)
-                )
-            }
-        }
     }
 }
 
@@ -626,7 +631,9 @@ private fun StatColumn(
         Text(
             text = stat.label,
             style = MaterialTheme.typography.labelSmall,
-            color = berimaColors.textSecondary
+            color = berimaColors.textSecondary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -704,7 +711,7 @@ private fun ProfileListingRow(
                     )
                     Spacer(Modifier.width(3.dp))
                     Text(
-                        text = String.format(Locale("id", "ID"), "%.1f", listing.averageRating),
+                        text = String.format(Locale.forLanguageTag("id-ID"), "%.1f", listing.averageRating),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
@@ -734,14 +741,11 @@ private fun ProfileListingRow(
             )
             if (listing.isActive) {
                 Spacer(Modifier.height(8.dp))
-                Text(
+                InlineTextAction(
                     text = AppStrings.LISTING_DEACTIVATE_SHORT,
-                    style = MaterialTheme.typography.labelSmall,
+                    onClick = onDeactivate,
                     color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(9999.dp))
-                        .clickable(onClick = onDeactivate)
-                        .padding(horizontal = 6.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(end = 0.dp)
                 )
             }
         }
@@ -778,11 +782,6 @@ private fun EmptyListingState(
             textAlign = TextAlign.Center
         )
     }
-}
-
-private fun shouldShowStats(user: User): Boolean {
-    val showSellerRating = (user.role == UserRole.SELLER || user.role == UserRole.BOTH) && user.averageRating > 0.0
-    return showSellerRating || user.totalOrdersAsBuyer > 0 || user.totalOrdersAsSeller > 0
 }
 
 private fun verificationStatusLabel(status: String): String = when (status) {

@@ -85,7 +85,7 @@ fun CreateReviewScreen(
                 title = {
                     Text(
                         text = AppStrings.REVIEW_TITLE,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },
@@ -128,7 +128,7 @@ fun CreateReviewScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Pesanan tidak ditemukan.",
+                        text = AppStrings.REVIEW_NOT_FOUND,
                         style = MaterialTheme.typography.bodyMedium,
                         color = berimaColors.textSecondary,
                         textAlign = TextAlign.Center
@@ -177,7 +177,7 @@ private fun CreateReviewContent(
         Spacer(Modifier.height(24.dp))
 
         Text(
-            text = "Rating",
+            text = AppStrings.REVIEW_RATING_LABEL,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -195,7 +195,7 @@ private fun CreateReviewContent(
         BerimaTextField(
             value = comment,
             onValueChange = onCommentChange,
-            label = "Komentar (opsional)",
+            label = AppStrings.REVIEW_COMMENT_LABEL,
             singleLine = false,
             maxLines = 5,
             supportingText = {
@@ -213,7 +213,7 @@ private fun CreateReviewContent(
         Spacer(Modifier.height(24.dp))
 
         BerimaButton(
-            text = "Kirim Ulasan",
+            text = AppStrings.REVIEW_SUBMIT,
             onClick = onSubmit,
             isLoading = isLoading,
             enabled = !isLoading,
@@ -265,16 +265,22 @@ private fun StarRatingSelector(
 
     Row(modifier = modifier) {
         (1..5).forEach { index ->
-            Icon(
-                painter = painterResource(R.drawable.ic_star),
-                contentDescription = "Rating $index",
-                tint = if (index <= rating) berimaColors.starRating else MaterialTheme.colorScheme.outline,
+            Box(
                 modifier = Modifier
-                    .size(32.dp)
-                    .clickable { onRatingChange(index) }
-            )
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(9999.dp))
+                    .clickable { onRatingChange(index) },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_star),
+                    contentDescription = AppStrings.REVIEW_STAR_DESCRIPTION.format(index),
+                    tint = if (index <= rating) berimaColors.starRating else MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
             if (index < 5) {
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(2.dp))
             }
         }
     }
@@ -304,8 +310,8 @@ private fun CreateReviewScreenPreview() {
                 TopAppBar(
                     title = {
                         Text(
-                            text = "Tulis Ulasan",
-                            style = MaterialTheme.typography.titleMedium,
+                            text = AppStrings.REVIEW_TITLE,
+                            style = MaterialTheme.typography.headlineMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     },

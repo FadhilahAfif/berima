@@ -41,7 +41,8 @@ fun ListingCard(
     listing: Listing,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    imageHeight: Dp = 124.dp
+    imageHeight: Dp = 124.dp,
+    cardHeight: Dp = 304.dp
 ) {
     val berimaColors = LocalBerimaColors.current
     val cardShape = RoundedCornerShape(16.dp)
@@ -49,6 +50,7 @@ fun ListingCard(
 
     Column(
         modifier = modifier
+            .height(cardHeight)
             .clip(cardShape)
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, berimaColors.borderSubtle, cardShape)
@@ -62,7 +64,12 @@ fun ListingCard(
 
         Spacer(Modifier.height(12.dp))
 
-        Column(modifier = Modifier.padding(horizontal = 6.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 6.dp)
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
             Text(
                 text = listing.title,
                 style = MaterialTheme.typography.headlineSmall,
@@ -86,7 +93,7 @@ fun ListingCard(
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.weight(1f))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AsyncImage(

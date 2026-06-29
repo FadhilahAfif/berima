@@ -112,8 +112,8 @@ fun HomeScreen(
                                 ListingCard(
                                     listing = listing,
                                     onClick = { onListingClick(listing.listingId) },
-                                    modifier = Modifier.width(208.dp),
-                                    imageHeight = 116.dp
+                                    modifier = Modifier.width(196.dp),
+                                    imageHeight = 108.dp
                                 )
                             }
                         }
@@ -263,8 +263,8 @@ private fun CategoryRail(
     val berimaColors = LocalBerimaColors.current
     LazyRow(
         modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(start = 16.dp, end = 28.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         items(categoryVisuals, key = { it.label }) { cat ->
             val isSelected = selectedCategory == cat.id
@@ -282,9 +282,9 @@ private fun CategoryRail(
                         shape = RoundedCornerShape(9999.dp)
                     )
                     .clickable { onCategorySelected(if (isSelected && cat.id != null) null else cat.id) }
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                    .padding(horizontal = 10.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(7.dp)
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
             ) {
                 if (cat.iconRes != null) {
                     Icon(
@@ -292,12 +292,12 @@ private fun CategoryRail(
                         contentDescription = null,
                         tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(14.dp)
                     )
                 }
                 Text(
                     text = cat.label,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.labelLarge,
                     color = if (isSelected) MaterialTheme.colorScheme.onPrimary
                     else MaterialTheme.colorScheme.onSurface
                 )
@@ -315,7 +315,7 @@ private fun SectionHeader(
     Column(modifier = modifier) {
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineLarge,
+            style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
         if (subtitle != null) {
@@ -335,6 +335,7 @@ private fun ListingSkeleton(modifier: Modifier = Modifier) {
     val cardShape = RoundedCornerShape(16.dp)
     Column(
         modifier = modifier
+            .height(304.dp)
             .clip(cardShape)
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, berimaColors.borderSubtle, cardShape)

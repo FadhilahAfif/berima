@@ -25,6 +25,8 @@ Splash
 
 Bottom navigation items: **Home** (browse) | **Orders** | **Profile**
 
+Terminology note: user-facing copy should use `layanan`, `pemesan`, and `penyedia jasa`. Internal route names, model names, and Firestore field names may still use `Listing`, `buyer`, and `seller` when the technical contract depends on them.
+
 ---
 
 ## Screen Specifications
@@ -79,7 +81,7 @@ Bottom navigation items: **Home** (browse) | **Orders** | **Profile**
 - Full-width thumbnail, using the uploaded listing image when available or the generated category fallback image when `thumbnailUrl` is null
 - Title, price (Rupiah format), delivery time estimate
 - Full description
-- Seller card: photo, name, average rating, total completed orders, identity badge when approved, and relevant skill badge when approved for the listing category
+- Penyedia jasa card: photo, name, average rating, total completed orders, identity badge when approved, and relevant skill badge when approved for the listing category
 - Tags
 - Reviews section: show latest 5, "Lihat semua" button
 - **"Pesan Sekarang" button** — visible only if current user is NOT the listing owner
@@ -99,14 +101,14 @@ Bottom navigation items: **Home** (browse) | **Orders** | **Profile**
 ---
 
 ### CreateOrderScreen
-- Show listing summary (title, seller, price)
-- Optional field: note for seller (max 300 chars)
+- Show listing summary (title, penyedia jasa, price)
+- Optional field: note for penyedia jasa (max 300 chars)
 - Show total price
 - "Konfirmasi Pesanan" button → create order document with status `pending`
 - Navigate to OrderDetailScreen on success
 
 ### OrdersScreen
-- Sub-tabs: "Sebagai Pembeli" | "Sebagai Penjual"
+- Sub-tabs: "Sebagai Pemesan" | "Sebagai Penyedia"
 - List of orders with color-coded status chip
 - Sorted by `createdAt` DESC
 - Tap → OrderDetailScreen
@@ -117,17 +119,17 @@ Order status flow:
 ```
 pending → in_progress → delivered → completed → paid
 ```
-Additional statuses: `cancelled` (buyer cancels at pending), `rejected` (seller rejects at pending)
+Additional statuses: `cancelled` (pemesan cancels at pending), `rejected` (penyedia jasa rejects at pending)
 
 Actions per role and status:
 
-| Status | Buyer Actions | Seller Actions |
+| Status | Pemesan Actions | Penyedia Jasa Actions |
 |---|---|---|
-| `pending` | Cancel order | Accept / Reject |
-| `in_progress` | — | Upload result file |
-| `delivered` | Confirm done | — |
-| `completed` | Simulate payment | — |
-| `paid` | Write review (if not yet) | — |
+| `pending` | Batalkan pesanan | Terima / Tolak |
+| `in_progress` | — | Unggah hasil |
+| `delivered` | Konfirmasi selesai | — |
+| `completed` | Simulasi bayar | — |
+| `paid` | Tulis ulasan (jika belum) | — |
 | `cancelled` / `rejected` | — | — |
 
 Below the status section: Chat section (see below)
@@ -137,7 +139,7 @@ Explain this as a Midtrans placeholder during demo.
 Order revision is not part of the current PRD scope. Do not add revision statuses unless explicitly requested.
 
 ### Chat Section (inside OrderDetailScreen)
-- Real-time message list between buyer and seller for this specific order
+- Real-time message list between pemesan and penyedia jasa for this specific order
 - Text input + send button
 - Text only, max 500 chars per message
 - No media attachments in chat (result file is uploaded separately via order action)
@@ -148,32 +150,32 @@ Order revision is not part of the current PRD scope. Do not add revision statuse
 - Accessible from OrderDetailScreen after status is `paid` and `hasReview == false`
 - One review per order, cannot be edited after submission
 - Fields: star rating 1–5 (required), comment (optional, max 300 chars)
-- On submit: create review document, update `averageRating` on listing and seller profile
+- On submit: create review document, update `averageRating` on listing and penyedia jasa profile
 
 ---
 
 ### ProfileScreen (own)
 - Profile photo (tappable to change)
 - Name, email, bio, faculty
-- Role badge: Pembeli / Penjual / Keduanya
+- Role badge: Pemesan / Penyedia Jasa / Keduanya
 - Identity and skill verification badges when approved
-- Stats: average rating (if seller), total orders as buyer, total orders as seller
+- Stats: average rating (if penyedia jasa), total orders as pemesan, total orders as penyedia jasa
 - "Pusat Verifikasi" entry with current identity/skill status summary
 - Portfolio preview section with "Kelola" entry to Portfolio management
-- "Listing Saya" section with own listings
+- "Layanan Saya" section with own layanan
 - Inactive own listings remain visible here with a `NONAKTIF` label
-- "Tambah Listing Baru" button
+- "Tambah Layanan Baru" button
 - Edit Profile button
 - Logout button
 
 ### EditProfileScreen
 - Fields: name, bio (max 150 chars), faculty
-- Role selector: Pembeli saja | Penjual saja | Keduanya
+- Role selector: Pemesan saja | Penyedia Jasa saja | Keduanya
 - Upload / change profile photo
 
 ### UserProfileScreen (other user, read-only)
 - Photo, name, bio, rating, stats, identity badge, skill badges
-- Active listings owned by this user
+- Active layanan owned by this user
 - Public portfolio items owned by this user
 
 ---
@@ -213,8 +215,8 @@ Order revision is not part of the current PRD scope. Do not add revision statuse
 ### Badges
 - Identity and skill badges use reusable UI from `ui/common/VerificationBadges.kt`
 - Profile and UserProfile show approved identity and all approved skill badges from public `users/{uid}` fields
-- ListingCard shows a compact verified skill badge only when the seller has a badge for that listing category
-- ListingDetail seller card shows identity plus the relevant skill badge and observes the seller's public user badge fields as the display source
+- ListingCard shows a compact verified skill badge only when the penyedia jasa has a badge for that listing category
+- ListingDetail penyedia jasa card shows identity plus the relevant skill badge and observes the penyedia jasa's public user badge fields as the display source
 
 ---
 

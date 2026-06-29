@@ -200,7 +200,7 @@ private fun SearchScreenEmptyQueryPreview() {
                             value = "",
                             onValueChange = {},
                             placeholder = {
-                                Text("Cari layanan...", style = MaterialTheme.typography.bodyMedium, color = berimaColors.textSecondary)
+                                Text(AppStrings.SEARCH_PLACEHOLDER, style = MaterialTheme.typography.bodyMedium, color = berimaColors.textSecondary)
                             },
                             singleLine = true,
                             colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(

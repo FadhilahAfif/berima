@@ -85,7 +85,7 @@ fun OrdersScreen(
                 title = {
                     Text(
                         text = AppStrings.ORDERS_TITLE,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },

@@ -76,7 +76,7 @@ class CreateOrderViewModel @Inject constructor(
         if (_isSubmitting.value) return
 
         val listing = _listing.value ?: run {
-            _error.value = "Listing belum siap"
+            _error.value = "Layanan belum siap"
             return
         }
         val uid = authRepository.currentUserId ?: run {

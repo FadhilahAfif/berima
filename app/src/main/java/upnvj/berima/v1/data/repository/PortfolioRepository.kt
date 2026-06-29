@@ -2,7 +2,6 @@ package upnvj.berima.v1.data.repository
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -23,7 +22,6 @@ class PortfolioRepository @Inject constructor(
     fun observePortfolioItems(userId: String): Flow<List<PortfolioItem>> = callbackFlow {
         val listener = portfolioCollection
             .whereEqualTo("userId", userId)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
@@ -31,6 +29,7 @@ class PortfolioRepository @Inject constructor(
                 }
                 val items = snapshot?.documents
                     ?.mapNotNull { it.toObject(PortfolioItem::class.java) }
+                    ?.sortedByDescending { it.createdAt }
                     ?: emptyList()
                 trySend(items)
             }

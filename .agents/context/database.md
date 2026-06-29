@@ -4,6 +4,15 @@
 
 ---
 
+## Terminology Note
+
+Firestore field names and model names remain technical: `buyerId`, `sellerId`,
+`listingId`, and similar identifiers are part of the schema contract. When
+writing user-facing copy, translate those roles to `pemesan`, `penyedia jasa`,
+and `layanan` instead of surfacing the raw technical labels.
+
+---
+
 ### `users/{userId}`
 `userId` = Firebase Auth UID. Created on register.
 
@@ -219,6 +228,13 @@ Required behavior:
 ## Required Composite Indexes
 
 Create or deploy these via `firestore.indexes.json`:
+
+Runtime note: Firestore may require an implicit `__name__ DESC` tiebreaker for
+queries that combine equality filters with `createdAt DESC` ordering and limits.
+`firestore.indexes.json` includes that field where Firebase requested it during
+physical-device QA. The current portfolio and verification repository streams sort
+small owner-scoped result sets client-side to keep demo screens usable while new
+indexes are still building.
 
 | Collection | Fields | Order |
 |---|---|---|
