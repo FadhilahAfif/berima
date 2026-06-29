@@ -2,6 +2,8 @@ package upnvj.berima.v1.ui.order
 
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.formatRupiah
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +52,7 @@ import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Listing
 import upnvj.berima.v1.data.model.Validation
 import upnvj.berima.v1.ui.common.BerimaButton
+import upnvj.berima.v1.ui.common.SecondaryActionButton
 import upnvj.berima.v1.ui.common.categoryThumbnailRes
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 
@@ -63,12 +66,18 @@ fun CreateOrderScreen(
 ) {
     val listing by viewModel.listing.collectAsStateWithLifecycle()
     val note by viewModel.note.collectAsStateWithLifecycle()
+    val selectedRequirementFileName by viewModel.selectedRequirementFileName.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val isSubmitting by viewModel.isSubmitting.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val createdOrderId by viewModel.createdOrderId.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val berimaColors = LocalBerimaColors.current
+    val pickRequirementFile = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        viewModel.onRequirementFileSelected(uri)
+    }
 
     LaunchedEffect(createdOrderId) {
         createdOrderId?.let { onOrderCreated(it) }
@@ -144,8 +153,10 @@ fun CreateOrderScreen(
                 CreateOrderContent(
                     listing = listing!!,
                     note = note,
+                    selectedRequirementFileName = selectedRequirementFileName,
                     isSubmitting = isSubmitting,
                     onNoteChange = viewModel::onNoteChange,
+                    onPickRequirementFile = { pickRequirementFile.launch("*/*") },
                     onSubmit = viewModel::submit,
                     modifier = Modifier
                         .fillMaxSize()
@@ -160,8 +171,10 @@ fun CreateOrderScreen(
 private fun CreateOrderContent(
     listing: Listing,
     note: String,
+    selectedRequirementFileName: String?,
     isSubmitting: Boolean,
     onNoteChange: (String) -> Unit,
+    onPickRequirementFile: () -> Unit,
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -177,7 +190,7 @@ private fun CreateOrderContent(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = "Catatan untuk penyedia jasa (opsional)",
+            text = AppStrings.CREATE_ORDER_NOTE_LABEL,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -189,13 +202,13 @@ private fun CreateOrderContent(
             onValueChange = onNoteChange,
             label = {
                 Text(
-                    text = "Tulis catatan...",
+                    text = AppStrings.CREATE_ORDER_NOTE_LABEL,
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
             placeholder = {
                 Text(
-                    text = "Contoh: tolong gunakan warna biru",
+                    text = AppStrings.CREATE_ORDER_NOTE_PLACEHOLDER,
                     style = MaterialTheme.typography.bodyMedium,
                     color = berimaColors.textSecondary
                 )
@@ -228,6 +241,14 @@ private fun CreateOrderContent(
 
         Spacer(Modifier.height(24.dp))
 
+        RequirementFilePicker(
+            selectedFileName = selectedRequirementFileName,
+            onPickFile = onPickRequirementFile,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(24.dp))
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -248,9 +269,59 @@ private fun CreateOrderContent(
         Spacer(Modifier.height(24.dp))
 
         BerimaButton(
-            text = "Konfirmasi Pesanan",
+            text = AppStrings.CREATE_ORDER_SUBMIT,
             onClick = onSubmit,
             isLoading = isSubmitting,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun RequirementFilePicker(
+    selectedFileName: String?,
+    onPickFile: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    val cardShape = RoundedCornerShape(12.dp)
+
+    Column(
+        modifier = modifier
+            .clip(cardShape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle, cardShape)
+            .padding(14.dp)
+    ) {
+        Text(
+            text = AppStrings.CREATE_ORDER_REQUIREMENT_FILE_TITLE,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = AppStrings.CREATE_ORDER_REQUIREMENT_FILE_HELP,
+            style = MaterialTheme.typography.bodySmall,
+            color = berimaColors.textSecondary
+        )
+        if (!selectedFileName.isNullOrBlank()) {
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text = "${AppStrings.CREATE_ORDER_SELECTED_FILE}: $selectedFileName",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Spacer(Modifier.height(12.dp))
+        SecondaryActionButton(
+            text = if (selectedFileName.isNullOrBlank()) {
+                AppStrings.CREATE_ORDER_PICK_FILE
+            } else {
+                AppStrings.CREATE_ORDER_CHANGE_FILE
+            },
+            onClick = onPickFile,
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -364,8 +435,10 @@ private fun CreateOrderScreenPreview() {
             CreateOrderContent(
                 listing = listing,
                 note = "Tolong gunakan warna biru tua dengan aksen emas",
+                selectedRequirementFileName = "brief-ppt-sidang.pdf",
                 isSubmitting = false,
                 onNoteChange = {},
+                onPickRequirementFile = {},
                 onSubmit = {},
                 modifier = Modifier
                     .fillMaxSize()

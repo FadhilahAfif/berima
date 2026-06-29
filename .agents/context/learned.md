@@ -5,6 +5,22 @@ Each entry must include: what was learned, which file it affects (if any), and d
 
 Historical entries may still mention older marketplace terms. Treat those as snapshots of previous implementation work, not as guidance for current user-facing copy.
 
+- [2026-06-29] Order flow now supports the screenshot/report scenario from
+  `docs/ORDER_FLOW_CHANGE_PLAN.md`: pemesan can attach one optional requirement
+  file at order creation, penyedia jasa result uploads persist URL/name/storage
+  path metadata, pemesan can request one revision through
+  `revision_requested`, and penyedia jasa can upload a revised result back to
+  `delivered`. Repository methods now guard actor/status transitions instead of
+  accepting arbitrary status writes from the ViewModel. `scripts/seed-demo.js`
+  also seeds fixed `demoShotOrder*Andi` orders with requirement/result files and
+  chat messages for screenshots.
+  → Affects `Order.kt`, `Constants.kt`, `StorageRepository.kt`,
+  `OrderRepository.kt`, `CreateOrderScreen.kt`, `CreateOrderViewModel.kt`,
+  `OrderDetailScreen.kt`, `OrderDetailViewModel.kt`, `OrderActions.kt`,
+  `OrderStatusTimeline.kt`, `StatusChip.kt`, `AppStrings.kt`,
+  `storage.rules`, `scripts/seed-demo.js`, `features.md`, `database.md`, and
+  `AGENTS.md`.
+
 - [2026-06-29] Profile order stats now show one completed-order count for the
   provider role instead of separate buyer/seller counters. The displayed value is
   `totalOrdersAsSeller`, labelled `PESANAN SELESAI`, so the profile no longer

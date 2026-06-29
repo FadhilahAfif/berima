@@ -1,5 +1,6 @@
 package upnvj.berima.v1.ui.order
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import upnvj.berima.v1.data.model.Validation
 import upnvj.berima.v1.data.repository.AuthRepository
 import upnvj.berima.v1.data.repository.ListingRepository
 import upnvj.berima.v1.data.repository.OrderRepository
+import upnvj.berima.v1.data.repository.StorageRepository
 import upnvj.berima.v1.navigation.Screen
 import javax.inject.Inject
 
@@ -27,6 +29,7 @@ class CreateOrderViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val listingRepository: ListingRepository,
     private val orderRepository: OrderRepository,
+    private val storageRepository: StorageRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
@@ -38,6 +41,12 @@ class CreateOrderViewModel @Inject constructor(
 
     private val _note = MutableStateFlow("")
     val note: StateFlow<String> = _note.asStateFlow()
+
+    private val _selectedRequirementUri = MutableStateFlow<Uri?>(null)
+    val selectedRequirementUri: StateFlow<Uri?> = _selectedRequirementUri.asStateFlow()
+
+    private val _selectedRequirementFileName = MutableStateFlow<String?>(null)
+    val selectedRequirementFileName: StateFlow<String?> = _selectedRequirementFileName.asStateFlow()
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -72,6 +81,11 @@ class CreateOrderViewModel @Inject constructor(
         }
     }
 
+    fun onRequirementFileSelected(uri: Uri?) {
+        _selectedRequirementUri.value = uri
+        _selectedRequirementFileName.value = uri?.lastPathSegment?.substringAfterLast('/')
+    }
+
     fun submit() {
         if (_isSubmitting.value) return
 
@@ -100,7 +114,24 @@ class CreateOrderViewModel @Inject constructor(
             )
 
             orderRepository.createOrder(order).fold(
-                onSuccess = { orderId -> _createdOrderId.value = orderId },
+                onSuccess = { orderId ->
+                    val requirementUri = _selectedRequirementUri.value
+                    if (requirementUri != null) {
+                        storageRepository.uploadOrderRequirement(orderId, requirementUri)
+                            .fold(
+                                onSuccess = { metadata ->
+                                    orderRepository.setRequirementFile(orderId, uid, metadata)
+                                        .onFailure {
+                                            _error.value = it.message ?: "File kebutuhan gagal disimpan"
+                                        }
+                                },
+                                onFailure = {
+                                    _error.value = it.message ?: "Pesanan dibuat, tapi file kebutuhan gagal diunggah"
+                                }
+                            )
+                    }
+                    _createdOrderId.value = orderId
+                },
                 onFailure = { _error.value = it.message ?: "Gagal membuat pesanan" }
             )
             _isSubmitting.value = false

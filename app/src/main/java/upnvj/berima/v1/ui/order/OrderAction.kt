@@ -17,8 +17,11 @@ sealed interface OrderAction {
     /** Buyer @ pending → cancelled. */
     data object Cancel : OrderAction
 
-    /** Seller @ in_progress: upload result file then flip to delivered. */
+    /** Seller @ in_progress/revision_requested: upload result file then flip to delivered. */
     data class UploadResult(val uri: Uri) : OrderAction
+
+    /** Buyer @ delivered: asks the seller for one revision. */
+    data class RequestRevision(val note: String) : OrderAction
 
     /** Buyer @ delivered → completed. */
     data object ConfirmDelivered : OrderAction

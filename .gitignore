@@ -19,3 +19,4 @@ gradle/gradle-daemon-jvm.properties
 # Local QA artifacts
 .qa/
 qa-*.png
+documentation/

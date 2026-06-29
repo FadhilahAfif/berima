@@ -23,8 +23,15 @@ data class PublicImageUploadMetadata(
     val contentType: String?
 )
 
+data class OrderFileUploadMetadata(
+    val downloadUrl: String,
+    val storagePath: String,
+    val fileName: String?,
+    val contentType: String?
+)
+
 /**
- * Wraps Firebase Storage uploads for order result files and user profile photos.
+ * Wraps Firebase Storage uploads for order files and user-owned images.
  */
 @Singleton
 class StorageRepository @Inject constructor(
@@ -32,18 +39,10 @@ class StorageRepository @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     companion object {
-        /** Maximum allowed size for an order result file: 20 MB. */
-        const val MAX_RESULT_FILE_BYTES = 20L * 1024 * 1024
+        /** Maximum allowed size for an order requirement/result file: 20 MB. */
+        const val MAX_ORDER_FILE_BYTES = 20L * 1024 * 1024
     }
 
-    /**
-     * Uploads the file at [uri] to `orders/{orderId}/result/{filename}` and
-     * returns the public download URL. Rejects files larger than
-     * [MAX_RESULT_FILE_BYTES] before the upload starts.
-     *
-     * Some content providers don't expose a known length (returns -1). In
-     * that case we trust Firebase's own limits as a backstop.
-     */
     suspend fun uploadProfilePhoto(userId: String, uri: Uri): Result<String> {
         return try {
             val rawName = uri.lastPathSegment?.substringAfterLast('/').orEmpty()
@@ -57,22 +56,53 @@ class StorageRepository @Inject constructor(
         }
     }
 
-    suspend fun uploadOrderResult(orderId: String, uri: Uri): Result<String> {
+    suspend fun uploadOrderRequirement(orderId: String, uri: Uri): Result<OrderFileUploadMetadata> {
+        return uploadOrderFile(
+            orderId = orderId,
+            uri = uri,
+            folder = "requirements",
+            fallbackPrefix = "kebutuhan"
+        )
+    }
+
+    suspend fun uploadOrderResult(orderId: String, uri: Uri): Result<OrderFileUploadMetadata> {
+        return uploadOrderFile(
+            orderId = orderId,
+            uri = uri,
+            folder = "result",
+            fallbackPrefix = "hasil"
+        )
+    }
+
+    private suspend fun uploadOrderFile(
+        orderId: String,
+        uri: Uri,
+        folder: String,
+        fallbackPrefix: String
+    ): Result<OrderFileUploadMetadata> {
         return try {
             val size = fileSize(uri)
 
-            if (size in 1..Long.MAX_VALUE && size > MAX_RESULT_FILE_BYTES) {
+            if (size in 1..Long.MAX_VALUE && size > MAX_ORDER_FILE_BYTES) {
                 return Result.failure(
                     IllegalArgumentException("Ukuran file maksimal 20 MB")
                 )
             }
 
-            val rawName = uri.lastPathSegment?.substringAfterLast('/').orEmpty()
-            val filename = if (rawName.isNotBlank()) rawName else "result-${System.currentTimeMillis()}"
-            val ref = storage.reference.child("orders/$orderId/result/$filename")
+            val fileName = displayName(uri)
+                ?: "$fallbackPrefix-${System.currentTimeMillis()}"
+            val contentType = context.contentResolver.getType(uri)
+            val storagePath = "orders/$orderId/$folder/$fileName"
+            val ref = storage.reference.child(storagePath)
             ref.putFile(uri).await()
-            val url = ref.downloadUrl.await().toString()
-            Result.success(url)
+            Result.success(
+                OrderFileUploadMetadata(
+                    downloadUrl = ref.downloadUrl.await().toString(),
+                    storagePath = storagePath,
+                    fileName = fileName,
+                    contentType = contentType
+                )
+            )
         } catch (e: Exception) {
             Result.failure(e)
         }

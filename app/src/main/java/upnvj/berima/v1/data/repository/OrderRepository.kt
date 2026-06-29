@@ -111,14 +111,18 @@ class OrderRepository @Inject constructor(
      * Idempotent: if the order is already `paid`, returns success without
      * any writes — guards against accidental double-tap on "Simulasi Bayar".
      */
-    suspend fun markPaid(orderId: String): Result<Unit> {
+    suspend fun markPaid(orderId: String, buyerId: String): Result<Unit> {
         return try {
             firestore.runTransaction { txn ->
                 val orderRef = ordersCollection.document(orderId)
                 val snapshot = txn.get(orderRef)
                 val order = snapshot.toObject(Order::class.java)
                     ?: throw IllegalStateException("Pesanan tidak ditemukan")
+                if (order.buyerId != buyerId) throw IllegalStateException("Aksi hanya untuk pemesan")
                 if (order.status == OrderStatus.PAID) return@runTransaction null
+                if (order.status != OrderStatus.COMPLETED) {
+                    throw IllegalStateException("Pesanan belum siap dibayar")
+                }
 
                 txn.update(
                     orderRef,
@@ -150,33 +154,98 @@ class OrderRepository @Inject constructor(
         }
     }
 
-    suspend fun updateStatus(orderId: String, status: String): Result<Unit> {
+    suspend fun acceptOrder(orderId: String, sellerId: String): Result<Unit> =
+        transition(orderId, OrderStatus.PENDING, OrderStatus.IN_PROGRESS, sellerId, buyerAction = false)
+
+    suspend fun rejectOrder(orderId: String, sellerId: String): Result<Unit> =
+        transition(orderId, OrderStatus.PENDING, OrderStatus.REJECTED, sellerId, buyerAction = false)
+
+    suspend fun cancelOrder(orderId: String, buyerId: String): Result<Unit> =
+        transition(orderId, OrderStatus.PENDING, OrderStatus.CANCELLED, buyerId, buyerAction = true)
+
+    suspend fun confirmDelivered(orderId: String, buyerId: String): Result<Unit> =
+        transition(orderId, OrderStatus.DELIVERED, OrderStatus.COMPLETED, buyerId, buyerAction = true)
+
+    suspend fun requestRevision(orderId: String, buyerId: String, note: String): Result<Unit> {
         return try {
-            ordersCollection.document(orderId)
-                .update(
+            firestore.runTransaction { txn ->
+                val orderRef = ordersCollection.document(orderId)
+                val order = txn.get(orderRef).toObject(Order::class.java)
+                    ?: throw IllegalStateException("Pesanan tidak ditemukan")
+                if (order.buyerId != buyerId) throw IllegalStateException("Aksi hanya untuk pemesan")
+                if (order.status != OrderStatus.DELIVERED) throw IllegalStateException("Hasil belum bisa direvisi")
+                if (order.revisionCount >= 1L) throw IllegalStateException("Revisi hanya tersedia satu kali")
+                txn.update(
+                    orderRef,
                     mapOf(
-                        "status" to status,
+                        "status" to OrderStatus.REVISION_REQUESTED,
+                        "revisionNote" to note,
+                        "revisionCount" to FieldValue.increment(1L),
                         "updatedAt" to Timestamp.now()
                     )
                 )
-                .await()
+                null
+            }.await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun setAttachmentUrl(orderId: String, url: String): Result<Unit> {
+    suspend fun setRequirementFile(
+        orderId: String,
+        buyerId: String,
+        metadata: OrderFileUploadMetadata
+    ): Result<Unit> {
         return try {
-            ordersCollection.document(orderId)
-                .update(
+            firestore.runTransaction { txn ->
+                val orderRef = ordersCollection.document(orderId)
+                val order = txn.get(orderRef).toObject(Order::class.java)
+                    ?: throw IllegalStateException("Pesanan tidak ditemukan")
+                if (order.buyerId != buyerId) throw IllegalStateException("Aksi hanya untuk pemesan")
+                txn.update(
+                    orderRef,
                     mapOf(
-                        "attachmentUrl" to url,
+                        "requirementFileUrl" to metadata.downloadUrl,
+                        "requirementFileName" to metadata.fileName,
+                        "requirementStoragePath" to metadata.storagePath,
+                        "updatedAt" to Timestamp.now()
+                    )
+                )
+                null
+            }.await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun setResultFile(
+        orderId: String,
+        sellerId: String,
+        metadata: OrderFileUploadMetadata
+    ): Result<Unit> {
+        return try {
+            firestore.runTransaction { txn ->
+                val orderRef = ordersCollection.document(orderId)
+                val order = txn.get(orderRef).toObject(Order::class.java)
+                    ?: throw IllegalStateException("Pesanan tidak ditemukan")
+                if (order.sellerId != sellerId) throw IllegalStateException("Aksi hanya untuk penyedia jasa")
+                if (order.status !in listOf(OrderStatus.IN_PROGRESS, OrderStatus.REVISION_REQUESTED)) {
+                    throw IllegalStateException("Hasil belum bisa dikirim")
+                }
+                txn.update(
+                    orderRef,
+                    mapOf(
+                        "attachmentUrl" to metadata.downloadUrl,
+                        "resultFileName" to metadata.fileName,
+                        "resultStoragePath" to metadata.storagePath,
                         "status" to OrderStatus.DELIVERED,
                         "updatedAt" to Timestamp.now()
                     )
                 )
-                .await()
+                null
+            }.await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -188,6 +257,40 @@ class OrderRepository @Inject constructor(
             ordersCollection.document(orderId)
                 .update("hasReview", true)
                 .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private suspend fun transition(
+        orderId: String,
+        fromStatus: String,
+        toStatus: String,
+        actorId: String,
+        buyerAction: Boolean
+    ): Result<Unit> {
+        return try {
+            firestore.runTransaction { txn ->
+                val orderRef = ordersCollection.document(orderId)
+                val order = txn.get(orderRef).toObject(Order::class.java)
+                    ?: throw IllegalStateException("Pesanan tidak ditemukan")
+                val allowedActor = if (buyerAction) order.buyerId else order.sellerId
+                if (allowedActor != actorId) {
+                    throw IllegalStateException(
+                        if (buyerAction) "Aksi hanya untuk pemesan" else "Aksi hanya untuk penyedia jasa"
+                    )
+                }
+                if (order.status != fromStatus) throw IllegalStateException("Status pesanan sudah berubah")
+                txn.update(
+                    orderRef,
+                    mapOf(
+                        "status" to toStatus,
+                        "updatedAt" to Timestamp.now()
+                    )
+                )
+                null
+            }.await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

@@ -102,7 +102,8 @@ Terminology note: user-facing copy should use `layanan`, `pemesan`, and `penyedi
 
 ### CreateOrderScreen
 - Show listing summary (title, penyedia jasa, price)
-- Optional field: note for penyedia jasa (max 300 chars)
+- Optional field: catatan kebutuhan for penyedia jasa (max 300 chars)
+- Optional one-file requirement upload (max 20 MB), stored on the order as requirement file URL/name/storage path
 - Show total price
 - "Konfirmasi Pesanan" button → create order document with status `pending`
 - Navigate to OrderDetailScreen on success
@@ -118,6 +119,7 @@ Terminology note: user-facing copy should use `layanan`, `pemesan`, and `penyedi
 Order status flow:
 ```
 pending → in_progress → delivered → completed → paid
+                         -> revision_requested -> delivered
 ```
 Additional statuses: `cancelled` (pemesan cancels at pending), `rejected` (penyedia jasa rejects at pending)
 
@@ -127,16 +129,17 @@ Actions per role and status:
 |---|---|---|
 | `pending` | Batalkan pesanan | Terima / Tolak |
 | `in_progress` | — | Unggah hasil |
-| `delivered` | Konfirmasi selesai | — |
+| `delivered` | Konfirmasi selesai / Minta revisi | - |
+| `revision_requested` | - | Kirim revisi |
 | `completed` | Simulasi bayar | — |
 | `paid` | Tulis ulasan (jika belum) | — |
 | `cancelled` / `rejected` | — | — |
 
-Below the status section: Chat section (see below)
+Below the status section: kebutuhan dari pemesan (note + optional requirement file), hasil dari penyedia jasa when uploaded, optional revision note, then Chat section (see below)
 
 **"Simulasi Bayar"** — MVP only. Changes status to `paid` immediately. No real payment.
 Explain this as a Midtrans placeholder during demo.
-Order revision is not part of the current PRD scope. Do not add revision statuses unless explicitly requested.
+Order revision was explicitly added by `docs/ORDER_FLOW_CHANGE_PLAN.md` for the demo/report flow. Keep it to one simple revision round via `revisionCount`.
 
 ### Chat Section (inside OrderDetailScreen)
 - Real-time message list between pemesan and penyedia jasa for this specific order
