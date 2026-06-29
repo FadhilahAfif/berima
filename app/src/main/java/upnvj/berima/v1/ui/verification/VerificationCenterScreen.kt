@@ -90,7 +90,7 @@ fun VerificationCenterScreen(
                 title = {
                     Text(
                         text = AppStrings.VERIFICATION_TITLE,
-                        style = MaterialTheme.typography.headlineLarge,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },

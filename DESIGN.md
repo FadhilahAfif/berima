@@ -217,6 +217,15 @@ Pressed states are indicated by a surface shift to `surface-pressed` (`#EEEBE4`)
 
 Primary buttons are pill-shaped (`rounded.full`), `primary` background, `on-primary` (white) text, `label-lg` (ExtraBold 14sp). Pressed state shifts background to `primary-dim`. Disabled state uses `surface-container` background with `on-surface-variant` text.
 
+Action hierarchy:
+
+- `BerimaButton` is reserved for the single primary positive action in a decision cluster.
+- `SecondaryActionButton` is for neutral alternatives such as back-up choices or non-destructive secondary actions. It uses an outline with neutral text.
+- `DangerActionButton` is for destructive actions such as cancel, reject, deactivate, or delete. It uses an outline with `error` text/border and must not use the primary green fill.
+- `InlineTextAction` is for compact text actions such as Kelola, Ganti gambar, or Hapus gambar. Its visual text can stay compact, but the hit area must remain at least 44dp high.
+
+Do not stack two full-width primary green buttons in one action group. If an action is risky or destructive, separate it visually with the danger vocabulary and use confirmation where needed.
+
 ### Cards
 
 White (`surface`) background, `rounded.md` (12px) corners, 1dp `border-subtle` hairline border. No shadows. Internal padding 16dp on all sides. Pressed state shifts background to `surface-pressed`.
@@ -236,6 +245,8 @@ List items separated by a 1dp `border-subtle` divider. Pressed state uses `surfa
 ### Micro-Gig Grid
 
 Listings display price prominently using `display-price` (ExtraBold 24sp) in `on-surface` (`#1A1A1A`). Price is positioned in the card info area, visually dominant over title and seller name.
+
+Service cards use a stable fixed height so grid and rail layouts do not form a staggered masonry effect. Shared `ListingCard` defaults to 304dp tall; its thumbnail height may vary by context, but the outer card height must stay fixed and the seller row should anchor to the bottom. Loading skeleton cards must use the same 304dp height. Profile-owned service rows use a stable 132dp row height.
 
 ### Bottom Navigation
 

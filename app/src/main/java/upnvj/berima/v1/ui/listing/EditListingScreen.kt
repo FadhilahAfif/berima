@@ -42,6 +42,7 @@ import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Category
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
+import upnvj.berima.v1.ui.common.DangerActionButton
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -183,7 +184,7 @@ fun EditListingScreen(
                 onSubmit = viewModel::submit
             )
             if (isActive) {
-                BerimaButton(
+                DangerActionButton(
                     text = AppStrings.LISTING_DEACTIVATE,
                     onClick = { showDeactivateDialog = true },
                     enabled = !isLoading,
@@ -191,7 +192,7 @@ fun EditListingScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 )
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(32.dp))
             }
         }
     }

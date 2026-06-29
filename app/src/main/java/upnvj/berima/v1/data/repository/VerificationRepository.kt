@@ -2,7 +2,6 @@ package upnvj.berima.v1.data.repository
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -31,7 +30,6 @@ class VerificationRepository @Inject constructor(
             val listener = submissionsCollection
                 .whereEqualTo("userId", userId)
                 .whereEqualTo("type", type)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
                         close(error)
@@ -39,6 +37,7 @@ class VerificationRepository @Inject constructor(
                     }
                     val submissions = snapshot?.documents
                         ?.mapNotNull { it.toObject(VerificationSubmission::class.java) }
+                        ?.sortedByDescending { it.createdAt }
                         ?: emptyList()
                     trySend(submissions)
                 }
@@ -48,7 +47,6 @@ class VerificationRepository @Inject constructor(
     fun observePortfolioItems(userId: String): Flow<List<PortfolioItem>> = callbackFlow {
         val listener = portfolioCollection
             .whereEqualTo("userId", userId)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
@@ -56,6 +54,7 @@ class VerificationRepository @Inject constructor(
                 }
                 val items = snapshot?.documents
                     ?.mapNotNull { it.toObject(PortfolioItem::class.java) }
+                    ?.sortedByDescending { it.createdAt }
                     ?: emptyList()
                 trySend(items)
             }
@@ -164,7 +163,6 @@ class VerificationRepository @Inject constructor(
         val snapshot = submissionsCollection
             .whereEqualTo("userId", userId)
             .whereEqualTo("type", type)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
             .get()
             .await()
 

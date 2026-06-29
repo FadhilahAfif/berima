@@ -3,7 +3,6 @@ package upnvj.berima.v1.ui.listing
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +37,7 @@ import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.common.BerimaTextField
 import upnvj.berima.v1.ui.common.CategoryPickerField
 import upnvj.berima.v1.ui.common.CounterText
+import upnvj.berima.v1.ui.common.InlineTextAction
 import upnvj.berima.v1.ui.common.categoryThumbnailRes
 import upnvj.berima.v1.ui.common.formatRupiahInput
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
@@ -329,29 +329,21 @@ private fun ListingImagePicker(
         }
         Spacer(Modifier.height(10.dp))
         Row {
-            Text(
+            InlineTextAction(
                 text = if (imageModel == null) {
                     AppStrings.LISTING_PICK_IMAGE
                 } else {
                     AppStrings.LISTING_CHANGE_IMAGE
                 },
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(9999.dp))
-                    .clickable(onClick = onPickThumbnail)
-                    .padding(vertical = 6.dp)
+                onClick = onPickThumbnail,
+                modifier = Modifier.padding(end = 4.dp)
             )
             if (imageModel != null) {
-                Spacer(Modifier.width(12.dp))
-                Text(
+                Spacer(Modifier.width(8.dp))
+                InlineTextAction(
                     text = AppStrings.LISTING_REMOVE_IMAGE,
-                    style = MaterialTheme.typography.labelLarge,
+                    onClick = onRemoveThumbnail,
                     color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(9999.dp))
-                        .clickable(onClick = onRemoveThumbnail)
-                        .padding(vertical = 6.dp)
                 )
             }
         }

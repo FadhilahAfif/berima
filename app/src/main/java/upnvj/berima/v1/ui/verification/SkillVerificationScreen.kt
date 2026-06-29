@@ -110,7 +110,7 @@ fun SkillVerificationScreen(
                 title = {
                     Text(
                         text = AppStrings.SKILL_TITLE,
-                        style = MaterialTheme.typography.headlineLarge,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },

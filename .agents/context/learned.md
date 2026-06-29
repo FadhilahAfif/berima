@@ -3,6 +3,98 @@
 Document discoveries here as the project progresses.
 Each entry must include: what was learned, which file it affects (if any), and date.
 
+Historical entries may still mention older marketplace terms. Treat those as snapshots of previous implementation work, not as guidance for current user-facing copy.
+
+- [2026-06-29] Profile order stats now show one completed-order count for the
+  provider role instead of separate buyer/seller counters. The displayed value is
+  `totalOrdersAsSeller`, labelled `PESANAN SELESAI`, so the profile no longer
+  shows confusing role counters like `42 PENYEDIA`.
+  → Affects `ProfileScreen.kt`, `AppStrings.kt`, and `AGENTS.md`.
+
+- [2026-06-29] Profile and Edit Profile now read more like native mobile account
+  surfaces instead of stacked generic cards. Profile folds layanan count, rating,
+  and order stats into the identity header; Edit Profile groups public info and
+  role choice into form sections with a sticky `Simpan Perubahan` bar. Verified
+  with `./gradlew.bat :app:compileDebugKotlin`, `./gradlew.bat :app:installDebug`,
+  and device UI-tree checks on Samsung SM-A235F / Android 14.
+  → Affects `ProfileScreen.kt`, `EditProfileScreen.kt`, `AppStrings.kt`, and
+  `AGENTS.md`.
+
+- [2026-06-29] Listing Detail now behaves more like a native service-commerce
+  screen: the primary order/edit action is in a sticky bottom bar, while the
+  scroll content uses a dedicated price/category/delivery panel instead of loose
+  metadata text. Verified with `./gradlew.bat :app:compileDebugKotlin`,
+  `./gradlew.bat :app:installDebug`, and device UI-tree/screenshot checks on
+  Samsung SM-A235F / Android 14.
+  â†’ Affects `ListingDetailScreen.kt` and `AGENTS.md`.
+
+- [2026-06-28] Service card sizing was standardized after device QA showed card
+  height could vary by title, badge, and rating content. Shared `ListingCard`
+  now defaults to a fixed 304dp height, anchors the seller row to the bottom, and
+  Home skeleton cards use the same 304dp height to avoid layout jumps.
+  Profile-owned service rows are fixed at 132dp. Keep future layanan card
+  variants aligned to these dimensions unless the design system is deliberately
+  revised.
+  → Affects `ListingCard.kt`, `HomeScreen.kt`, `ProfileScreen.kt`, `DESIGN.md`,
+  and `AGENTS.md`.
+
+- [2026-06-28] UI/UX redesign foundation pass shipped from
+  `docs/UI_UX_REDESIGN_PLAN.md`. Shared semantic actions now live in
+  `ui/common/Components.kt` (`SecondaryActionButton`, `DangerActionButton`,
+  `InlineTextAction`) so destructive and inline actions no longer reuse primary
+  green styling. Edit Listing and Listing Detail now render `Nonaktifkan layanan`
+  as outline danger, OrderActions shares the same danger vocabulary, Profile moves
+  `Tambah Layanan Baru` above Portfolio and splits verification status into
+  readable identity/skill rows, Home category rail density was adjusted so all
+  four chips fit on the Samsung SM-A235F viewport, ListingCard compact badges now
+  say `Ahli <kategori>`, ListingDetail uses a chevron-right affordance for
+  `Lihat profil`, and CreateReview star targets are 44dp. Verified with
+  `./gradlew.bat :app:compileDebugKotlin`, `./gradlew.bat :app:installDebug`,
+  and manual device QA on Samsung SM-A235F / Android 14.
+  → Affects `Components.kt`, `AppStrings.kt`, `HomeScreen.kt`,
+  `EditListingScreen.kt`, `ListingDetailScreen.kt`, `ListingFormContent.kt`,
+  `OrderActions.kt`, `CreateReviewScreen.kt`, Profile/verification/order top bars,
+  `docs/UI_UX_REDESIGN_PLAN.md`, and `AGENTS.md`.
+
+- [2026-06-28] UI/UX redesign audit completed without implementing redesign
+  changes. `docs/UI_UX_REDESIGN_PLAN.md` is the structured backlog for future
+  polish work. Main findings: action hierarchy needs semantic primary/secondary/
+  danger components, Profile can clip the "Tambah Layanan Baru" CTA behind bottom
+  navigation, several task surfaces use type/icon sizes that feel oversized on a
+  physical 1080 x 2408 device, small text/icon actions need 44dp touch targets,
+  top app bar typography varies by screen, Home rails and compact trust badges
+  need density tuning, and ListingDetail uses a back-arrow glyph for forward
+  navigation to the penyedia jasa profile.
+  → Affects `docs/UI_UX_REDESIGN_PLAN.md`, `PRODUCT.md`, and future UI redesign
+  passes across shared components and screen composables.
+
+- [2026-06-28] Demo dataset tooling added in `scripts/seed-demo.js`. It generates
+  six custom PNG thumbnails under `scripts/demo-assets/`, uploads them to Firebase
+  Storage, and upserts deterministic Firestore records for a presentation-ready
+  business walkthrough: ethical layanan in all three categories, public badge
+  fields, portfolio items, pending/in-progress/paid/reviewed orders, and reusable
+  buyer/seller demo identities. The script can reuse the local Firebase CLI token
+  after `firebase login`, or accept `FIREBASE_ACCESS_TOKEN`.
+  → Affects `scripts/seed-demo.js`, `scripts/demo-assets/`, and `AGENTS.md`.
+
+- [2026-06-28] Android device QA on Samsung SM-A235F / Android 14 verified that
+  the app installs and opens, Home renders the seeded demo layanan with custom
+  thumbnails and badges, ListingDetail opens, Profile renders, and Pusat
+  Verifikasi opens without crash. Live Firebase rules/storage/indexes were
+  deployed during QA to resolve the previous `PERMISSION_DENIED`. To avoid
+  blocking the demo on Firestore composite index build time,
+  `PortfolioRepository` and `VerificationRepository` now remove `orderBy` from
+  the portfolio/verification queries and sort by `createdAt` in memory.
+  → Affects `PortfolioRepository.kt`, `VerificationRepository.kt`,
+  `firestore.indexes.json`, and `AGENTS.md`.
+
+- [2026-06-28] Terminology policy was codified across AGENTS and the product
+  context files. User-facing copy should now prefer layanan/pemesan/penyedia jasa,
+  while buyer/seller/listing remain internal identifiers for schema, routes, and
+  code. `project.md`, `features.md`, `database.md`, and `.agents/PRD.md` now
+  explicitly carry that guidance so future agents do not drift back to marketplace
+  retail wording in visible UI.
+
 - [2026-06-28] User-facing terminology was refreshed from marketplace-retail language
   to service-first language. Core UI copy now prefers layanan, penyedia jasa,
   and pemesan on Home, Orders, Profile, listing forms, create-order, and seller

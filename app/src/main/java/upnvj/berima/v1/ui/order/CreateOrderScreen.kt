@@ -89,7 +89,7 @@ fun CreateOrderScreen(
                 title = {
                     Text(
                         text = AppStrings.CREATE_ORDER_TITLE,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },
@@ -132,7 +132,7 @@ fun CreateOrderScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Listing tidak ditemukan.",
+                        text = "Layanan tidak ditemukan.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = berimaColors.textSecondary,
                         textAlign = TextAlign.Center
@@ -177,7 +177,7 @@ private fun CreateOrderContent(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = "Catatan untuk penjual (opsional)",
+            text = "Catatan untuk penyedia jasa (opsional)",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )

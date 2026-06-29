@@ -13,6 +13,17 @@ This PRD defines the next implementable Berima MVP scope. It is not a copy of th
 
 The core product addition is an optional **Verification Center** from the Profile screen. Users may continue using Berima without verification, but verified identity and skill badges improve trust across profiles, listings, and seller information.
 
+### Terminology and Copy Policy
+
+Use service-first language in every user-facing surface:
+
+- `layanan` for public service offerings and listing cards
+- `pemesan` for the user who places the order
+- `penyedia jasa` for the user who provides the service
+- `portofolio` for public work samples
+
+Keep `buyer`, `seller`, and `listing` as internal terms for schema fields, routes, models, repository names, and technical documentation when needed. Do not reintroduce marketplace-retail wording into visible UI copy unless the PRD explicitly asks for it.
+
 ### Current Existing Features
 
 - Email/password register, login, logout.
@@ -84,6 +95,8 @@ The core product addition is an optional **Verification Center** from the Profil
 | Buyer | Can create orders, cancel pending orders, confirm delivered work, simulate payment, write one review after paid. |
 | Seller | Can create/edit/deactivate listings, accept/reject orders, upload result files, submit skill verification. |
 | Admin | Reviews verification submissions manually in Firebase Console using Firebase project access. No Android admin UI in MVP. |
+
+Note: `Buyer` and `Seller` are internal role labels for the spec and schema. In visible UI copy, prefer `Pemesan` and `Penyedia Jasa`.
 
 ---
 

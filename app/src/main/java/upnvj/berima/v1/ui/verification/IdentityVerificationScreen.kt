@@ -102,7 +102,7 @@ fun IdentityVerificationScreen(
                 title = {
                     Text(
                         text = AppStrings.IDENTITY_TITLE,
-                        style = MaterialTheme.typography.headlineLarge,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },

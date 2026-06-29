@@ -83,7 +83,7 @@ fun UserProfileScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Profil Penjual",
+                        text = "Profil Penyedia Jasa",
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -280,7 +280,7 @@ private fun UserProfileContent(
 
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Listing Aktif",
+                text = "Layanan Aktif",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -295,7 +295,7 @@ private fun UserProfileContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Belum ada listing aktif",
+                        text = "Belum ada layanan aktif",
                         style = MaterialTheme.typography.bodyMedium,
                         color = berimaColors.textSecondary,
                         textAlign = TextAlign.Center
@@ -359,11 +359,11 @@ private fun UserProfileScreenPreview() {
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(
-                            text = "Profil Penjual",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                    Text(
+                        text = "Profil Penyedia Jasa",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                     },
                     navigationIcon = {
                         IconButton(onClick = {}) {

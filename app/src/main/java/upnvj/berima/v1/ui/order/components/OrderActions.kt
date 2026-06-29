@@ -1,6 +1,5 @@
 package upnvj.berima.v1.ui.order.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,9 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import upnvj.berima.v1.data.model.OrderStatus
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
+import upnvj.berima.v1.ui.common.DangerActionButton
 import upnvj.berima.v1.ui.order.OrderAction
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 
@@ -47,7 +45,7 @@ fun OrderActions(
         when (status) {
             OrderStatus.PENDING -> {
                 if (isBuyer) {
-                    DangerOutlinedButton(
+                    DangerActionButton(
                         text = AppStrings.ORDER_ACTION_CANCEL,
                         onClick = { onAction(OrderAction.Cancel) },
                         enabled = !isLoading,
@@ -58,23 +56,13 @@ fun OrderActions(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        OutlinedButton(
+                        DangerActionButton(
+                            text = AppStrings.ORDER_ACTION_REJECT,
                             onClick = { onAction(OrderAction.Reject) },
                             enabled = !isLoading,
-                            shape = RoundedCornerShape(9999.dp),
-                            border = BorderStroke(1.dp, berimaColors.borderInput),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.onSurface
-                            ),
                             modifier = Modifier
                                 .weight(1f)
-                                .height(52.dp)
-                        ) {
-                            Text(
-                                text = AppStrings.ORDER_ACTION_REJECT,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        }
+                        )
                         BerimaButton(
                             text = AppStrings.ORDER_ACTION_ACCEPT,
                             onClick = { onAction(OrderAction.Accept) },
@@ -150,30 +138,6 @@ fun OrderActions(
 }
 
 @Composable
-private fun DangerOutlinedButton(
-    text: String,
-    onClick: () -> Unit,
-    enabled: Boolean,
-    modifier: Modifier = Modifier
-) {
-    OutlinedButton(
-        onClick = onClick,
-        enabled = enabled,
-        shape = RoundedCornerShape(9999.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
-        colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = MaterialTheme.colorScheme.error
-        ),
-        modifier = modifier.height(52.dp)
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge
-        )
-    }
-}
-
-@Composable
 private fun Callout(
     text: String,
     modifier: Modifier = Modifier
@@ -201,17 +165,17 @@ private fun OrderActionsPreview() {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Buyer · pending", style = MaterialTheme.typography.labelSmall)
+            Text("Pemesan · pending", style = MaterialTheme.typography.labelSmall)
             OrderActions(OrderStatus.PENDING, isBuyer = true, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
-            Text("Seller · pending", style = MaterialTheme.typography.labelSmall)
+            Text("Penyedia · pending", style = MaterialTheme.typography.labelSmall)
             OrderActions(OrderStatus.PENDING, isBuyer = false, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
-            Text("Seller · in_progress", style = MaterialTheme.typography.labelSmall)
+            Text("Penyedia · in_progress", style = MaterialTheme.typography.labelSmall)
             OrderActions(OrderStatus.IN_PROGRESS, isBuyer = false, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
-            Text("Buyer · in_progress", style = MaterialTheme.typography.labelSmall)
+            Text("Pemesan · in_progress", style = MaterialTheme.typography.labelSmall)
             OrderActions(OrderStatus.IN_PROGRESS, isBuyer = true, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
-            Text("Buyer · completed", style = MaterialTheme.typography.labelSmall)
+            Text("Pemesan · completed", style = MaterialTheme.typography.labelSmall)
             OrderActions(OrderStatus.COMPLETED, isBuyer = true, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
-            Text("Buyer · paid (no review yet)", style = MaterialTheme.typography.labelSmall)
+            Text("Pemesan · paid (no review yet)", style = MaterialTheme.typography.labelSmall)
             OrderActions(OrderStatus.PAID, isBuyer = true, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
         }
     }

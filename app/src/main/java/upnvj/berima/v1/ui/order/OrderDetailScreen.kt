@@ -127,7 +127,7 @@ fun OrderDetailScreen(
                 title = {
                     Text(
                         text = AppStrings.ORDER_DETAIL_TITLE,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },

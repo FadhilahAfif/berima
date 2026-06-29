@@ -136,7 +136,7 @@ fun PortfolioManagerScreen(
                 title = {
                     Text(
                         text = AppStrings.PORTFOLIO_TITLE,
-                        style = MaterialTheme.typography.headlineLarge,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },

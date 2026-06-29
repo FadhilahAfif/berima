@@ -3,7 +3,8 @@
 ## What is Berima
 
 Berima ("Beri Jasa, Terima Hasil") is an Android marketplace app where students
-buy and sell small digital services (micro-gigs) that can be completed in under 48 hours.
+request and provide small digital services (micro-gigs) that can be completed in
+under 48 hours.
 
 Tagline: "Tugas Tuntas, Kantong Pas."
 
@@ -11,20 +12,20 @@ Tagline: "Tugas Tuntas, Kantong Pas."
 
 Student-to-student service transactions currently happen informally through WhatsApp groups.
 This causes three problems:
-- **Unsafe** — ghosting after payment, no accountability
-- **Unstructured** — no ratings, no portfolio, no transaction history
-- **No existing fit** — Fiverr/Fastwork are too complex and expensive for micro-scale transactions
+- **Unsafe** - ghosting after payment, no accountability
+- **Unstructured** - no ratings, no portfolio, no transaction history
+- **No existing fit** - Fiverr/Fastwork are too complex and expensive for micro-scale transactions
 
 ## The Solution
 
 A student-focused C2C marketplace with:
 - Any valid email registration, plus Google login in the next PRD scope
 - Optional Verification Center for identity and skill trust badges
-- Public seller portfolios to show work evidence
-- Structured listings with categories and fixed pricing
+- Public portfolios from penyedia jasa to show work evidence
+- Structured service listings with categories and fixed pricing
 - Order tracking with clear status flow
 - Rating and review system to build trust
-- In-order chat between buyer and seller
+- In-order chat between pemesan and penyedia jasa
 
 ## Service Categories
 
@@ -34,13 +35,26 @@ A student-focused C2C marketplace with:
 | `visual` | Visual Branding | PPT design, CV design, UKM poster |
 | `data` | Data Processing | SPSS/Excel data processing, document retyping |
 
+## Terminology
+
+Use these terms in user-facing copy:
+- `layanan` = a service offering or listing card
+- `pemesan` = the user who places the order
+- `penyedia jasa` = the user who provides the service
+- `portofolio` = public work samples
+
+Keep internal identifiers and schema names like `buyerId`, `sellerId`, and
+`listingId` unchanged unless the PRD explicitly requires a migration. The codebase
+may keep technical names for repositories, models, and routes, but UI copy should
+stay service-first.
+
 ## Target Users
 
-**Seller** — student with a digital skill, wants to earn money, not confident enough for Upwork
+**Penyedia Jasa** - student with a digital skill, wants to earn money, not confident enough for Upwork
 
-**Buyer** — student who needs quick help with a small task, budget Rp10.000–Rp100.000
+**Pemesan** - student who needs quick help with a small task, budget Rp10.000-Rp100.000
 
-One user can be both seller and buyer simultaneously.
+One user can be both penyedia jasa and pemesan simultaneously.
 
 ## User Restriction (MVP)
 
@@ -53,7 +67,7 @@ Verified identity/skill badges are trust signals, not access gates.
 ## Project Status
 
 This is an MVP built for a Technopreneurship course demo.
-Goal: a working, demonstrable app — not a production system.
+Goal: a working, demonstrable app - not a production system.
 Payment is simulated (no real money). Some features are intentionally simplified.
 
 `.agents/PRD.md` defines the next implementable scope:

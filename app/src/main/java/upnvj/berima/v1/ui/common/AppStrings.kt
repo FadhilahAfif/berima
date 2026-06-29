@@ -132,13 +132,14 @@ object AppStrings {
     const val PROFILE_PORTFOLIO_EMPTY = "Tambahkan contoh karya agar calon pemesan lebih yakin."
     const val PROFILE_NOT_FOUND = "Profil tidak ditemukan"
     const val PROFILE_STAT_RATING = "RATING"
-    const val PROFILE_STAT_AS_SELLER = "PENYEDIA"
-    const val PROFILE_STAT_AS_BUYER = "PEMESAN"
+    const val PROFILE_STAT_COMPLETED_ORDERS = "PESANAN SELESAI"
     const val PROFILE_LISTING_COUNT_LABEL = "LAYANAN"
     const val PROFILE_EMPTY_LISTINGS_TITLE = "Belum ada layanan"
     const val PROFILE_EMPTY_LISTINGS_BODY = "Tawarkan jasamu, mulai dari layanan pertama."
     const val PROFILE_VERIFICATION_TITLE = "Pusat Verifikasi"
     const val PROFILE_VERIFICATION_BODY = "Identitas %s · Keahlian %s"
+    const val PROFILE_VERIFICATION_IDENTITY = "Identitas: %s"
+    const val PROFILE_VERIFICATION_SKILL = "Keahlian: %s"
     const val PROFILE_VERIFICATION_ACTION = "Lihat status"
     const val ROLE_BUYER = "Pemesan"
     const val ROLE_SELLER = "Penyedia Jasa"
@@ -147,7 +148,7 @@ object AppStrings {
     // Public badges
     const val BADGE_IDENTITY = "Identitas"
     const val BADGE_SKILL = "Ahli %s"
-    const val BADGE_SKILL_COMPACT = "%s terverifikasi"
+    const val BADGE_SKILL_COMPACT = "Ahli %s"
 
     // Portfolio
     const val PORTFOLIO_TITLE = "Portofolio"
@@ -190,7 +191,7 @@ object AppStrings {
 
     // Verification
     const val VERIFICATION_TITLE = "Pusat Verifikasi"
-    const val VERIFICATION_SUBTITLE = "Verifikasi opsional untuk membangun kepercayaan di marketplace."
+    const val VERIFICATION_SUBTITLE = "Verifikasi opsional untuk membangun kepercayaan saat menawarkan layanan."
     const val VERIFICATION_IDENTITY_TITLE = "Verifikasi Identitas"
     const val VERIFICATION_IDENTITY_BODY = "KTM ditinjau manual melalui Firebase Console."
     const val VERIFICATION_SKILL_TITLE = "Verifikasi Keahlian"
@@ -247,6 +248,8 @@ object AppStrings {
     // Edit profile
     const val EDIT_PROFILE_TITLE = "Edit Profil"
     const val EDIT_PROFILE_CHANGE_PHOTO = "Ubah Foto"
+    const val EDIT_PROFILE_SECTION_PUBLIC = "Informasi Publik"
+    const val EDIT_PROFILE_SECTION_ROLE = "Peran di Berima"
     const val EDIT_PROFILE_FIELD_NAME = "Nama"
     const val EDIT_PROFILE_FIELD_BIO = "Bio"
     const val EDIT_PROFILE_BIO_PLACEHOLDER = "Ceritakan sedikit tentang dirimu"
@@ -302,6 +305,17 @@ object AppStrings {
     const val LISTING_ORDER_ACTION = "Pesan Sekarang"
     const val LISTING_NOT_FOUND = "Layanan tidak ditemukan."
     const val LISTING_ESTIMATE_PREFIX = "Estimasi selesai:"
+    const val LISTING_SELLER_PROFILE_ACTION = "Lihat profil"
+    const val LISTING_SELLER_NO_RATING = "Belum ada rating"
+    const val LISTING_SELLER_ORDER_COUNT = "%d pesanan"
+    const val LISTING_REVIEWS_TITLE = "Ulasan"
+
+    // Review
+    const val REVIEW_NOT_FOUND = "Pesanan tidak ditemukan."
+    const val REVIEW_RATING_LABEL = "Rating"
+    const val REVIEW_COMMENT_LABEL = "Komentar (opsional)"
+    const val REVIEW_SUBMIT = "Kirim Ulasan"
+    const val REVIEW_STAR_DESCRIPTION = "Rating %d"
 
     const val PROFILE_PHOTO_DESCRIPTION = "Foto profil"
 
