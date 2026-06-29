@@ -83,21 +83,24 @@ class OrderDetailViewModel @Inject constructor(
             try {
                 val result: Result<Unit> = when (action) {
                     OrderAction.Accept ->
-                        orderRepository.updateStatus(orderId, OrderStatus.IN_PROGRESS)
+                        requireUser { orderRepository.acceptOrder(orderId, it) }
 
                     OrderAction.Reject ->
-                        orderRepository.updateStatus(orderId, OrderStatus.REJECTED)
+                        requireUser { orderRepository.rejectOrder(orderId, it) }
 
                     OrderAction.Cancel ->
-                        orderRepository.updateStatus(orderId, OrderStatus.CANCELLED)
+                        requireUser { orderRepository.cancelOrder(orderId, it) }
 
                     is OrderAction.UploadResult -> uploadResult(action.uri)
 
+                    is OrderAction.RequestRevision ->
+                        requireUser { orderRepository.requestRevision(orderId, it, action.note.trim()) }
+
                     OrderAction.ConfirmDelivered ->
-                        orderRepository.updateStatus(orderId, OrderStatus.COMPLETED)
+                        requireUser { orderRepository.confirmDelivered(orderId, it) }
 
                     OrderAction.SimulatePay ->
-                        orderRepository.markPaid(orderId)
+                        requireUser { orderRepository.markPaid(orderId, it) }
 
                     OrderAction.OpenReview -> {
                         _navigateToReview.emit(orderId)
@@ -117,9 +120,18 @@ class OrderDetailViewModel @Inject constructor(
 
     private suspend fun uploadResult(uri: Uri): Result<Unit> {
         return storageRepository.uploadOrderResult(orderId, uri).fold(
-            onSuccess = { url -> orderRepository.setAttachmentUrl(orderId, url) },
+            onSuccess = { metadata ->
+                requireUser { orderRepository.setResultFile(orderId, it, metadata) }
+            },
             onFailure = { Result.failure(it) }
         )
+    }
+
+    private suspend fun requireUser(block: suspend (String) -> Result<Unit>): Result<Unit> {
+        val uid = currentUserId ?: return Result.failure(
+            IllegalStateException("Sesi berakhir, silakan login ulang")
+        )
+        return block(uid)
     }
 
     fun clearError() {

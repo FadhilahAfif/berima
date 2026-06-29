@@ -62,6 +62,7 @@ fun OrderStatusTimeline(
         OrderStatus.PENDING to AppStrings.TIMELINE_PENDING,
         OrderStatus.IN_PROGRESS to AppStrings.TIMELINE_IN_PROGRESS,
         OrderStatus.DELIVERED to AppStrings.TIMELINE_DELIVERED,
+        OrderStatus.REVISION_REQUESTED to AppStrings.TIMELINE_REVISION,
         OrderStatus.COMPLETED to AppStrings.TIMELINE_COMPLETED,
         OrderStatus.PAID to AppStrings.TIMELINE_PAID
     )
@@ -156,6 +157,7 @@ private fun OrderStatusTimelinePreview() {
             OrderStatusTimeline(currentStatus = OrderStatus.PENDING)
             OrderStatusTimeline(currentStatus = OrderStatus.IN_PROGRESS)
             OrderStatusTimeline(currentStatus = OrderStatus.DELIVERED)
+            OrderStatusTimeline(currentStatus = OrderStatus.REVISION_REQUESTED)
             OrderStatusTimeline(currentStatus = OrderStatus.COMPLETED)
             OrderStatusTimeline(currentStatus = OrderStatus.PAID)
             OrderStatusTimeline(currentStatus = OrderStatus.CANCELLED)

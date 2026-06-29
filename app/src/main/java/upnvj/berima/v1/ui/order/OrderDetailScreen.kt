@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,12 +41,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +64,7 @@ import upnvj.berima.v1.R
 import upnvj.berima.v1.data.model.Message
 import upnvj.berima.v1.data.model.Order
 import upnvj.berima.v1.data.model.OrderStatus
+import upnvj.berima.v1.data.model.Validation
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.InitialAvatar
 import upnvj.berima.v1.ui.common.StatusChip
@@ -231,6 +236,24 @@ private fun OrderDetailContent(
 ) {
     val berimaColors = LocalBerimaColors.current
     val counterpartyName = if (isBuyer) order.sellerName else order.buyerName
+    var showRevisionDialog by remember { mutableStateOf(false) }
+    var revisionNote by remember { mutableStateOf("") }
+
+    if (showRevisionDialog) {
+        RevisionRequestDialog(
+            note = revisionNote,
+            onNoteChange = { if (it.length <= Validation.MAX_ORDER_NOTE_LENGTH) revisionNote = it },
+            onDismiss = {
+                showRevisionDialog = false
+                revisionNote = ""
+            },
+            onSubmit = {
+                onAction(OrderAction.RequestRevision(revisionNote))
+                showRevisionDialog = false
+                revisionNote = ""
+            }
+        )
+    }
 
     Column(
         modifier = modifier
@@ -252,14 +275,30 @@ private fun OrderDetailContent(
             modifier = Modifier.fillMaxWidth()
         )
 
-        if (!order.note.isNullOrBlank()) {
+        if (!order.note.isNullOrBlank() || !order.requirementFileUrl.isNullOrBlank()) {
             Spacer(Modifier.height(20.dp))
-            NoteCard(note = order.note, modifier = Modifier.fillMaxWidth())
+            RequirementCard(
+                note = order.note,
+                fileName = order.requirementFileName,
+                onFileClick = order.requirementFileUrl?.let { url -> { onAttachmentClick(url) } },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        if (!order.revisionNote.isNullOrBlank()) {
+            Spacer(Modifier.height(16.dp))
+            NoteCard(
+                label = AppStrings.ORDER_DETAIL_REVISION_LABEL,
+                note = order.revisionNote,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         order.attachmentUrl?.let { url ->
             Spacer(Modifier.height(16.dp))
             AttachmentRow(
+                title = AppStrings.ORDER_DETAIL_RESULT_LABEL,
+                fileName = order.resultFileName,
                 onClick = { onAttachmentClick(url) },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -279,9 +318,11 @@ private fun OrderDetailContent(
             status = order.status,
             isBuyer = isBuyer,
             hasReview = order.hasReview,
+            canRequestRevision = order.revisionCount < 1L,
             actionInFlight = actionInFlight,
             onAction = onAction,
             onPickFile = onPickFile,
+            onRequestRevision = { showRevisionDialog = true },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -427,6 +468,8 @@ private fun statusDescription(status: String, isBuyer: Boolean): String = when (
         if (isBuyer) AppStrings.ORDER_STATUS_IN_PROGRESS_BUYER else AppStrings.ORDER_STATUS_IN_PROGRESS_SELLER
     OrderStatus.DELIVERED ->
         if (isBuyer) AppStrings.ORDER_STATUS_DELIVERED_BUYER else AppStrings.ORDER_STATUS_DELIVERED_SELLER
+    OrderStatus.REVISION_REQUESTED ->
+        if (isBuyer) AppStrings.ORDER_STATUS_REVISION_BUYER else AppStrings.ORDER_STATUS_REVISION_SELLER
     OrderStatus.COMPLETED ->
         if (isBuyer) AppStrings.ORDER_STATUS_COMPLETED_BUYER else AppStrings.ORDER_STATUS_COMPLETED_SELLER
     OrderStatus.PAID ->
@@ -483,7 +526,49 @@ private fun CounterpartyRow(
 }
 
 @Composable
+private fun RequirementCard(
+    note: String?,
+    fileName: String?,
+    onFileClick: (() -> Unit)?,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+    val cardShape = RoundedCornerShape(16.dp)
+
+    Column(
+        modifier = modifier
+            .clip(cardShape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, berimaColors.borderSubtle, cardShape)
+            .padding(14.dp)
+    ) {
+        Text(
+            text = AppStrings.ORDER_DETAIL_REQUIREMENT_LABEL,
+            style = MaterialTheme.typography.labelSmall,
+            color = berimaColors.textSecondary
+        )
+        if (!note.isNullOrBlank()) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = note,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        if (onFileClick != null) {
+            Spacer(Modifier.height(12.dp))
+            FileInlineRow(
+                title = AppStrings.ORDER_DETAIL_REQUIREMENT_FILE_TITLE,
+                fileName = fileName,
+                onClick = onFileClick
+            )
+        }
+    }
+}
+
+@Composable
 private fun NoteCard(
+    label: String,
     note: String,
     modifier: Modifier = Modifier
 ) {
@@ -498,7 +583,7 @@ private fun NoteCard(
             .padding(14.dp)
     ) {
         Text(
-            text = AppStrings.ORDER_DETAIL_NOTE_LABEL,
+            text = label,
             style = MaterialTheme.typography.labelSmall,
             color = berimaColors.textSecondary
         )
@@ -513,6 +598,8 @@ private fun NoteCard(
 
 @Composable
 private fun AttachmentRow(
+    title: String,
+    fileName: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -545,13 +632,13 @@ private fun AttachmentRow(
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = AppStrings.ORDER_DETAIL_ATTACHMENT_TITLE,
+                text = title,
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(2.dp))
             Text(
-                text = AppStrings.ORDER_DETAIL_ATTACHMENT_ACTION,
+                text = fileName ?: AppStrings.ORDER_DETAIL_FILE_ACTION,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -564,6 +651,106 @@ private fun AttachmentRow(
             modifier = Modifier.size(22.dp)
         )
     }
+}
+
+@Composable
+private fun FileInlineRow(
+    title: String,
+    fileName: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val berimaColors = LocalBerimaColors.current
+
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_berima_mark),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = fileName ?: AppStrings.ORDER_DETAIL_FILE_ACTION,
+                style = MaterialTheme.typography.bodySmall,
+                color = berimaColors.textSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun RevisionRequestDialog(
+    note: String,
+    onNoteChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onSubmit: () -> Unit
+) {
+    val berimaColors = LocalBerimaColors.current
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(AppStrings.ORDER_REVISION_DIALOG_TITLE) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = note,
+                    onValueChange = onNoteChange,
+                    label = { Text(AppStrings.ORDER_REVISION_DIALOG_LABEL) },
+                    placeholder = { Text(AppStrings.ORDER_REVISION_DIALOG_PLACEHOLDER) },
+                    singleLine = false,
+                    minLines = 3,
+                    maxLines = 5,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = berimaColors.borderInput,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = berimaColors.textSecondary,
+                        cursorColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "${note.length}/${Validation.MAX_ORDER_NOTE_LENGTH}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = berimaColors.textSecondary,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onSubmit,
+                enabled = note.isNotBlank()
+            ) {
+                Text(AppStrings.ORDER_REVISION_DIALOG_SUBMIT)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(AppStrings.ORDER_REVISION_DIALOG_CANCEL)
+            }
+        }
+    )
 }
 
 @Composable

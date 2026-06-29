@@ -76,9 +76,16 @@ buyerName:            String      // denormalized
 sellerId:             String
 sellerName:           String      // denormalized
 price:                Long        // price at time of order, immutable after creation
-note:                 String?     // buyer's note, max 300 chars
+note:                 String?     // pemesan requirement note, max 300 chars
 status:               String      // see status values below
 attachmentUrl:        String?     // seller's result file, Firebase Storage URL
+requirementFileUrl:   String?     // pemesan requirement file URL
+requirementFileName:  String?     // display name for requirement file
+requirementStoragePath:String?    // Storage path for requirement file
+resultFileName:       String?     // display name for seller result file
+resultStoragePath:    String?     // Storage path for seller result file
+revisionNote:         String?     // latest revision note from pemesan
+revisionCount:        Long        // simple one-round revision count, default 0
 hasReview:            Boolean     // default false
 createdAt:            Timestamp
 updatedAt:            Timestamp
@@ -89,6 +96,7 @@ updatedAt:            Timestamp
 "pending"       buyer placed order, waiting for seller
 "in_progress"   seller accepted, working on it
 "delivered"     seller uploaded result, waiting for buyer confirmation
+"revision_requested" buyer requested one revision after delivery
 "completed"     buyer confirmed result received
 "paid"          payment confirmed (MVP: simulated)
 "cancelled"     buyer cancelled while still pending
@@ -213,6 +221,7 @@ users/{userId}/verification/skill/{submissionId}/{filename}
 users/{userId}/portfolio/{portfolioItemId}/{filename}
 users/{userId}/listings/{listingId}/{filename}
 users/{userId}/profile/{filename}
+orders/{orderId}/requirements/{filename}
 orders/{orderId}/result/{filename}
 ```
 
@@ -223,6 +232,7 @@ Required behavior:
 - Portfolio images can be readable by authenticated users.
 - Listing thumbnail images can be readable by authenticated users and writable only by the listing owner.
 - Profile photos remain readable where needed for profile/listing display.
+- Order requirement files must be uploaded by the order pemesan and readable only to the order pemesan and penyedia jasa.
 - Order result files must be accessible only to the order buyer and seller.
 
 ## Required Composite Indexes

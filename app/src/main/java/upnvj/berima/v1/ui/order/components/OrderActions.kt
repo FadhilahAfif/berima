@@ -19,6 +19,7 @@ import upnvj.berima.v1.data.model.OrderStatus
 import upnvj.berima.v1.ui.common.AppStrings
 import upnvj.berima.v1.ui.common.BerimaButton
 import upnvj.berima.v1.ui.common.DangerActionButton
+import upnvj.berima.v1.ui.common.SecondaryActionButton
 import upnvj.berima.v1.ui.order.OrderAction
 import upnvj.berima.v1.ui.theme.LocalBerimaColors
 
@@ -33,9 +34,11 @@ fun OrderActions(
     status: String,
     isBuyer: Boolean,
     hasReview: Boolean,
+    canRequestRevision: Boolean,
     actionInFlight: String?,
     onAction: (OrderAction) -> Unit,
     onPickFile: () -> Unit,
+    onRequestRevision: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isLoading = actionInFlight != null
@@ -94,8 +97,30 @@ fun OrderActions(
                         isLoading = isLoading,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    if (canRequestRevision) {
+                        Spacer(Modifier.height(8.dp))
+                        SecondaryActionButton(
+                            text = AppStrings.ORDER_ACTION_REQUEST_REVISION,
+                            onClick = onRequestRevision,
+                            enabled = !isLoading,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 } else {
                     Callout(text = AppStrings.ORDER_ACTION_WAITING_BUYER_CONFIRM)
+                }
+            }
+
+            OrderStatus.REVISION_REQUESTED -> {
+                if (isBuyer) {
+                    Callout(text = AppStrings.ORDER_ACTION_WAITING_REVISION)
+                } else {
+                    BerimaButton(
+                        text = AppStrings.ORDER_ACTION_UPLOAD_REVISION,
+                        onClick = onPickFile,
+                        isLoading = isLoading,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
 
@@ -166,17 +191,19 @@ private fun OrderActionsPreview() {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text("Pemesan · pending", style = MaterialTheme.typography.labelSmall)
-            OrderActions(OrderStatus.PENDING, isBuyer = true, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
+            OrderActions(OrderStatus.PENDING, isBuyer = true, hasReview = false, canRequestRevision = true, actionInFlight = null, onAction = {}, onPickFile = {}, onRequestRevision = {})
             Text("Penyedia · pending", style = MaterialTheme.typography.labelSmall)
-            OrderActions(OrderStatus.PENDING, isBuyer = false, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
+            OrderActions(OrderStatus.PENDING, isBuyer = false, hasReview = false, canRequestRevision = true, actionInFlight = null, onAction = {}, onPickFile = {}, onRequestRevision = {})
             Text("Penyedia · in_progress", style = MaterialTheme.typography.labelSmall)
-            OrderActions(OrderStatus.IN_PROGRESS, isBuyer = false, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
+            OrderActions(OrderStatus.IN_PROGRESS, isBuyer = false, hasReview = false, canRequestRevision = true, actionInFlight = null, onAction = {}, onPickFile = {}, onRequestRevision = {})
             Text("Pemesan · in_progress", style = MaterialTheme.typography.labelSmall)
-            OrderActions(OrderStatus.IN_PROGRESS, isBuyer = true, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
+            OrderActions(OrderStatus.IN_PROGRESS, isBuyer = true, hasReview = false, canRequestRevision = true, actionInFlight = null, onAction = {}, onPickFile = {}, onRequestRevision = {})
+            Text("Penyedia - revision_requested", style = MaterialTheme.typography.labelSmall)
+            OrderActions(OrderStatus.REVISION_REQUESTED, isBuyer = false, hasReview = false, canRequestRevision = true, actionInFlight = null, onAction = {}, onPickFile = {}, onRequestRevision = {})
             Text("Pemesan · completed", style = MaterialTheme.typography.labelSmall)
-            OrderActions(OrderStatus.COMPLETED, isBuyer = true, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
+            OrderActions(OrderStatus.COMPLETED, isBuyer = true, hasReview = false, canRequestRevision = true, actionInFlight = null, onAction = {}, onPickFile = {}, onRequestRevision = {})
             Text("Pemesan · paid (no review yet)", style = MaterialTheme.typography.labelSmall)
-            OrderActions(OrderStatus.PAID, isBuyer = true, hasReview = false, actionInFlight = null, onAction = {}, onPickFile = {})
+            OrderActions(OrderStatus.PAID, isBuyer = true, hasReview = false, canRequestRevision = true, actionInFlight = null, onAction = {}, onPickFile = {}, onRequestRevision = {})
         }
     }
 }

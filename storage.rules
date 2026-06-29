@@ -42,6 +42,11 @@ service firebase.storage {
         && orderDoc(orderId).data.sellerId == request.auth.uid;
     }
 
+    function isOrderBuyer(orderId) {
+      return isSignedIn()
+        && orderDoc(orderId).data.buyerId == request.auth.uid;
+    }
+
     match /users/{userId}/verification/identity/{submissionId}/{fileName} {
       allow read: if isOwner(userId);
       allow write: if isOwner(userId) && isVerificationUpload();
@@ -75,6 +80,11 @@ service firebase.storage {
     match /orders/{orderId}/result/{fileName} {
       allow read: if isOrderParticipant(orderId);
       allow write: if isOrderSeller(orderId) && isResultUpload();
+    }
+
+    match /orders/{orderId}/requirements/{fileName} {
+      allow read: if isOrderParticipant(orderId);
+      allow write: if isOrderBuyer(orderId) && isResultUpload();
     }
   }
 }

@@ -19,6 +19,13 @@ data class Order(
     val note: String? = null,
     val status: String = OrderStatus.PENDING,
     val attachmentUrl: String? = null,
+    val requirementFileUrl: String? = null,
+    val requirementFileName: String? = null,
+    val requirementStoragePath: String? = null,
+    val resultFileName: String? = null,
+    val resultStoragePath: String? = null,
+    val revisionNote: String? = null,
+    val revisionCount: Long = 0L,
     val hasReview: Boolean = false,
     val createdAt: Timestamp = Timestamp.now(),
     val updatedAt: Timestamp = Timestamp.now()

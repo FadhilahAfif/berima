@@ -312,6 +312,13 @@ function ts(daysBack) {
   return { __type: "timestamp", value: d.toISOString() };
 }
 
+function tsMinutesAgo(minutesBack) {
+  return {
+    __type: "timestamp",
+    value: new Date(Date.now() - minutesBack * 60 * 1000).toISOString(),
+  };
+}
+
 function firestoreValue(value) {
   if (value === null || value === undefined) return { nullValue: null };
   if (value && value.__type === "timestamp") return { timestampValue: value.value };
@@ -371,7 +378,7 @@ async function upsertDoc(collection, docId, data) {
   console.log(`  ok ${collection}/${docId}`);
 }
 
-async function uploadPng(storagePath, filePath) {
+async function uploadFile(storagePath, filePath, contentType) {
   const bytes = fs.readFileSync(filePath);
   const encodedPath = encodeURIComponent(storagePath);
   const token = crypto.randomUUID();
@@ -380,7 +387,7 @@ async function uploadPng(storagePath, filePath) {
     `/upload/storage/v1/b/${STORAGE_BUCKET}/o?uploadType=media&name=${encodedPath}`,
     "POST",
     bytes,
-    { "Content-Type": "image/png" },
+    { "Content-Type": contentType },
   );
   await requestJson(
     "storage.googleapis.com",
@@ -394,11 +401,31 @@ async function uploadPng(storagePath, filePath) {
   };
 }
 
+async function uploadPng(storagePath, filePath) {
+  return uploadFile(storagePath, filePath, "image/png");
+}
+
 function generateAssets() {
   fs.mkdirSync(ASSET_DIR, { recursive: true });
   for (const [fileName, draw] of thumbnails) {
     fs.writeFileSync(path.join(ASSET_DIR, fileName), png(1200, 800, draw));
   }
+  fs.writeFileSync(
+    path.join(ASSET_DIR, "demo-brief-ppt.txt"),
+    [
+      "Brief PPT Sidang - Berima Demo",
+      "Tema: visual rapi, profesional, warna hijau kampus.",
+      "Isi utama sudah disiapkan pemesan. Penyedia jasa hanya merapikan tampilan.",
+    ].join("\n"),
+  );
+  fs.writeFileSync(
+    path.join(ASSET_DIR, "demo-hasil-ppt.txt"),
+    [
+      "Hasil Demo - Desain PPT Sidang",
+      "File dummy untuk screenshot alur pesanan Berima.",
+      "Pada demo asli, penyedia jasa mengunggah PPT/PDF final di sini.",
+    ].join("\n"),
+  );
 }
 
 async function main() {
@@ -417,6 +444,29 @@ async function main() {
       path.join(ASSET_DIR, listing.asset),
     );
     console.log(`  ok ${listing.asset}`);
+  }
+
+  const shotOrderIds = [
+    "demoShotOrderPendingAndi",
+    "demoShotOrderInProgressAndi",
+    "demoShotOrderDeliveredAndi",
+    "demoShotOrderRevisionAndi",
+    "demoShotOrderCompletedAndi",
+    "demoShotOrderPaidAndi",
+  ];
+  const orderFiles = {};
+  for (const orderId of shotOrderIds) {
+    orderFiles[`${orderId}:brief`] = await uploadFile(
+      `orders/${orderId}/requirements/brief-ppt-sidang.txt`,
+      path.join(ASSET_DIR, "demo-brief-ppt.txt"),
+      "text/plain",
+    );
+    orderFiles[`${orderId}:result`] = await uploadFile(
+      `orders/${orderId}/result/hasil-ppt-sidang.txt`,
+      path.join(ASSET_DIR, "demo-hasil-ppt.txt"),
+      "text/plain",
+    );
+    console.log(`  ok ${orderId} order files`);
   }
 
   console.log("Writing demo users...");
@@ -618,6 +668,81 @@ async function main() {
     createdAt: ts(12),
     updatedAt: ts(8),
   });
+
+  const shotOrders = [
+    ["demoShotOrderPendingAndi", "pending", 0, false, null, 0],
+    ["demoShotOrderInProgressAndi", "in_progress", 1, false, null, 0],
+    ["demoShotOrderDeliveredAndi", "delivered", 2, true, null, 0],
+    [
+      "demoShotOrderRevisionAndi",
+      "revision_requested",
+      3,
+      true,
+      "Tolong bagian grafik dibuat lebih kontras dan judul tiap slide dibuat lebih ringkas.",
+      1,
+    ],
+    ["demoShotOrderCompletedAndi", "completed", 4, true, null, 0],
+    ["demoShotOrderPaidAndi", "paid", 5, true, null, 0],
+  ];
+  for (const [orderId, status, daysBack, hasResult, revisionNote, revisionCount] of shotOrders) {
+    const brief = orderFiles[`${orderId}:brief`];
+    const result = orderFiles[`${orderId}:result`];
+    await upsertDoc("orders", orderId, {
+      listingId: "demoListingPptSidang",
+      listingTitle: "Desain PPT Sidang yang Rapi",
+      buyerId,
+      buyerName: "Dian Rahayu",
+      sellerId,
+      sellerName: "Andi Pratama",
+      price: 45000,
+      note: "Rapikan visual slide sidang, pertahankan isi utama, dan buat grafik lebih mudah dibaca.",
+      status,
+      attachmentUrl: hasResult ? result.url : null,
+      requirementFileUrl: brief.url,
+      requirementFileName: "brief-ppt-sidang.txt",
+      requirementStoragePath: brief.storagePath,
+      resultFileName: hasResult ? "hasil-ppt-sidang.txt" : null,
+      resultStoragePath: hasResult ? result.storagePath : null,
+      revisionNote,
+      revisionCount,
+      hasReview: false,
+      demoScenario: "screenshot-order-flow",
+      createdAt: ts(daysBack),
+      updatedAt: ts(daysBack),
+    });
+  }
+
+  const chatThreads = {
+    demoShotOrderInProgressAndi: [
+      [buyerId, "Dian Rahayu", "Halo Kak Andi, brief sudah saya lampirkan di pesanan ya.", 90],
+      [sellerId, "Andi Pratama", "Siap, saya cek dulu. Saya fokus rapikan layout dan grafiknya.", 80],
+      [buyerId, "Dian Rahayu", "Terima kasih, isi slide jangan diubah ya Kak.", 70],
+    ],
+    demoShotOrderDeliveredAndi: [
+      [sellerId, "Andi Pratama", "Hasil pertama sudah saya unggah. Mohon dicek bagian grafiknya.", 60],
+      [buyerId, "Dian Rahayu", "Saya cek dulu ya Kak.", 50],
+    ],
+    demoShotOrderRevisionAndi: [
+      [buyerId, "Dian Rahayu", "Sudah bagus, tapi grafik slide 8 bisa dibuat lebih kontras?", 45],
+      [sellerId, "Andi Pratama", "Bisa, saya revisi dan kirim ulang sebentar lagi.", 35],
+    ],
+    demoShotOrderCompletedAndi: [
+      [sellerId, "Andi Pratama", "Revisi sudah saya kirim ulang.", 30],
+      [buyerId, "Dian Rahayu", "Sudah sesuai. Saya konfirmasi selesai.", 20],
+    ],
+  };
+  for (const [orderId, messages] of Object.entries(chatThreads)) {
+    for (const [index, [senderId, senderName, text, minutesBack]] of messages.entries()) {
+      await upsertDoc(`messages/${orderId}/chats`, `demoMsg${index + 1}`, {
+        senderId,
+        senderName,
+        text,
+        isRead: true,
+        createdAt: tsMinutesAgo(minutesBack),
+      });
+    }
+  }
+
   await upsertDoc("reviews", "demoReviewPpt", {
     orderId: "demoOrderReviewed",
     listingId: "demoListingCvDesign",

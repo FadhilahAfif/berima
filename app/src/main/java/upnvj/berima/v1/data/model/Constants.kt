@@ -41,6 +41,7 @@ object OrderStatus {
     const val PENDING = "pending"
     const val IN_PROGRESS = "in_progress"
     const val DELIVERED = "delivered"
+    const val REVISION_REQUESTED = "revision_requested"
     const val COMPLETED = "completed"
     const val PAID = "paid"
     const val CANCELLED = "cancelled"

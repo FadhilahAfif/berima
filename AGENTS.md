@@ -102,11 +102,11 @@ One agent session should update at minimum one item before ending.
 ### Phase 3 — Order Flow
 | Task | Status | Notes |
 |---|---|---|
-| CreateOrderScreen + CreateOrderViewModel | ✅ Done | Loads listing via one-shot `getListing`, denormalizes buyer/seller fields onto Order, optional 300-char note |
+| CreateOrderScreen + CreateOrderViewModel | ✅ Done | Loads listing via one-shot `getListing`, denormalizes buyer/seller fields onto Order, optional 300-char requirement note, and one optional 20 MB requirement file |
 | OrdersScreen + OrdersViewModel | ✅ Done | Redesigned (editorial gen): 16dp cards w/ 44dp leading `InitialAvatar`, headlineSmall title + headlineMedium price, "Penyedia Jasa · Name" line, canonical glyph empty state. `PrimaryTabRow` Pemesan/Penyedia. |
-| OrderDetailScreen + OrderDetailViewModel | ✅ Done | Redesigned: card-for-objects/open-for-content rhythm — summary (displayMedium price) → open status block (chip + contextual sentence + haloed-dot timeline) → note → attachment → counterparty person row → actions → chat. |
+| OrderDetailScreen + OrderDetailViewModel | ✅ Done | Redesigned: summary → status block → kebutuhan pemesan → hasil penyedia jasa → optional revision note → counterparty → guarded actions → chat. Supports one-round `revision_requested`. |
 | Chat section inside OrderDetailScreen | ✅ Done | Bounded LazyColumn (200–480dp), auto-scroll on new message, ➤ glyph send button (no `material-icons-extended` dep) |
-| StatusChip composable (reusable) | ✅ Done | `ui/common/StatusChip.kt`, all 7 statuses mapped to design tokens, pill shape |
+| StatusChip composable (reusable) | ✅ Done | `ui/common/StatusChip.kt`, all 8 statuses mapped to design tokens, pill shape |
 
 ### Phase 4 — Profile & Review
 | Task | Status | Notes |
@@ -180,9 +180,9 @@ One agent session should update at minimum one item before ending.
 | Codebase capability audit | ✅ Done | 2026-06-28 audit confirms source contains the complete marketplace demo surface: email auth, Google auth wiring, forgot password, browse/search layanan, create/edit/deactivate layanan, thumbnail upload, order lifecycle, chat, result upload, simulated payment, review, profile, verification center, identity/skill submissions, portfolio CRUD, and badge display. |
 | Local compile verification | ✅ Done | `./gradlew.bat :app:compileDebugKotlin` succeeded on 2026-06-28. Only warning observed is the Kotlin annotation default-target warning in `StorageRepository`; no compile blocker. |
 | Firebase rules and indexes dry-run | ✅ Done | `firebase deploy --only firestore:rules,firestore:indexes,storage --dry-run --project berima-74938` succeeded on 2026-06-28; Firestore and Storage rules compile locally. |
-| Deploy latest Firestore rules, Storage rules, and indexes to live Firebase project | ✅ Done | Deployed on 2026-06-28. Runtime smoke found index-build blockers, then repository queries were adjusted to sort verification/portfolio data client-side so demo screens do not depend on newly building composite indexes. |
+| Deploy latest Firestore rules, Storage rules, and indexes to live Firebase project | ✅ Done | Deployed on 2026-06-28. Storage rules redeployed on 2026-06-29 for order requirement files. Runtime smoke found index-build blockers, then repository queries were adjusted to sort verification/portfolio data client-side so demo screens do not depend on newly building composite indexes. |
 | Google login production readiness check | 🔄 In progress | `berima_web_client_id` is present in `strings.xml`; still verify Firebase Google provider, SHA config, and real device sign-in before demo. Keep email/password demo accounts as fallback. |
-| Demo dataset refresh for business story | ✅ Done | `scripts/seed-demo.js` generated/uploaded six custom service thumbnails and seeded a reusable Firebase demo dataset: 1 pemesan, 2 penyedia jasa, active layanan across all 3 categories, verified identity/skill badges, 2 portfolio items, pending + in-progress + paid-review-ready + reviewed orders. |
+| Demo dataset refresh for business story | ✅ Done | `scripts/seed-demo.js` generated/uploaded six custom service thumbnails and seeded a reusable Firebase demo dataset: 1 pemesan, 2 penyedia jasa, active layanan across all 3 categories, verified identity/skill badges, 2 portfolio items, pending + in-progress + paid-review-ready + reviewed orders. It also seeds fixed `demoShotOrder*Andi` screenshot orders with requirement/result files and realistic chat. |
 | End-to-end buyer demo rehearsal | ⬜ Not started | Run browse → search/filter → listing detail → create order → chat → seller accepts/delivers → buyer confirms → Simulasi Bayar → review. Record blockers and fix before presentation. |
 | End-to-end seller/trust demo rehearsal | ⬜ Not started | Run profile edit → create layanan with policy acknowledgement → portfolio CRUD → identity/skill verification submission → manual Firebase Console approval story → badge appears on Profile/UserProfile/ListingCard/ListingDetail. |
 | Maestro regression suite run on current APK | ⬜ Not started | Run `.maestro/run.ps1` after installing the latest debug APK and refreshing `.maestro/.env`. Treat failures as demo blockers only when they affect the planned presentation path. |
@@ -199,6 +199,22 @@ One agent session should update at minimum one item before ending.
 ---
 
 ## Learned
+
+- [2026-06-29] Order flow now supports the screenshot/report scenario from
+  `docs/ORDER_FLOW_CHANGE_PLAN.md`: pemesan can attach one optional requirement
+  file at order creation, penyedia jasa result uploads persist URL/name/storage
+  path metadata, pemesan can request one revision through
+  `revision_requested`, and penyedia jasa can upload a revised result back to
+  `delivered`. Repository methods now guard actor/status transitions instead of
+  accepting arbitrary status writes from the ViewModel. `scripts/seed-demo.js`
+  also seeds fixed `demoShotOrder*Andi` orders with requirement/result files and
+  chat messages for screenshots.
+  → Affects `Order.kt`, `Constants.kt`, `StorageRepository.kt`,
+  `OrderRepository.kt`, `CreateOrderScreen.kt`, `CreateOrderViewModel.kt`,
+  `OrderDetailScreen.kt`, `OrderDetailViewModel.kt`, `OrderActions.kt`,
+  `OrderStatusTimeline.kt`, `StatusChip.kt`, `AppStrings.kt`,
+  `storage.rules`, `scripts/seed-demo.js`, `.agents/context/features.md`,
+  `.agents/context/database.md`, `.agents/context/learned.md`, and `AGENTS.md`.
 
 - [2026-06-29] Profile order stats now show one completed-order count for the
   provider role instead of separate buyer/seller counters. The displayed value is

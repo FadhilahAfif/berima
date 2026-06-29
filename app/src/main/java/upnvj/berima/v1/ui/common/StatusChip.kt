@@ -28,6 +28,7 @@ fun StatusChip(
         OrderStatus.PENDING -> berimaColors.statusPending to "MENUNGGU"
         OrderStatus.IN_PROGRESS -> berimaColors.statusInProgress to "DIKERJAKAN"
         OrderStatus.DELIVERED -> berimaColors.statusDelivered to "TERKIRIM"
+        OrderStatus.REVISION_REQUESTED -> berimaColors.statusPending to "REVISI DIMINTA"
         OrderStatus.COMPLETED -> berimaColors.statusCompleted to "SELESAI"
         OrderStatus.PAID -> berimaColors.statusPaid to "DIBAYAR"
         OrderStatus.CANCELLED -> berimaColors.statusCancelled to "DIBATALKAN"
@@ -60,6 +61,7 @@ private fun StatusChipPreview() {
             StatusChip(OrderStatus.PENDING)
             StatusChip(OrderStatus.IN_PROGRESS)
             StatusChip(OrderStatus.DELIVERED)
+            StatusChip(OrderStatus.REVISION_REQUESTED)
             StatusChip(OrderStatus.COMPLETED)
             StatusChip(OrderStatus.PAID)
             StatusChip(OrderStatus.CANCELLED)
