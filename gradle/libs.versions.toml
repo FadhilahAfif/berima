@@ -10,8 +10,8 @@ kotlin = "2.2.10"
 composeBom = "2026.02.01"
 
 # Added for Berima foundation
-hilt = "2.59.2"
-hiltNavigationCompose = "1.2.0"
+hilt = "2.60"
+hiltNavigationCompose = "1.4.0"
 ksp = "2.2.10-2.0.2"
 firebaseBom = "34.3.0"
 navigationCompose = "2.9.5"
